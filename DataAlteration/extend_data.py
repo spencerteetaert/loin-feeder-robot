@@ -9,14 +9,15 @@ import numpy as np
 MIN_WIDTH = 1000
 MIN_HEIGHT = 1000
 MAX_NOISE = 2000
-MAX_SKEW = 8 
+MAX_SKEW = 0.8
 MAX_COLOUR_DISTORT = 10 
+MIN_QUALITY_REDUCTIION = 10
 MAX_QUALITY_REDUCTION = 25
 
-RESIZE_FREQ = 2
-NOISE_FREQ = 2
-SKEW_FREQ = 2
-COLOUR_DISTORT_FREQ = 2
+RESIZE_FREQ = 50
+NOISE_FREQ = 50
+SKEW_FREQ = 50
+COLOUR_DISTORT_FREQ = 50
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\Raw Data\*.jpg"
 now = datetime.now()
@@ -42,37 +43,31 @@ def main(input_path=DATA_PATH, output_path=OUTPUT_PATH, resize_freq=RESIZE_FREQ,
     else:
         print("Output folder created successfully.")
 
-    print("Extending dataset...\n\nInput path:",
-        input_path,"\nOutput path:", output_path, 
-        "\n\nDistortion Parameters:\n\tResize frequency:",
-        resize_freq, "\n\tNoise frequency:",noise_freq, 
-        "\n\tSkew frequency:", skew_freq,
-        "\n\tColour distortion frequency:", colour_distort_freq)
+    print("Extending dataset...\n\n")
+    
+    settings = "Input path:"+str(input_path)+"\nOutput path:"+str(output_path)+"\n\nDistortion Parameters:\n\tResize frequency:"+str(resize_freq) + "\n\tNoise frequency:" + str(noise_freq) + "\n\tSkew frequency:" + str(skew_freq) +"\n\tColour distortion frequency:" + str(colour_distort_freq)
+    print(settings)
 
     for item_name in in_data:
-        print("Viewing",item_name)
         try:
             og = cv2.imread(item_name)
         except:
-            print("ERR: Item",item_name,"not an image.")
             continue
         else:
-            print("Image detected.")
+            print("Altering",item_name)
 
         export(og, counter, output_path)
         counter += 1 
 
         for i in range(0, 10):
             output = og
-            # if (r.randint(0, resize_freq-1) == 0):
-            #     output = recrop(output)
-            if (r.randint(0, noise_freq-1) == 0):
+            if (r.randint(0, 100) <= resize_freq):
+                output = recrop(output)
+            if (r.randint(0, 100) <= noise_freq):
                 output = make_noise(output)
-            # if (r.randint(0, skew_freq-1) == 0):
-            #     output = skew(output, "h")
-            # if (r.randint(0, skew_freq-1) == 0):
-            #     output = skew(output, "v")
-            # if (r.randint(0, colour_distort_freq-1) == 0):
+            if (r.randint(0, 100) <= skew_freq):
+                output = skew(output)
+            # if (r.randint(0, 100) <= colour_distort_freq):
             #     output = colour_distort(output)
             # output = reduce_quality(output)
 
@@ -92,8 +87,6 @@ def recrop(img, min_width=MIN_WIDTH, min_height=MIN_HEIGHT):
     height_offset = r.randint(0, iH - height)
     width_offset = r.randint(0, iW - width) 
 
-    print("new bounds:\n\t", height_offset,":",height_offset+height,"\n\t",width_offset,":",width_offset+width)
-
     return img[height_offset:height_offset+height, width_offset:width_offset+width]
 
 def make_noise(img, max_noise=MAX_NOISE):
@@ -109,8 +102,19 @@ def make_noise(img, max_noise=MAX_NOISE):
     noisy = img + gauss
     return noisy
 
-def skew(img, orientation, max_skew=MAX_SKEW):
-    pass
+def skew(img, max_skew=MAX_SKEW):
+    iH, iW, iD = img.shape
+
+    sf = [1 - r.uniform(max_skew, 1) for i in range(0, 8)]
+
+    pts1 = np.float32([[0,iH],[iW,iH],[iW,0],[0,0]])
+    pts2 = np.float32([[0 + iW*sf[0],iH - iH*sf[1]],
+        [iW - iW*sf[2],iH - iH*sf[3]],
+        [iW - iW*sf[4],0 + iH*sf[5]],
+        [0 + iW*sf[6],0 + iH*sf[7]]])
+
+    M = cv2.getPerspectiveTransform(pts2,pts1)
+    return cv2.warpPerspective(img, M, (iW, iH))
 
 def reduce_quality(img, max_quality_reduction=MAX_QUALITY_REDUCTION):
     pass
