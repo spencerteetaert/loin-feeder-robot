@@ -77,7 +77,17 @@ def main(input_path=DATA_PATH, output_path=OUTPUT_PATH, resize_freq=RESIZE_FREQ,
     print("Dataset extended.")
 
 def recrop(img, min_width=MIN_WIDTH, min_height=MIN_HEIGHT):
-    pass
+    iH, iW = img.shape
+    
+    #Chooses random size within constraints
+    width = r.randint(min_width, iW)
+    height = r.randint(min_height, iH)
+
+    #Chooses random offsets based off new size
+    height_offset = r.randint(0, iH - height)
+    width_offset = r.randint(0, iW - width) 
+
+    return img[height_offset:height_offset+height, width_offset:width_offset+width]
 
 def make_noise(img, MAX_NOISE=MAX_NOISE):
     pass
