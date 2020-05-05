@@ -3,11 +3,12 @@ import glob
 import random as r
 import cv2
 from datetime import datetime
+import numpy as np
 
 #Distortion parameter limits 
 MIN_WIDTH = 1000
 MIN_HEIGHT = 1000
-MAX_NOISE = 10
+MAX_NOISE = 2000
 MAX_SKEW = 8 
 MAX_COLOUR_DISTORT = 10 
 MAX_QUALITY_REDUCTION = 25
@@ -63,10 +64,10 @@ def main(input_path=DATA_PATH, output_path=OUTPUT_PATH, resize_freq=RESIZE_FREQ,
 
         for i in range(0, 10):
             output = og
-            if (r.randint(0, resize_freq-1) == 0):
-                output = recrop(output)
-            # if (r.randint(0, noise_freq-1) == 0):
-            #     output = make_noise(output)
+            # if (r.randint(0, resize_freq-1) == 0):
+            #     output = recrop(output)
+            if (r.randint(0, noise_freq-1) == 0):
+                output = make_noise(output)
             # if (r.randint(0, skew_freq-1) == 0):
             #     output = skew(output, "h")
             # if (r.randint(0, skew_freq-1) == 0):
@@ -95,8 +96,18 @@ def recrop(img, min_width=MIN_WIDTH, min_height=MIN_HEIGHT):
 
     return img[height_offset:height_offset+height, width_offset:width_offset+width]
 
-def make_noise(img, MAX_NOISE=MAX_NOISE):
-    pass
+def make_noise(img, max_noise=MAX_NOISE):
+    '''Function adapted from Shubham Pachori's answer at 
+    https://stackoverflow.com/questions/22937589/how-to-add-noise-gaussian-salt-and-pepper-etc-to-image-in-python-with-opencv
+    '''
+    iH, iW, iD= img.shape
+    mean = 0
+    var = r.randint(0, max_noise)
+    sigma = var**0.5
+    gauss = np.random.normal(mean,sigma,(iH,iW,iD))
+    gauss = gauss.reshape(iH,iW,iD)
+    noisy = img + gauss
+    return noisy
 
 def skew(img, orientation, max_skew=MAX_SKEW):
     pass
