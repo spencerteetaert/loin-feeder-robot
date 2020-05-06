@@ -11,15 +11,16 @@ MIN_WIDTH = 0.5
 MIN_HEIGHT = 0.5
 MAX_NOISE = 20
 MAX_SKEW = 0.8
-MAX_COLOUR_DISTORT = 10 
 MIN_QUALITY_REDUCTIION = 2
 MAX_QUALITY_REDUCTION = 15
+MAX_BRIGHTNESS_DISTORT = 0.5
+MAX_CONTRAST_DISTORT = 0.5
 
 RESIZE_FREQ = 80
 REDUCTION_FREQ = 90
 NOISE_FREQ = 80
 SKEW_FREQ = 95
-COLOUR_DISTORT_FREQ = 50
+COLOUR_DISTORT_FREQ = 85
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\Raw Data\*.jpg"
 now = datetime.now()
@@ -71,8 +72,8 @@ def main(input_path=DATA_PATH, output_path=OUTPUT_PATH, resize_freq=RESIZE_FREQ,
                 output = make_noise(output)
             if (r.randint(0, 100) <= skew_freq):
                 output = skew(output)
-            # if (r.randint(0, 100) <= colour_distort_freq):
-            #     output = colour_distort(output)
+            if (r.randint(0, 100) <= colour_distort_freq):
+                output = lighting_distort(output)
 
             export(output, counter, output_path)
             counter += 1
@@ -122,13 +123,14 @@ def skew(img, max_skew=MAX_SKEW):
 def reduce_quality(img, max_quality_reduction=MAX_QUALITY_REDUCTION):
     compression_ratio = r.randint(MIN_QUALITY_REDUCTIION, MAX_QUALITY_REDUCTION)
     return skim.block_reduce(img, (compression_ratio, compression_ratio, 1), np.max)
-    # encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
-    # result, encimg = cv2.imencode('.jpg', img, encode_param)
-    # return encimg 
 
-
-def colour_distort(img, max_colour_distort=MAX_COLOUR_DISTORT):
-    pass
+def lighting_distort(img, max_brightness_distort=MAX_BRIGHTNESS_DISTORT, max_contrast_distort=MAX_CONTRAST_DISTORT):
+    alpha = r.uniform(1-max_contrast_distort, 1)
+    beta = r.uniform(1-max_brightness_distort, 1)
+    new_image = np.zeros(img.shape, img.dtype)
+    new_image = np.clip(alpha*img + beta, 0, 255)
+    
+    return new_image
 
 def export(img, counter, output_path):
     cv2.imwrite(output_path + "\\" + str(counter) + ".png",img)
