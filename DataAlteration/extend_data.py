@@ -7,12 +7,12 @@ import numpy as np
 import skimage.measure as skim
 
 #Distortion parameter limits 
-MIN_WIDTH = 0.5
-MIN_HEIGHT = 0.5
+MIN_WIDTH = 0.7
+MIN_HEIGHT = 0.7
 MAX_NOISE = 20
 MAX_SKEW = 0.8
-MIN_QUALITY_REDUCTIION = 2
-MAX_QUALITY_REDUCTION = 15
+MIN_QUALITY_REDUCTION = 1
+MAX_QUALITY_REDUCTION = 8
 MAX_BRIGHTNESS_DISTORT = 0.5
 MAX_CONTRAST_DISTORT = 0.5
 
@@ -120,7 +120,9 @@ def skew(img, max_skew=MAX_SKEW):
     M = cv2.getPerspectiveTransform(pts2,pts1)
     return cv2.warpPerspective(img, M, (iW, iH))
 
-def reduce_quality(img, max_quality_reduction=MAX_QUALITY_REDUCTION):
+def reduce_quality(img, min_quality_reduction=MIN_QUALITY_REDUCTION, max_quality_reduction=MAX_QUALITY_REDUCTION):
+    if min_quality_reduction == 1:
+        return img
     compression_ratio = r.randint(MIN_QUALITY_REDUCTIION, MAX_QUALITY_REDUCTION)
     return skim.block_reduce(img, (compression_ratio, compression_ratio, 1), np.max)
 
