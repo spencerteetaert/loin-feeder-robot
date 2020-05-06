@@ -4,19 +4,21 @@ import random as r
 import cv2
 from datetime import datetime
 import numpy as np
+import skimage.measure as skim
 
 #Distortion parameter limits 
-MIN_WIDTH = 1000
-MIN_HEIGHT = 1000
-MAX_NOISE = 2000
+MIN_WIDTH = 0.5
+MIN_HEIGHT = 0.5
+MAX_NOISE = 20
 MAX_SKEW = 0.8
 MAX_COLOUR_DISTORT = 10 
-MIN_QUALITY_REDUCTIION = 10
-MAX_QUALITY_REDUCTION = 25
+MIN_QUALITY_REDUCTIION = 2
+MAX_QUALITY_REDUCTION = 15
 
-RESIZE_FREQ = 50
-NOISE_FREQ = 50
-SKEW_FREQ = 50
+RESIZE_FREQ = 80
+REDUCTION_FREQ = 90
+NOISE_FREQ = 80
+SKEW_FREQ = 95
 COLOUR_DISTORT_FREQ = 50
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\Raw Data\*.jpg"
@@ -63,13 +65,14 @@ def main(input_path=DATA_PATH, output_path=OUTPUT_PATH, resize_freq=RESIZE_FREQ,
             output = og
             if (r.randint(0, 100) <= resize_freq):
                 output = recrop(output)
+            if (r.randint(0, 100) <= REDUCTION_FREQ):
+                output = reduce_quality(output)
             if (r.randint(0, 100) <= noise_freq):
                 output = make_noise(output)
             if (r.randint(0, 100) <= skew_freq):
                 output = skew(output)
             # if (r.randint(0, 100) <= colour_distort_freq):
             #     output = colour_distort(output)
-            # output = reduce_quality(output)
 
             export(output, counter, output_path)
             counter += 1
@@ -80,8 +83,8 @@ def recrop(img, min_width=MIN_WIDTH, min_height=MIN_HEIGHT):
     iH, iW, iD = img.shape
     
     #Chooses random size within constraints
-    width = r.randint(min_width, iW-1)
-    height = r.randint(min_height, iH-1)
+    width = r.randint(iW * min_width // 1, iW-1)
+    height = r.randint(iH * min_height // 1, iH-1)
 
     #Chooses random offsets based off new size
     height_offset = r.randint(0, iH - height)
@@ -117,7 +120,12 @@ def skew(img, max_skew=MAX_SKEW):
     return cv2.warpPerspective(img, M, (iW, iH))
 
 def reduce_quality(img, max_quality_reduction=MAX_QUALITY_REDUCTION):
-    pass
+    compression_ratio = r.randint(MIN_QUALITY_REDUCTIION, MAX_QUALITY_REDUCTION)
+    return skim.block_reduce(img, (compression_ratio, compression_ratio, 1), np.max)
+    # encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
+    # result, encimg = cv2.imencode('.jpg', img, encode_param)
+    # return encimg 
+
 
 def colour_distort(img, max_colour_distort=MAX_COLOUR_DISTORT):
     pass
