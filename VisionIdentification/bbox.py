@@ -1,4 +1,5 @@
-'''Altered from bbox example on opencv documentation site 
+'''
+Altered from bbox example on opencv documentation site 
 https://docs.opencv.org/3.4/da/d0c/tutorial_bounding_rects_circles.html 
 '''
 
@@ -11,13 +12,44 @@ import image_sizing as imgsz
 r.seed(12345)
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\left middle.jpg"
-THRESHOLD = 130
+THRESHOLD = 120
 
-def show(img):
-    cv2.imshow("",img)
-    cv2.waitKey(0)
+def get_bbox(img, threshold=THRESHOLD, draw=False):
+    '''
+    Returns single bounding box for the given middle image
+    A larger threshold value will result in larger bbox
+    '''
+    temp = preprocess(img)
+    boundRect, contours_poly, canny_output, contours = thresh_callback(threshold, temp)
+    boundRect = filter_outliers(boundRect)
+    boundRect = find_large_bbox(boundRect)
+
+    if draw:
+        draw_results(temp, canny_output, contours_poly, contours, boundRect)
+
+    return boundRect
+
+def preprocess(img):
+    '''
+    Crops image
+    Scales image
+    Filters out red channel (makes contour finding easier for meats for bbox later)
+    Grayscales image to reduce computation time
+    '''
+    ret = imgsz.crop(img)
+    ret = imgsz.scale(ret)
+
+    # Convert image to gray and blur it -- removes noise
+    ret[:,:,2] = np.zeros([ret.shape[0], ret.shape[1]])
+    ret = cv2.cvtColor(ret, cv2.COLOR_BGR2GRAY)
+    # ret = cv2.blur(ret, (3,3))
+    return ret 
 
 def thresh_callback(val, temp):
+    '''
+    Finds all image contours within a given threshold. 
+
+    '''
     threshold = val #Threshold value for contours 
     canny_output = cv2.Canny(temp, threshold, threshold * 2)
     
@@ -31,30 +63,11 @@ def thresh_callback(val, temp):
 
     return boundRect, contours_poly, canny_output, contours
     
-def draw_results(img, canny_output, contours_poly, contours, boundRect):
-    drawing = np.zeros((canny_output.shape[0], canny_output.shape[1], 3), dtype=np.uint8)
-    
-    for i in range(len(boundRect)):
-        color = (r.randint(0,256), r.randint(0,256), r.randint(0,256))
-        # cv2.drawContours(drawing, contours_poly, i, color)
-        cv2.rectangle(drawing, (int(boundRect[i][0]), int(boundRect[i][1])), 
-          (int(boundRect[i][0]+boundRect[i][2]), int(boundRect[i][1]+boundRect[i][3])), color, 2)
-    
-    cv2.imshow('Original Image', img)
-    cv2.imshow('Bbox', drawing)
-    cv2.waitKey(0)
-
-def preprocess(img):
-    ret = imgsz.crop(img)
-    ret = imgsz.scale(ret)
-
-    # Convert image to gray and blur it -- removes noise
-    ret[:,:,2] = np.zeros([ret.shape[0], ret.shape[1]])
-    ret = cv2.cvtColor(ret, cv2.COLOR_BGR2GRAY)
-    # ret = cv2.blur(ret, (3,3))
-    return ret 
-
 def filter_outliers(boundRect, m=1):
+    '''
+    Filters out all bounding boxes with center X or Y coordinates further than
+    m standard deviations from average. 
+    '''
     centersX = [int(boundRect[i][0]+boundRect[i][2]/2) for i in range(0, len(boundRect))]
     centersY = [int(boundRect[i][1]+boundRect[i][3]/2) for i in range(0, len(boundRect))]
 
@@ -66,6 +79,8 @@ def filter_outliers(boundRect, m=1):
     for i in range(0, len(boundRect)):
         if (abs(centersX[i] - avgX) < stdX * m):
             filt+=[True]
+        elif (abs(centersY[i] - avgY) < stdY * m):
+            filt+=[True]
         else:
             filt+=[False]
 
@@ -73,11 +88,15 @@ def filter_outliers(boundRect, m=1):
     return ret
 
 def find_large_bbox(boundRects):
+    '''
+    Given a list of small bboxes, finds the smallest bbox that contains
+    all small bboxes.
+    '''
     minX = 100000
     maxX = 0
     minY = 100000
     maxY = 0
-    
+
     for i in range(0, len(boundRects)):
         if boundRects[i][0] < minX:
             minX = boundRects[i][0]
@@ -90,22 +109,21 @@ def find_large_bbox(boundRects):
     
     return [(minX, minY, maxX - minX, maxY - minY)]
 
-def get_bbox(img, threshold=THRESHOLD, draw=False):
-    temp = preprocess(img)
-    boundRect, contours_poly, canny_output, contours = thresh_callback(threshold, temp)
-    boundRect = filter_outliers(boundRect)
-    boundRect = find_large_bbox(boundRect)
+def draw_results(img, canny_output, contours_poly, contours, boundRect):
+    drawing = img
 
-    if draw:
-        draw_results(temp, canny_output, contours_poly, contours, boundRect)
-    return boundRect
+    for i in range(len(boundRect)):
+        color = (r.randint(0,256), r.randint(0,256), r.randint(0,256))
+        cv2.rectangle(drawing, (int(boundRect[i][0]), int(boundRect[i][1])), 
+          (int(boundRect[i][0]+boundRect[i][2]), int(boundRect[i][1]+boundRect[i][3])), color, 2)
+    
+    cv2.imshow('Bbox', drawing)
+    cv2.waitKey(0)
+
 
 def main(input_path=DATA_PATH):
     og = cv2.imread(input_path)
-
     get_bbox(og, draw=True)
 
 if __name__=="__main__":
     main() 
-
-    
