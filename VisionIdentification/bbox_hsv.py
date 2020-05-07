@@ -36,7 +36,7 @@ def get_bbox(img, threshold=THRESHOLD, draw=False, lower_mask=LOWER_MASK, upper_
         draw_results(img, bound_poly, "single")
         cv2.waitKey(0)
 
-    return bound_poly
+    return bound_poly, temp
 
 def preprocess(img):
     '''
@@ -63,11 +63,11 @@ def gen_mask(img, lower_mask, upper_mask):
     ret = cv2.bitwise_and(ret, ret, mask=mask)
 
     # First erode and dilate to remove small pieces and noise
-    kernel = np.ones([20,20])
+    kernel = np.ones([30,30])
     refined = cv2.morphologyEx(ret, cv2.MORPH_OPEN, kernel)
 
     #Then dilate and erode to remove holes 
-    kernel = np.ones([30,30])
+    kernel = np.ones([40,40])
     refined = cv2.morphologyEx(refined, cv2.MORPH_CLOSE, kernel)
 
     return refined
@@ -124,9 +124,10 @@ def draw_results(img, boundRect, name):
     if (boundRect != 0):
         cv2.drawContours(drawing, boundRect, 0, color, 2)
     cv2.imshow(name, drawing)
+    return drawing
 
 def main(input_path=DATA_PATH):
-    for i in range(228, 230):
+    for i in range(228, 260):
         temp = input_path + str(i) + ".png"
         try: 
             og = cv2.imread(temp)
