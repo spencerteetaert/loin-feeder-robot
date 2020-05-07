@@ -9,7 +9,9 @@ DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\IMG_0111.MOV"
 def main(data_path=DATA_PATH):
     cap = cv2.VideoCapture(data_path)
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter('output.avi', fourcc, 20.0, (1000,1000))
+    out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output.avi', fourcc, 20.0, (1000,1000))
+
+    times = []
 
     while(cap.isOpened()):
         start = time.time()
@@ -27,8 +29,10 @@ def main(data_path=DATA_PATH):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-        print(time.time() - start)
+        times += [time.time() - start]
         # cv2.waitKey(20)
+
+    print("Average frame time:", np.average(times))
 
     cap.release()
     out.release()
