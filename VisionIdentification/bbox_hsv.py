@@ -63,11 +63,11 @@ def gen_mask(img, lower_mask, upper_mask):
     ret = cv2.bitwise_and(ret, ret, mask=mask)
 
     # First erode and dilate to remove small pieces and noise
-    kernel = np.ones([15,15])
+    kernel = np.ones([20,20])
     refined = cv2.morphologyEx(ret, cv2.MORPH_OPEN, kernel)
 
     #Then dilate and erode to remove holes 
-    kernel = np.ones([25,25])
+    kernel = np.ones([30,30])
     refined = cv2.morphologyEx(refined, cv2.MORPH_CLOSE, kernel)
 
     return refined
@@ -81,6 +81,9 @@ def thresh_callback(val, img):
     canny_output = cv2.Canny(img, threshold, threshold * 2)
     
     contours, _ = cv2.findContours(canny_output, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    if (len(contours) == 0):
+        return 0 
 
     contours = np.concatenate(contours)
     hull = cv2.convexHull(contours)
@@ -117,12 +120,13 @@ def filter_outliers(c, m=1):
 def draw_results(img, boundRect, name):
     drawing = img.copy()
 
-    color = (255, 255, 255)
-    cv2.drawContours(drawing, boundRect, 0, color)
+    color = (31, 255, 49)
+    if (boundRect != 0):
+        cv2.drawContours(drawing, boundRect, 0, color, 2)
     cv2.imshow(name, drawing)
 
 def main(input_path=DATA_PATH):
-    for i in range(228, 300):
+    for i in range(228, 230):
         temp = input_path + str(i) + ".png"
         try: 
             og = cv2.imread(temp)

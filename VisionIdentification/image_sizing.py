@@ -2,8 +2,8 @@ import numpy as np
 import cv2
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\Raw Data\*.jpg"
-DEST_WIDTH = 500
-DEST_HEIGHT = 500
+DEST_WIDTH = 1000
+DEST_HEIGHT = 1000
 
 def main(input_path=DATA_PATH):
     import glob
