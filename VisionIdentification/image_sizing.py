@@ -2,8 +2,6 @@ import numpy as np
 import cv2
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\Raw Data\*.jpg"
-DEST_WIDTH = 500
-DEST_HEIGHT = 500
 
 def main(input_path=DATA_PATH):
     import glob
@@ -28,14 +26,20 @@ def main(input_path=DATA_PATH):
 
 def crop(img):
     '''Crops image to be largest square possible'''
-    iH, iW, iD = img.shape
+    iH, iW, _ = img.shape
     crop_size = min(iH, iW)
     ret = img[(iH - crop_size)//2:(iH - crop_size)//2 + crop_size,(iW - crop_size)//2:(iW - crop_size)//2+crop_size]
     return ret
 
-def scale(img, dest_height=DEST_HEIGHT, dest_width=DEST_WIDTH):
+def scale(img):
     iH, iW, iD = img.shape
-    res = cv2.resize(img, dsize=(dest_height, dest_width), interpolation=cv2.INTER_CUBIC)
+
+    final_window_width = 1280
+
+    dest_width = final_window_width
+    dest_height = round((final_window_width / iW) * iH)
+
+    res = cv2.resize(img, dsize=(dest_width, dest_height), interpolation=cv2.INTER_CUBIC)
     return res
 
 if __name__=='__main__':
