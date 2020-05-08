@@ -8,7 +8,6 @@ DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\IMG_0111.MOV"
 
 def main(data_path=DATA_PATH):
     cap = cv2.VideoCapture(data_path)
-    # fourcc = cv2.VideoWriter_fourcc(*'MP4V')
     # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output.mp4', 0x7634706d, 20.0, (1000,1000))
 
     times = []
@@ -16,23 +15,26 @@ def main(data_path=DATA_PATH):
     while(cap.isOpened()):
         start = time.time()
 
-        ret, frame = cap.read()
+        _, frame = cap.read()
 
-        frame = bbox.preprocess(frame)
-        box, img = bbox.get_bbox(frame)
-        temp = bbox.draw_results(frame, box, "test")
-
-        # out.write(temp)
-
-        # cv2.imshow("adgasdfg", box)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        try:
+            frame = bbox.preprocess(frame)
+        except:
+            print("End of video")
             break
+
+        box, _, _ = bbox.get_bbox(frame, draw=True, source="Video")
+        
+        k = cv2.waitKey(1) & 0xFF
+        if k == ord('q'):
+            break
+        elif k == ord('p'):
+            cv2.waitKey(0)
 
         times += [time.time() - start]
         # cv2.waitKey(20)
 
-    print("Average frame time:", np.average(times))
+    print("Average frame processing time:", np.average(times))
 
     cap.release()
     # out.release()
