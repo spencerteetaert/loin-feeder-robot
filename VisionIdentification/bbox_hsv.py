@@ -14,7 +14,6 @@ r.seed(12345)
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\Output Data 07.05.2020 07-31-40\L"
 THRESHOLD = 255
 
-#Threshold values for typical meat colours (lean and fat)
 LOWER_MASK = np.array([0, 51, 51])
 UPPER_MASK = np.array([15, 204, 255])
 
@@ -33,10 +32,10 @@ def get_bbox(img, threshold=THRESHOLD, draw=False, lower_mask=LOWER_MASK, upper_
     bound_poly = thresh_callback(threshold, temp)
 
     if draw:
-        draw_results(img, bound_poly, "single")
-        cv2.waitKey(0)
+        drawing = draw_results(img, bound_poly, "single")
+        # cv2.waitKey(0)
 
-    return bound_poly, temp
+    return bound_poly, temp, drawing
 
 def preprocess(img):
     '''
@@ -63,11 +62,11 @@ def gen_mask(img, lower_mask, upper_mask):
     # ret = cv2.bitwise_and(ret, ret, mask=mask)
 
     # First erode and dilate to remove small pieces and noise
-    kernel = np.ones([30,30])
+    kernel = np.ones([15,15])
     refined = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
     #Then dilate and erode to remove holes 
-    kernel = np.ones([40,40])
+    kernel = np.ones([20,20])
     refined = cv2.morphologyEx(refined, cv2.MORPH_CLOSE, kernel)
 
     return refined
@@ -138,18 +137,84 @@ def draw_results(img, boundPolys, name):
     if (boundPolys != 0):
         for i in range(0, len(boundPolys)):
             cv2.drawContours(drawing, boundPolys, i, color, 2)
-    cv2.imshow(name, drawing)
+    # cv2.imshow(name, drawing)
     return drawing
 
+def n(x):
+    pass
+
 def main(input_path=DATA_PATH):
-    for i in range(228, 230):
+    h = [0, 180]
+    s = [0, 255]
+    v = [0, 255]
+    hlow = 0
+    hhigh = 15
+    slow = 51
+    shigh = 204
+    vlow = 51
+    vhigh = 255
+    flag = False
+
+    for i in range(228, 245):
         temp = input_path + str(i) + ".png"
         try: 
             og = cv2.imread(temp)
             og.shape
         except:
             continue
-        get_bbox(og, draw=True)
+        
+        src = 'Source'
+        cv2.namedWindow(src)
+
+        cv2.createTrackbar('H Low', src, hlow, 180, n)
+        cv2.createTrackbar('H High', src, hhigh, 180, n)
+        cv2.createTrackbar('S Low', src, slow, 255, n)
+        cv2.createTrackbar('S High', src, shigh, 255, n)
+        cv2.createTrackbar('V Low', src, vlow, 255, n)
+        cv2.createTrackbar('V High', src, vhigh, 255, n)
+
+        while (1):
+            k = cv2.waitKey(1) & 0xFF
+            if (k == ord('n')):
+                break
+            elif (k == ord('q')):
+                flag = True
+                break
+            hlow = cv2.getTrackbarPos('H Low', src)
+            hhigh = cv2.getTrackbarPos('H High', src)
+            slow = cv2.getTrackbarPos('S Low', src)
+            shigh = cv2.getTrackbarPos('S High', src)
+            vlow = cv2.getTrackbarPos('V Low', src)
+            vhigh = cv2.getTrackbarPos('V High', src)
+
+            LOWER_MASK = np.array([hlow, slow, vlow])
+            UPPER_MASK = np.array([hhigh, shigh, vhigh])
+
+            _, _, drawing = get_bbox(og, draw=True, lower_mask=LOWER_MASK, upper_mask=UPPER_MASK)
+            cv2.imshow(src, drawing)
+
+        cv2.destroyAllWindows()
+
+        if (hlow < h[1]):
+            h[1] = hlow
+        if (slow < s[1]):
+            s[1] = hlow
+        if (vlow < v[1]):
+            v[1] = hlow
+
+        if (hhigh > h[0]):
+            h[0] = hhigh
+        if (shigh > s[0]):
+            s[0] = shigh
+        if (vhigh > v[0]):
+            v[0] = vhigh
+
+        if flag:
+            break
+
+
+    print("H:", h[1], h[0], "\nS:", s[1], s[0], "\nV:", v[1], v[0])
 
 if __name__=="__main__":
     main() 
+
