@@ -8,8 +8,8 @@ DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\IMG_0111.MOV"
 
 def main(data_path=DATA_PATH):
     cap = cv2.VideoCapture(data_path)
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output.avi', fourcc, 20.0, (1000,1000))
+    # fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output.mp4', 0x7634706d, 20.0, (1000,1000))
 
     times = []
 
@@ -35,7 +35,7 @@ def main(data_path=DATA_PATH):
     print("Average frame time:", np.average(times))
 
     cap.release()
-    out.release()
+    # out.release()
     cv2.destroyAllWindows()
 
 if __name__=='__main__':
