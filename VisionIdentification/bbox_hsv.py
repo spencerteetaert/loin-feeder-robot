@@ -12,7 +12,7 @@ import image_sizing as imgsz
 r.seed(12345)
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\Output Data 07.05.2020 07-31-40\L"
-THRESHOLD = 200
+THRESHOLD = 255
 
 #Threshold values for typical meat colours (lean and fat)
 LOWER_MASK = np.array([0, 51, 51])
@@ -60,11 +60,11 @@ def gen_mask(img, lower_mask, upper_mask):
     hsv = cv2.cvtColor(ret, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, lower_mask, upper_mask)
     cv2.bitwise_not(mask)
-    ret = cv2.bitwise_and(ret, ret, mask=mask)
+    # ret = cv2.bitwise_and(ret, ret, mask=mask)
 
     # First erode and dilate to remove small pieces and noise
     kernel = np.ones([30,30])
-    refined = cv2.morphologyEx(ret, cv2.MORPH_OPEN, kernel)
+    refined = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
 
     #Then dilate and erode to remove holes 
     kernel = np.ones([40,40])
@@ -85,10 +85,22 @@ def thresh_callback(val, img):
     if (len(contours) == 0):
         return 0 
 
-    contours = np.concatenate(contours)
-    hull = cv2.convexHull(contours)
+    # contours = np.concatenate(contours)
+    hulls = [cv2.convexHull(contours[i]) for i in range(0, len(contours))]
 
-    return [hull]
+    # Removes hulls that are contained within others. This allows for multiple pieces of meat to be detected
+    filt = []
+    for i in range(0, len(hulls)):
+        flag = True
+        for j in range(0, len(hulls)):
+            if (cv2.pointPolygonTest(hulls[j], (hulls[i][0][0][0], hulls[i][0][0][1]), measureDist=False) == 1):
+                flag = False
+            
+        filt += [flag]
+
+    ret = [hulls[i] for i in range(0, len(hulls)) if filt[i]==True]
+
+    return ret
     
 def filter_outliers(c, m=1):
     '''
@@ -117,17 +129,20 @@ def filter_outliers(c, m=1):
     ret = [c[i] for i in range(0, len(c)) if filt[i]==True]
     return ret
 
-def draw_results(img, boundRect, name):
+def draw_results(img, boundPolys, name):
     drawing = img.copy()
 
+    # print(boundPolys)
+
     color = (31, 255, 49)
-    if (boundRect != 0):
-        cv2.drawContours(drawing, boundRect, 0, color, 2)
+    if (boundPolys != 0):
+        for i in range(0, len(boundPolys)):
+            cv2.drawContours(drawing, boundPolys, i, color, 2)
     cv2.imshow(name, drawing)
     return drawing
 
 def main(input_path=DATA_PATH):
-    for i in range(228, 260):
+    for i in range(228, 230):
         temp = input_path + str(i) + ".png"
         try: 
             og = cv2.imread(temp)

@@ -22,7 +22,7 @@ def main(data_path=DATA_PATH):
         box, img = bbox.get_bbox(frame)
         temp = bbox.draw_results(frame, box, "test")
 
-        out.write(temp)
+        # out.write(temp)
 
         # cv2.imshow("adgasdfg", box)
 
