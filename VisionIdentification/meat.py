@@ -3,10 +3,11 @@ import cv2
 import math
 
 class Meat():
-    def __init__(self, bbox, conveyor_speed=6, side="Left"):
+    def __init__(self, bbox, conveyor_speed=6, side="Left", center=(0,0)):
         self.conveyor_speed = conveyor_speed
         self.side = side
         self.bbox = bbox
+        self.center = center
         # self.area = cv2.contourArea(self.bbox)
 
         if (self.bbox == []):
@@ -17,6 +18,8 @@ class Meat():
             self.ham_line = self.gen_significant_lines("ham")
             self.flank_line = self.gen_significant_lines("flank")
             self.cut_line = self.gen_significant_lines("cut")
+
+            self.lines = [self.loin_line, self.shoulder_line, self.ham_line, self.flank_line]
 
     def __repr__(self):
         t1 = self.side + " piece\n"
@@ -36,6 +39,9 @@ class Meat():
         self.ham_line = self.ham_line + step_vec
         self.flank_line = self.flank_line + step_vec
         self.cut_line = self.cut_line + step_vec
+        self.center = self.center + step_vec
+
+        self.lines = [self.loin_line, self.shoulder_line, self.ham_line, self.flank_line]
 
     def gen_significant_lines(self, line):
         xs = self.bbox[:,0,0]
@@ -98,19 +104,13 @@ class Meat():
         dy = pt2[0][1] - pt1[0][1]
         dx = pt2[0][0] - pt1[0][0]
 
-        ret_pt1 = (pt2[0][0] + dx * 1000, pt2[0][1] + dy * 1000)
-        ret_pt2 = (pt2[0][0] - dx * 1000, pt2[0][1] - dy * 1000)
+        ret_pt1 = [pt2[0][0] + dx * 1000, pt2[0][1] + dy * 1000]
+        ret_pt2 = [pt2[0][0] - dx * 1000, pt2[0][1] - dy * 1000]
 
         return [ret_pt1, ret_pt2]
 
     def get_lines(self):
-        ret = []
-        ret += [self.loin_line]
-        ret += [self.shoulder_line]
-        ret += [self.ham_line]
-        ret += [self.flank_line]
-
-        return ret
+        return self.lines
 
     def get_bbox(self):
         return self.bbox

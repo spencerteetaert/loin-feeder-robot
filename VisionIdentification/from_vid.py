@@ -8,7 +8,7 @@ DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\IMG_0111.MOV"
 
 def main(data_path=DATA_PATH):
     cap = cv2.VideoCapture(data_path)
-    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output3.mp4', 0x7634706d, 30, (1279,720))
+    out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output5.mp4', 0x7634706d, 30, (500,881))
 
     delay = 0
     times = []
@@ -34,28 +34,26 @@ def main(data_path=DATA_PATH):
             for i in range(0, len(box)):
                 if delay > 15:
                     M = cv2.moments(box[i])
-                    # cX = int(M["m10"] / M["m00"])
+                    cX = int(M["m10"] / M["m00"])
                     cY = int(M["m01"] / M["m00"])
 
                     if iH / 2 - 5 < cY and iH / 2 + 5 > cY:
                         if flip_flop:
-                            meats += [Meat(box[i], side="Right")]
+                            meats += [Meat(box[i], side="Right", center=(cX, cY))]
                         else:
-                            meats += [Meat(box[i], side="Left")]
+                            meats += [Meat(box[i], side="Left", center=(cX, cY))]
                         flip_flop = not flip_flop
                         print("Meat detected")
                         print(meats[-1])
                         delay = 0
-                        # cv2.waitKey(0)
 
         for i in range(1, len(meats)):
             meats[i].step()
 
         try:
-            bbox.draw_results(frame, box, "Test")
-            bbox.draw_results(frame, [meats[-1].get_bbox()], "Test")
+            res = bbox.draw_results(frame, [meats[-1].get_bbox()], "Test", meat=meats[-1])
         except:
-            bbox.draw_results(frame, box, "Test")
+            res = cv2.imshow("Test", frame)
 
         # filtered = bbox.gen_mask(frame, bitwise_and=True)
         # mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
@@ -72,7 +70,7 @@ def main(data_path=DATA_PATH):
         #     for i in range(0, len(box)):
         #         cv2.drawContours(temp, box, i, color, 2)
 
-        # out.write(temp)
+        out.write(res)
         # cv2.imshow("Split", frame)
         
         k = cv2.waitKey(1) & 0xFF
@@ -90,7 +88,7 @@ def main(data_path=DATA_PATH):
     print("Average frame processing time:", np.average(times))
 
     cap.release()
-    # out.release()
+    out.release()
     cv2.destroyAllWindows()
 
 if __name__=='__main__':

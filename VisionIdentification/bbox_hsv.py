@@ -10,6 +10,7 @@ import random as r
 import image_sizing as imgsz 
 from meat import Meat 
 import time
+import sys
 
 r.seed(12345)
 
@@ -52,7 +53,7 @@ def preprocess(img):
     # ret = imgsz.crop(ret)
     ret = imgsz.scale(ret)
 
-    ret = cv2.copyMakeBorder(ret, 200, 200, 0, 0, cv2.BORDER_CONSTANT, value=0)
+    ret = cv2.copyMakeBorder(ret, 300, 300, 0, 0, cv2.BORDER_CONSTANT, value=0)
 
     return ret 
 
@@ -124,15 +125,16 @@ def draw_results(img, boundPolys, source, meat=0):
                 #Draws identified lines of interest
                 line_pts = meat.get_lines()
                 #Red - Loin
-                cv2.line(drawing, line_pts[0][0], line_pts[0][1], (0, 0, 255), thickness=3)
+                cv2.line(drawing, (line_pts[0][0][0],line_pts[0][0][1]), (line_pts[0][1][0],line_pts[0][1][1]), (0, 0, 255), thickness=2)
                 #Yellow - Shoulder
-                cv2.line(drawing, line_pts[1][0], line_pts[1][1], (0, 255, 255), thickness=3)
+                cv2.line(drawing, (line_pts[1][0][0],line_pts[1][0][1]), (line_pts[1][1][0],line_pts[1][1][1]), (0, 255, 255), thickness=2)
                 #Blue - Ham
-                cv2.line(drawing, line_pts[2][0], line_pts[2][1], (255, 0, 0), thickness=3)
+                cv2.line(drawing, (line_pts[2][0][0],line_pts[2][0][1]), (line_pts[2][1][0],line_pts[2][1][1]), (255, 0, 0), thickness=2)
                 #Magenta - Shank 
-                cv2.line(drawing, line_pts[3][0], line_pts[3][1], (255, 0, 255), thickness=3)
-    except:
-        pass
+                cv2.line(drawing, (line_pts[3][0][0],line_pts[3][0][1]), (line_pts[3][1][0],line_pts[3][1][1]), (255, 0, 255), thickness=2)
+    except SystemError as err:
+        # print("Error: {0}".format(err))
+        raise
 
     cv2.imshow(source, drawing)
 
