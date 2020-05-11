@@ -104,39 +104,9 @@ def thresh_callback(val, img):
     ret = [hulls[i] for i in range(0, len(hulls)) if filt[i]==True]
 
     return ret
-    
-# def filter_outliers(c, m=1):
-#     '''
-#     Filters out all bounding boxes with center X or Y coordinates further than
-#     m standard deviations from average. 
-#     '''
-
-#     M = [cv2.moments(c[i]) for i in range(0, len(c))]
-#     print(M)
-#     centersX = [int(M[i]["m10"] / M[i]["m00"]) for i in range(0, len(M))]
-#     centersY = [int(M[i]["m01"] / M[i]["m00"]) for i in range(0, len(M))]
-
-#     avgX, stdX = np.average(centersX), np.std(centersX)
-#     avgY, stdY = np.average(centersY), np.std(centersY)
-
-#     filt = []
-
-#     for i in range(0, len(c)):
-#         if (abs(centersX[i] - avgX) < stdX * m):
-#             filt+=[True]
-#         elif (abs(centersY[i] - avgY) < stdY * m):
-#             filt+=[True]
-#         else:
-#             filt+=[False]
-
-#     ret = [c[i] for i in range(0, len(c)) if filt[i]==True]
-#     return ret
 
 def draw_results(img, boundPolys, source):
     drawing = img.copy()
-
-    # print(boundPolys)
-
     color = (31, 255, 49)
     if (boundPolys != 0):
         for i in range(0, len(boundPolys)):
