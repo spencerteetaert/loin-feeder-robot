@@ -132,6 +132,9 @@ def draw_results(img, boundPolys, source, meat=0):
                 cv2.line(drawing, (line_pts[2][0][0],line_pts[2][0][1]), (line_pts[2][1][0],line_pts[2][1][1]), (255, 0, 0), thickness=2)
                 #Magenta - Shank 
                 cv2.line(drawing, (line_pts[3][0][0],line_pts[3][0][1]), (line_pts[3][1][0],line_pts[3][1][1]), (255, 0, 255), thickness=2)
+
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                cv2.putText(drawing, meat.get_side(), (meat.get_center()[0], meat.get_center()[1]), font, 1, (255, 255, 0))
     except SystemError as err:
         # print("Error: {0}".format(err))
         raise

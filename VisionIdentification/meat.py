@@ -53,7 +53,8 @@ class Meat():
         max_y_index = np.where(ys == max(ys))[0][0]
 
         start_index = 0 
-        threshold = 50 
+        threshold = 10
+        direction = -1
 
         # print(min(xs))
 
@@ -64,33 +65,43 @@ class Meat():
         # print("xs", xs)
         # print("ys", ys)
 
-        if line == "loin":
-            threshold = 100 
+        if line == "loin": # Red
             if self.side == "Left":
                 start_index = max_y_index
+                if xs[start_index] > self.center[0]:
+                    direction = 1
             else:
                 start_index = min_y_index
-        elif line == "shoulder":
+                if xs[start_index] < self.center[0]:
+                    direction = 1
+        elif line == "shoulder": # Yellow
             start_index = min_x_index
-        elif line == "ham":
+            if ys[start_index] > self.center[1]:
+                direction = 1
+        elif line == "ham": # Blue
             start_index = max_x_index
-        elif line == "flank":
-            threshold = 100 
+            if ys[start_index] < self.center[1]:
+                direction = 1
+        elif line == "flank": # Magenta 
             if self.side == "Left":
                 start_index = min_y_index
+                if xs[start_index] < self.center[0]:
+                    direction = 1
             else:
                 start_index = max_y_index
+                if xs[start_index] > self.center[0]:
+                    direction = 1
         elif line == "cut":
             pass
         else:
             print("ERR: Meat line generation failed. No line specified.")
 
-        rotated_index = (start_index + len(self.bbox) - 1) % len(self.bbox)
+        rotated_index = (start_index + len(self.bbox) + direction) % len(self.bbox)
         temp = start_index
 
         while(self.distance(self.bbox[start_index], self.bbox[rotated_index]) < threshold):
-            start_index = (start_index + len(self.bbox) - 1) % len(self.bbox)
-            rotated_index = (start_index + len(self.bbox) - 1) % len(self.bbox)
+            start_index = (start_index + len(self.bbox) + direction) % len(self.bbox)
+            rotated_index = (start_index + len(self.bbox) + direction) % len(self.bbox)
 
             if temp == start_index:
                 threshold -= 5
@@ -109,11 +120,17 @@ class Meat():
 
         return [ret_pt1, ret_pt2]
 
+    def get_center(self):
+        return self.center
+
     def get_lines(self):
         return self.lines
 
     def get_bbox(self):
         return self.bbox
+
+    def get_side(self):
+        return self.side
 
     def distance(self, pt1, pt2):
         return math.sqrt((pt2[0][1] - pt1[0][1])**2 + (pt2[0][0] - pt1[0][0])**2)
