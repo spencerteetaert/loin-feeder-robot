@@ -8,7 +8,7 @@ DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\IMG_0111.MOV"
 
 def main(data_path=DATA_PATH):
     cap = cv2.VideoCapture(data_path)
-    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output5.mp4', 0x7634706d, 30, (500,881))
+    out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output5.mp4', 0x7634706d, 30, (500,881))
 
     delay = 0
     times = []
@@ -54,7 +54,7 @@ def main(data_path=DATA_PATH):
             res = bbox.draw_results(frame, [meats[-1].get_bbox()], "Test", meat=meats[-1])
         except:
             res = cv2.imshow("Test", frame)
-            
+
         # filtered = bbox.gen_mask(frame, bitwise_and=True)
         # mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
 
@@ -70,7 +70,7 @@ def main(data_path=DATA_PATH):
         #     for i in range(0, len(box)):
         #         cv2.drawContours(temp, box, i, color, 2)
 
-        # out.write(res)
+        out.write(res)
         # cv2.imshow("Split", frame)
         
         k = cv2.waitKey(1) & 0xFF
@@ -88,7 +88,7 @@ def main(data_path=DATA_PATH):
     print("Average frame processing time:", np.average(times))
 
     cap.release()
-    # out.release()
+    out.release()
     cv2.destroyAllWindows()
 
 if __name__=='__main__':

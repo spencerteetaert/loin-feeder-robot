@@ -124,19 +124,22 @@ def draw_results(img, boundPolys, source, meat=0):
             if meat != 0:
                 #Draws identified lines of interest
                 line_pts = meat.get_lines()
+
                 #Red - Loin
                 cv2.line(drawing, (line_pts[0][0][0],line_pts[0][0][1]), (line_pts[0][1][0],line_pts[0][1][1]), (0, 0, 255), thickness=2)
                 #Yellow - Shoulder
                 cv2.line(drawing, (line_pts[1][0][0],line_pts[1][0][1]), (line_pts[1][1][0],line_pts[1][1][1]), (0, 255, 255), thickness=2)
                 #Blue - Ham
                 cv2.line(drawing, (line_pts[2][0][0],line_pts[2][0][1]), (line_pts[2][1][0],line_pts[2][1][1]), (255, 0, 0), thickness=2)
-                #Magenta - Shank 
+                #Magenta - Belly 
                 cv2.line(drawing, (line_pts[3][0][0],line_pts[3][0][1]), (line_pts[3][1][0],line_pts[3][1][1]), (255, 0, 255), thickness=2)
+                #White - Cut 
+                cv2.line(drawing, (line_pts[4][0][0],line_pts[4][0][1]), (line_pts[4][1][0],line_pts[4][1][1]), (100, 205, 205), thickness=2)
 
                 font = cv2.FONT_HERSHEY_SIMPLEX
                 cv2.putText(drawing, meat.get_side(), (meat.get_center()[0], meat.get_center()[1]), font, 1, (255, 255, 0))
-    except SystemError as err:
-        # print("Error: {0}".format(err))
+    except TypeError as err:
+        print("Error: {0}".format(err))
         raise
 
     cv2.imshow(source, drawing)
