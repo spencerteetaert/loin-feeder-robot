@@ -8,6 +8,8 @@ import cv2
 import argparse 
 import random as r 
 import image_sizing as imgsz 
+from meat import Meat 
+import time
 
 r.seed(12345)
 
@@ -86,10 +88,13 @@ def thresh_callback(val, img):
     contours, _ = cv2.findContours(canny_output, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     if (len(contours) == 0):
-        return 0 
+        return 0
 
     # contours = np.concatenate(contours)
-    hulls = [cv2.convexHull(contours[i]) for i in range(0, len(contours))]
+    hulls = [cv2.convexHull(contours[i]) for i in range(0, len(contours)) if cv2.contourArea(cv2.convexHull(contours[i])) > 50000]
+
+    if (len(hulls) == 0):
+        return 0
 
     # Removes hulls that are contained within others. This allows for multiple pieces of meat to be detected
     filt = []
@@ -105,13 +110,28 @@ def thresh_callback(val, img):
 
     return ret
 
-def draw_results(img, boundPolys, source):
+def draw_results(img, boundPolys, source, meat=0):
     drawing = img.copy()
-    color = (31, 255, 49)
+
     if (boundPolys != 0):
         for i in range(0, len(boundPolys)):
-            cv2.drawContours(drawing, boundPolys, i, color, 2)
+            #Draws convex hull
+            cv2.drawContours(drawing, boundPolys, i, (31, 255, 49), 2)
+
+            if meat != 0:
+                #Draws identified lines of interest
+                line_pts = meat.get_lines()
+                #Red - Loin
+                cv2.line(drawing, line_pts[0][0], line_pts[0][1], (0, 0, 255), thickness=3)
+                #Yellow - Shoulder
+                cv2.line(drawing, line_pts[1][0], line_pts[1][1], (0, 255, 255), thickness=3)
+                #Blue - Ham
+                cv2.line(drawing, line_pts[2][0], line_pts[2][1], (255, 0, 0), thickness=3)
+                #Magenta - Shank 
+                cv2.line(drawing, line_pts[3][0], line_pts[3][1], (255, 0, 255), thickness=3)
+
     cv2.imshow(source, drawing)
+
     return drawing
 
 def n(x):
@@ -129,10 +149,10 @@ def main(input_path=DATA_PATH):
     vhigh = 255
     flag = False
 
-    for i in range(228, 245):
+    for i in range(110, 200):
         temp = input_path + str(i) + ".png"
         try: 
-            og = cv2.imread(temp)
+            og = preprocess(cv2.imread(temp))
             og.shape
         except:
             continue
@@ -140,12 +160,12 @@ def main(input_path=DATA_PATH):
         src = 'Source'
         cv2.namedWindow(src)
 
-        cv2.createTrackbar('H Low', src, hlow, 180, n)
-        cv2.createTrackbar('H High', src, hhigh, 180, n)
-        cv2.createTrackbar('S Low', src, slow, 255, n)
-        cv2.createTrackbar('S High', src, shigh, 255, n)
-        cv2.createTrackbar('V Low', src, vlow, 255, n)
-        cv2.createTrackbar('V High', src, vhigh, 255, n)
+        # cv2.createTrackbar('H Low', src, hlow, 180, n)
+        # cv2.createTrackbar('H High', src, hhigh, 180, n)
+        # cv2.createTrackbar('S Low', src, slow, 255, n)
+        # cv2.createTrackbar('S High', src, shigh, 255, n)
+        # cv2.createTrackbar('V Low', src, vlow, 255, n)
+        # cv2.createTrackbar('V High', src, vhigh, 255, n)
 
         while (1):
             k = cv2.waitKey(1) & 0xFF
@@ -154,12 +174,12 @@ def main(input_path=DATA_PATH):
             elif (k == ord('q')):
                 flag = True
                 break
-            hlow = cv2.getTrackbarPos('H Low', src)
-            hhigh = cv2.getTrackbarPos('H High', src)
-            slow = cv2.getTrackbarPos('S Low', src)
-            shigh = cv2.getTrackbarPos('S High', src)
-            vlow = cv2.getTrackbarPos('V Low', src)
-            vhigh = cv2.getTrackbarPos('V High', src)
+            # hlow = cv2.getTrackbarPos('H Low', src)
+            # hhigh = cv2.getTrackbarPos('H High', src)
+            # slow = cv2.getTrackbarPos('S Low', src)
+            # shigh = cv2.getTrackbarPos('S High', src)
+            # vlow = cv2.getTrackbarPos('V Low', src)
+            # vhigh = cv2.getTrackbarPos('V High', src)
 
             LOWER_MASK = np.array([hlow, slow, vlow])
             UPPER_MASK = np.array([hhigh, shigh, vhigh])
