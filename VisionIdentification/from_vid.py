@@ -14,7 +14,6 @@ def main(data_path=DATA_PATH):
     times = []
     meats = [0]
     flip_flop = True 
-    last_cY = 0
 
     while(cap.isOpened()):
         start = time.time()
@@ -40,20 +39,21 @@ def main(data_path=DATA_PATH):
 
                     if iH / 2 - 5 < cY and iH / 2 + 5 > cY:
                         if flip_flop:
-                            meats += [Meat(box[i], side="Right", conveyor_speed=cY-last_cY)]
+                            meats += [Meat(box[i], side="Right")]
                         else:
-                            meats += [Meat(box[i], side="Left", conveyor_speed=cY-last_cY)]
+                            meats += [Meat(box[i], side="Left")]
                         flip_flop = not flip_flop
                         print("Meat detected")
                         print(meats[-1])
                         delay = 0
                         # cv2.waitKey(0)
 
-                    last_cY = cY
+        for i in range(1, len(meats)):
+            meats[i].step()
 
         try:
-            bbox.draw_results(frame, meats[-1].get_bbox(), "Test")
-            print("passed")
+            bbox.draw_results(frame, box, "Test")
+            bbox.draw_results(frame, [meats[-1].get_bbox()], "Test")
         except:
             bbox.draw_results(frame, box, "Test")
 
@@ -80,6 +80,8 @@ def main(data_path=DATA_PATH):
             break
         elif k == ord('p'):
             cv2.waitKey(0)
+        elif k == ord('t'):
+            pass
 
         delay += 1
         times += [time.time() - start]

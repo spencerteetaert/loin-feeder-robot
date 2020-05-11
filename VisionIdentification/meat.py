@@ -3,7 +3,7 @@ import cv2
 import math
 
 class Meat():
-    def __init__(self, bbox, conveyor_speed=0, side="Left"):
+    def __init__(self, bbox, conveyor_speed=6, side="Left"):
         self.conveyor_speed = conveyor_speed
         self.side = side
         self.bbox = bbox
@@ -28,7 +28,8 @@ class Meat():
         '''
         Tranlsates every stored point by the conveyor speed
         '''
-        step_vec = np.array([self.conveyor_speed, 0])
+        step_vec = np.array([0, self.conveyor_speed])
+        # print(step_vec)
         self.bbox = self.bbox + step_vec
         self.loin_line = self.loin_line + step_vec
         self.shoulder_line = self.shoulder_line + step_vec

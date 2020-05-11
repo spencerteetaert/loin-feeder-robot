@@ -52,6 +52,8 @@ def preprocess(img):
     # ret = imgsz.crop(ret)
     ret = imgsz.scale(ret)
 
+    ret = cv2.copyMakeBorder(ret, 200, 200, 0, 0, cv2.BORDER_CONSTANT, value=0)
+
     return ret 
 
 def gen_mask(img, lower_mask=LOWER_MASK, upper_mask=UPPER_MASK, bitwise_and=False):
@@ -113,7 +115,7 @@ def thresh_callback(val, img):
 def draw_results(img, boundPolys, source, meat=0):
     drawing = img.copy()
 
-    if (boundPolys != 0):
+    try:
         for i in range(0, len(boundPolys)):
             #Draws convex hull
             cv2.drawContours(drawing, boundPolys, i, (31, 255, 49), 2)
@@ -129,6 +131,8 @@ def draw_results(img, boundPolys, source, meat=0):
                 cv2.line(drawing, line_pts[2][0], line_pts[2][1], (255, 0, 0), thickness=3)
                 #Magenta - Shank 
                 cv2.line(drawing, line_pts[3][0], line_pts[3][1], (255, 0, 255), thickness=3)
+    except:
+        pass
 
     cv2.imshow(source, drawing)
 
