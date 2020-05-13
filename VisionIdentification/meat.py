@@ -2,14 +2,21 @@ import numpy as np
 import cv2
 import math
 
-loin_width = 100
+##############
+# Parameters #
+##############
+LOIN_WIDTH = 90 # How far from loin side to make cut
+LINE_THRESHOLD = 30 # Distance between points to be considered a valid line 
+CHANGING_START_INDEX = False # Toggles whether to iterated start indeces 
+##############
+
 class Meat():
-    def __init__(self, bbox, conveyor_speed=6, side="Left", center=(0,0)):
+    def __init__(self, bbox, conveyor_speed=4, side="Left", center=(0,0)):
         self.conveyor_speed = conveyor_speed
         self.side = side
         self.bbox = bbox
         self.center = center
-        # self.area = cv2.contourArea(self.bbox)
+        self.area = cv2.contourArea(self.bbox)
 
         if (self.bbox == []):
             print("ERR: Meat object created with empty bbox.")
@@ -54,7 +61,6 @@ class Meat():
         max_y_index = np.where(ys == max(ys))[0][0]
 
         start_index = 0 
-        threshold = 10
         direction = -1
 
         # print(min(xs))
@@ -94,25 +100,13 @@ class Meat():
                     direction = 1
         elif line == "cut":
             k = np.subtract(self.belly_line[0], self.belly_line[1])
-
-            temp = self.loin_line
-
-            x = np.random.randn(2)  # take a random vector
-            # print("1",x)
-            x -= x.dot(k) * k       # make it orthogonal to k
-            # print("2",x)
-            x /= np.linalg.norm(x)  # normalize it
-            # print("3",x)
+            x = np.array([(k / np.linalg.norm(k))[1], -1*(k / np.linalg.norm(k))[0]])  # Find perpendicular normal
             
             if self.side == "Left":
                 x *= -1
-            # print("3",x)
 
-            dir_vect = x * loin_width
-            # print("4", dir_vect)
-
-            ret = np.around(temp + dir_vect).astype(int)
-            # print("5", ret)
+            dir_vect = x * LOIN_WIDTH
+            ret = np.around(self.loin_line + dir_vect).astype(int)
 
             return ret
         else:
@@ -120,10 +114,12 @@ class Meat():
 
         rotated_index = (start_index + len(self.bbox) + direction) % len(self.bbox)
         temp = start_index
+        threshold = LINE_THRESHOLD
 
         while(self.distance(self.bbox[start_index], self.bbox[rotated_index]) < threshold):
-            start_index = (start_index + len(self.bbox) + direction) % len(self.bbox)
-            rotated_index = (start_index + len(self.bbox) + direction) % len(self.bbox)
+            if CHANGING_START_INDEX:
+                start_index = rotated_index
+            rotated_index = (rotated_index + len(self.bbox) + direction) % len(self.bbox)
 
             if temp == start_index:
                 threshold -= 5
@@ -148,15 +144,14 @@ class Meat():
 
     def get_center(self):
         return self.center
-
     def get_lines(self):
         return self.lines
-
     def get_bbox(self):
         return self.bbox
-
     def get_side(self):
         return self.side
+    def get_area(self):
+        return self.area
 
     def distance(self, pt1, pt2):
         return math.sqrt((pt2[0][1] - pt1[0][1])**2 + (pt2[0][0] - pt1[0][0])**2)
