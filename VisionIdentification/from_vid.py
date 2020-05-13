@@ -8,7 +8,7 @@ DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 
 def main(data_path=DATA_PATH):
     cap = cv2.VideoCapture(data_path)
-    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output5.mp4', 0x7634706d, 30, (500,881))
+    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output6.mp4', 0x7634706d, 30, (500,1059))
 
     delay = 0
     times = []
@@ -20,6 +20,7 @@ def main(data_path=DATA_PATH):
         start = time.time()
 
         _, frame = cap.read()
+
 
         # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
 
@@ -49,17 +50,16 @@ def main(data_path=DATA_PATH):
                             flip_flop = not flip_flop
                             print("Meat detected")
                             print(meats[-1])
+                            
+                            data = "Side:" + meats[-1].get_side() + "\n" + str(delay) + "\nArea:" + str(meats[-1].get_area())
+                            
                             delay = 0
                     except:
                         pass
 
-        
-
         try:   
-            data = "Side:" + meats[-1].get_side() + "\n" + str(delay) + "\nArea:" + str(meats[-1].get_area())
-
             if switch==1:
-                bbox.draw_results(frame, [meats[-1].get_bbox()], "Test", meat=meats[-1], extra_data=data)
+                res = bbox.draw_results(frame, [meats[-1].get_bbox()], "Test", meat=meats[-1], extra_data=data)
             elif switch==2:
                 filtered = bbox.gen_mask(frame, bitwise_and=True, process=False)
                 bbox.draw_results(filtered, [meats[-1].get_bbox()], "Test", meat=meats[-1], extra_data=data)
@@ -68,13 +68,11 @@ def main(data_path=DATA_PATH):
                 bbox.draw_results(filtered, [meats[-1].get_bbox()], "Test", meat=meats[-1], extra_data=data)
             # res = bbox.draw_results(mask, box, "Test", meat=meats[-1])
         except:
-            res = cv2.imshow("Test", frame)              
+            res = frame
+            cv2.imshow("Test", frame)              
 
         for i in range(1, len(meats)):
             meats[i].step()
-
-        
-
 
         # filtered = bbox.gen_mask(frame, bitwise_and=True, process=True)
         # mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
@@ -93,7 +91,7 @@ def main(data_path=DATA_PATH):
         # #     for i in range(0, len(box)):
         # #         cv2.drawContours(temp, box, i, color, 2)
 
-        # # out.write(res)
+        # out.write(res)
         # cv2.imshow("Split", temp)
         
         k = cv2.waitKey(1) & 0xFF
@@ -108,13 +106,11 @@ def main(data_path=DATA_PATH):
         elif k == ord('3'):
             switch = 3
 
-        if delay == 0:
-            cv2.waitKey(0)
+        # if delay == 0:
+        #     cv2.waitKey(0)
         delay += 1
         times += [time.time() - start]
         # cv2.waitKey(20)
-
-        
 
     print("Average frame processing time:", np.average(times))
 

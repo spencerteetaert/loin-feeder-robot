@@ -6,7 +6,8 @@ import math
 # Parameters #
 ##############
 LOIN_WIDTH = 90 # How far from loin side to make cut
-LINE_THRESHOLD = 30 # Distance between points to be considered a valid line 
+LINE_THRESHOLD = 200 # Distance between points to be considered a valid line 
+SHORT_END_FACTOR = 0.35
 CHANGING_START_INDEX = False # Toggles whether to iterated start indeces 
 ##############
 
@@ -72,6 +73,7 @@ class Meat():
         # print("xs", xs)
         # print("ys", ys)
 
+        thresh_factor = 1
         if line == "loin": # Red
             if self.side == "Left":
                 start_index = max_y_index
@@ -83,10 +85,12 @@ class Meat():
                     direction = 1
         elif line == "shoulder": # Yellow
             start_index = min_x_index
+            thresh_factor = SHORT_END_FACTOR
             if ys[start_index] > self.center[1]:
                 direction = 1
         elif line == "ham": # Blue
             start_index = max_x_index
+            thresh_factor = SHORT_END_FACTOR
             if ys[start_index] < self.center[1]:
                 direction = 1
         elif line == "belly": # Magenta 
@@ -114,7 +118,7 @@ class Meat():
 
         rotated_index = (start_index + len(self.bbox) + direction) % len(self.bbox)
         temp = start_index
-        threshold = LINE_THRESHOLD
+        threshold = LINE_THRESHOLD * thresh_factor
 
         while(self.distance(self.bbox[start_index], self.bbox[rotated_index]) < threshold):
             if CHANGING_START_INDEX:

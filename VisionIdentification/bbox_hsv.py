@@ -18,10 +18,16 @@ import sys
 MINIMUM_AREA = 40000 # Pixel area for an acceptable contour 
 EROSION_SCALE = 0.01 # Erosion kernel scale factor
 DILATION_SCALE = 0.1 # Dilation kernel scale factor
+
 # LOWER_MASK = np.array([0, 51, 51]) # Default lower mask
 # UPPER_MASK = np.array([15, 204, 255]) # Default upper mask
-LOWER_MASK = np.array([0, 70, 70]) # Default lower mask
-UPPER_MASK = np.array([15, 204, 255]) # Default upper mask
+LOWER_MASK = np.array([0, 71, 99]) # Default lower mask
+UPPER_MASK = np.array([9, 191, 212]) # Default upper mask
+# temp1 = np.array([0, 0, 0]) # Default lower mask
+# temp2 = np.array([5, 4, 15]) # Default upper mask
+
+# temp3 = np.array([140, 64, 201]) # Default lower mask
+# temp4 = np.array([179, 255, 255]) # Default upper mask
 ##############
 
 r.seed(12345)
@@ -76,19 +82,31 @@ def gen_mask(img, lower_mask=LOWER_MASK, upper_mask=UPPER_MASK, bitwise_and=Fals
 
     #Masks colour ranges provided
     hsv = cv2.cvtColor(ret, cv2.COLOR_BGR2HSV)
+
     mask = cv2.inRange(hsv, lower_mask, upper_mask)
+
+    # t1 = cv2.inRange(hsv, temp1, temp2)
+    # t2 = cv2.inRange(hsv, temp3, temp4)
+
+    # mask = t1 + t2
+
     cv2.bitwise_not(mask)
 
     if process:
-        #Then dilate and erode to remove holes 
+        mask = cv2.copyMakeBorder(mask, 0, 0, 0, 300, cv2.BORDER_CONSTANT, value=0)
+
         kernel = np.ones([round(iW*0.013),round(iH*0.013)])
         refined = cv2.dilate(mask, kernel)
 
         kernel = np.ones([round(iW*0.02),round(iH*0.02)])
         refined = cv2.erode(refined, kernel)
 
-        kernel = np.ones([round(iW*0.06),round(iH*0.06)])
-        refined = cv2.morphologyEx(refined, cv2.MORPH_CLOSE, kernel)
+        kernel = np.ones([round(iW*0.08),round(iH*0.08)])
+        refined = cv2.dilate(refined, kernel)
+        refined = cv2.erode(refined, kernel)
+
+        # kernel = np.ones([round(iW*0.08),round(iH*0.08)])
+        # refined = cv2.morphologyEx(refined, cv2.MORPH_CLOSE, kernel)
 
         # kernel = np.ones([round(iW*0.1),round(iH*0.1)])
         # refined = cv2.morphologyEx(refined, cv2.MORPH_CLOSE, kernel)
@@ -155,7 +173,7 @@ def draw_results(img, boundPolys, source, meat=0, extra_data=""):
                 #Blue - Ham
                 # cv2.line(drawing, (line_pts[2][0][0],line_pts[2][0][1]), (line_pts[2][1][0],line_pts[2][1][1]), (255, 0, 0), thickness=2)
                 #Magenta - Belly 
-                # cv2.line(drawing, (line_pts[3][0][0],line_pts[3][0][1]), (line_pts[3][1][0],line_pts[3][1][1]), (255, 0, 255), thickness=2)
+                cv2.line(drawing, (line_pts[3][0][0],line_pts[3][0][1]), (line_pts[3][1][0],line_pts[3][1][1]), (255, 0, 255), thickness=2)
                 #White - Cut 
                 cv2.line(drawing, (line_pts[4][0][0],line_pts[4][0][1]), (line_pts[4][1][0],line_pts[4][1][1]), (100, 205, 205), thickness=2)
     except TypeError as err:
