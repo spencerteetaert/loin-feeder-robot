@@ -25,6 +25,16 @@ class Point:
         return (self.x**2 + self.y**2)**0.5
     def norm(self):
         return Point(self.x / self.mag(), self.y / self.mag())
+    def angle(self):
+        if self.x < 0:
+            return math.degrees(math.atan((-1*self.y)/self.x)) + 180
+        elif self.x == 0:
+            if self.y < 0:
+                return 90
+            else:
+                return -90
+        else:
+            return math.degrees(math.atan((-1*self.y)/self.x))
 
     def toTuple(self):
         return (round(self.x), round(self.y))
@@ -34,25 +44,25 @@ class MainArm:
         self.basePt = pt
         self.length = length
         self.min_length = 50
-        self.max_length = 300
+        self.max_length = 75
         self.angle = angle 
-        self.refresh()
+        self.otherPt = self.getOtherPt()
 
     def __repr__(self):
         return "MainArm with:\n\tBase (" + str(self.basePt.x) + ", " + str(self.basePt.y) + ")\n\tLength " + str(self.length) + "\n\tAngle " + str(self.angle) + "°"
 
     def refresh(self):
-        self.otherPt = self.getotherPt()
+        self.angle = (self.otherPt - self.basePt).angle()
 
-    def getotherPt(self):
+    def getOtherPt(self):
         return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))))
 
     def draw(self, canvas):
         cv2.line(canvas, self.basePt.toTuple(), self.otherPt.toTuple(), (255, 255, 255)) 
         cv2.circle(canvas, self.basePt.toTuple(), 3, (255, 255, 255))
     
-    def follow(self, x, y):
-        dr = Point(x, y) - self.basePt
+    def follow(self, pt):
+        dr = pt - self.basePt
         if dr.mag() <= self.min_length:
             self.length = self.min_length
         elif dr.mag() <= self.max_length:
@@ -60,7 +70,13 @@ class MainArm:
         else:
             self.length = self.max_length
 
-        self.otherPt = self.basePt + dr.norm() * self.length
+        self.otherPt = pt
+        self.basePt = self.otherPt - dr.norm() * self.length
+
+    def moveBase(self, pt):
+        self.refresh()
+        self.basePt = pt
+        self.otherPt = self.getOtherPt()
 
 class SecondayArm:
     def __init__(self, pt, length1, length2, angle=0):
@@ -88,26 +104,42 @@ class SecondayArm:
 
 class Robot:
     def __init__(self):
-        self.main_arm = MainArm(Point(30, 30), 500) 
+        self.main_arm = MainArm(Point(500, 500), 200) 
+        self.secondary_arm = SecondayArm(self.main_arm.otherPt, 150, 100, angle=45)
 
-s1 = MainArm(Point(500, 500), 200)
-s2 = SecondayArm(s1.otherPt, 150, 100, angle=45)
+count = 5
+s = []
+for i in range(0, count):
+    s += [MainArm(Point(500, 500), 50)]
+
+# s2 = SecondayArm(s1.otherPt, 150, 100, angle=45)
 canvas = np.zeros([1000, 1000, 3])
 
 def mouseEvent(event, x, y, flags, param):
-    global s1, s2, canvas
+    global s, canvas
     if event==cv2.EVENT_MOUSEMOVE:
-        s1.follow(x, y)
-        s2.basePt = Point(x, y)
+        s[0].follow(Point(x, y))
+        for i in range(1, count):
+            s[i].follow(s[i-1].basePt)
 
-        s2.refresh()
+        s[count-1].moveBase(Point(500, 500))
+        for i in range(count-2, -1, -1):
+            s[i].moveBase(s[i+1].otherPt)
+
+
+        # s2.basePt = Point(x, y)
+
+        # s2.refresh()
 
         canvas = np.zeros([1000, 1000, 3])
-        s1.draw(canvas)
-        s2.draw(canvas)
+
+        for i in range(0, count):
+            s[i].draw(canvas)
+
+        # s2.draw(canvas)
 
 def main():
-    global s1, s2, canvas
+    global canvas
     win_name = "Inverse Kinematics"
     cv2.namedWindow(win_name)
     cv2.moveWindow(win_name, 500, 500)
