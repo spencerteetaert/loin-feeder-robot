@@ -6,13 +6,14 @@ from Carriage import Carriage
 import cv2
 
 class Robot:
-    def __init__(self, ROBOT_BASE_POINT):
+    def __init__(self, ROBOT_BASE_POINT, scale):
+        self.scale = scale
         self.basePt = ROBOT_BASE_POINT
-        self.main_track = MainTrack(self.basePt, 100)
-        self.main_arm = MainArm(self.main_track.otherPt, 200)
-        self.secondary_arm = SecondaryArm(self.main_arm.otherPt, 150, 100, angle=45)
-        self.carriage1 = Carriage(self.secondary_arm.otherPt1)
-        self.carriage2 = Carriage(self.secondary_arm.otherPt2)
+        self.main_track = MainTrack(self.basePt, scale)
+        self.main_arm = MainArm(self.main_track.otherPt, scale)
+        self.secondary_arm = SecondaryArm(self.main_arm.otherPt, scale, angle=45)
+        self.carriage1 = Carriage(self.secondary_arm.otherPt1, scale)
+        self.carriage2 = Carriage(self.secondary_arm.otherPt2, scale)
 
     def moveTo(self, pt1, pt2):
         self.secondary_arm.follow(pt1, pt2)
@@ -33,16 +34,16 @@ class Robot:
         self.carriage2.draw(canvas)
 
         font = cv2.FONT_HERSHEY_SIMPLEX
-        y0, dy = 30, 21
+        y0, dy = 30, 18
         for i, line in enumerate(self.__repr__().split('\n')):
             y = y0 + i*dy
             try:
                 if (line[0] == '\t'):
-                    cv2.putText(canvas, line[1:], (25, y), font, 0.7, (0, 100, 255))
+                    cv2.putText(canvas, line[1:], (25, y), font, 0.6, (150, 150, 0))
                 else:
-                    cv2.putText(canvas, line, (15, y), font, 0.7, (255, 255, 0))
+                    cv2.putText(canvas, line, (15, y), font, 0.6, (255, 255, 0))
             except:
-                cv2.putText(canvas, line, (15, y), font, 0.7, (255, 255, 0))
+                cv2.putText(canvas, line, (15, y), font, 0.6, (255, 255, 0))
 
     def __repr__(self):
         ret = ""

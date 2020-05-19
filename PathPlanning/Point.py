@@ -25,14 +25,14 @@ class Point:
         return Point(self.x / self.mag(), self.y / self.mag())
     def angle(self):
         if self.x < 0:
-            return math.degrees(math.atan((-1*self.y)/self.x)) + 180
+            return (math.degrees(math.atan((-1*self.y)/self.x)) + 180 + 360) % 360
         elif self.x == 0:
             if self.y < 0:
                 return 90
             else:
-                return -90
+                return 270
         else:
-            return math.degrees(math.atan((-1*self.y)/self.x))
+            return (math.degrees(math.atan((-1*self.y)/self.x)) + 360) % 360
 
     def toTuple(self):
         return (round(self.x), round(self.y))

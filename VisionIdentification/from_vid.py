@@ -20,8 +20,7 @@ def main(data_path=DATA_PATH):
         start = time.time()
 
         _, frame = cap.read()
-
-
+        
         # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
 
         try:
