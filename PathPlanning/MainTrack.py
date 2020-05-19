@@ -16,7 +16,7 @@ class MainTrack:
         self.otherPt = self.getOtherPt()
 
     def __repr__(self):
-        return "Main Track with:\n\tBase (" + str(self.basePt.x) + ", " + str(self.basePt.y) + ")\n\tLength " + str(self.length)
+        return "Main Track\n\tExtension " + str(round(self.length, 1)) + "px\n"
 
     def getOtherPt(self):
         return Point(self.basePt.x, self.basePt.y - self.length)

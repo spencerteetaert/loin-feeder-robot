@@ -1,21 +1,17 @@
 import sys
 import numpy as np
 
-sys.path.insert(1, "PathPlanning")
-from Point import Point
-
 ###########################
 ### Physical Parameters ###
 ###########################
 
-ROBOT_BASE_POINT = Point(300, 500)
-MAIN_MIN_LENGTH = 150
-MAIN_MAX_LENGTH = 300
 MAIN_TRACK_MIN_LENGTH = 10
 MAIN_TRACK_MAX_LENGTH = 300
-SECONDARY_MIN_LENGTH = 50
-SECONDARY_MAX_LENGTH = 300
+MAIN_ARM_MIN_LENGTH = 150
+MAIN_ARM_MAX_LENGTH = 300
 
+SECONDARY_ARM_MIN_LENGTH = 50
+SECONDARY_ARM_MAX_LENGTH = 150
 
 #########################
 ### Vision Parameters ###

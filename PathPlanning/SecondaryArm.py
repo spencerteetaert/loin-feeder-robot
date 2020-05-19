@@ -12,14 +12,14 @@ class SecondaryArm:
         self.basePt = pt
         self.length1 = length1
         self.length2 = length2
-        self.min_length = gp.SECONDARY_MIN_LENGTH
-        self.max_length = gp.SECONDARY_MAX_LENGTH
+        self.min_length = gp.SECONDARY_ARM_MIN_LENGTH
+        self.max_length = gp.SECONDARY_ARM_MAX_LENGTH
         self.angle = angle 
         self.otherPt1 = self.getotherPt1()
         self.otherPt2 = self.getotherPt2()
 
     def __repr__(self):
-        return "SecondayArm with:\n\tBase (" + str(self.basePt.x) + ", " + str(self.basePt.y) + ")\n\tLength1 " + str(self.length1) + "\n\tLength2 " + str(self.length2)+ "\n\tAngle " + str(self.angle) + "°"
+        return "Seconday Arm\n\tLength1 " + str(round(self.length1, 1)) + "px\n\tLength2 " + str(round(self.length2, 1))+ "px\n\tAngle " + str(round(self.angle, 1)) + "°\n"
 
     def refresh(self):
         self.angle = (self.otherPt1 - self.basePt).angle()

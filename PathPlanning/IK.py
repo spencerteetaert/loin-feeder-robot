@@ -7,7 +7,7 @@ from Point import Point
 canvas = np.zeros([1000, 1000, 3])
 otherPt = Point(500, 500)
 
-model = Robot()
+model = Robot(Point(300, 500))
 
 def mouseEvent(event, x, y, flags, param):
     global canvas, otherPt
@@ -22,7 +22,7 @@ def mouseEvent(event, x, y, flags, param):
 
 def main():
     global canvas
-
+    model.draw(canvas)
     win_name = "Inverse Kinematics"
     cv2.namedWindow(win_name)
     cv2.moveWindow(win_name, 500, 500)
