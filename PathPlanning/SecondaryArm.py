@@ -2,22 +2,18 @@ from Point import Point
 import math
 import cv2
 
-########################
-### Robot Parameters ###
-########################
-
-SECONDARY_MIN_LENGTH = 50
-SECONDARY_MAX_LENGTH = 300
-
-########################
+import sys
+import os
+sys.path.insert(1, os.getcwd())
+import GlobalParameters as gp
 
 class SecondaryArm:
     def __init__(self, pt:Point, length1, length2, angle=0):
         self.basePt = pt
         self.length1 = length1
         self.length2 = length2
-        self.min_length = SECONDARY_MIN_LENGTH
-        self.max_length = SECONDARY_MAX_LENGTH
+        self.min_length = gp.SECONDARY_MIN_LENGTH
+        self.max_length = gp.SECONDARY_MAX_LENGTH
         self.angle = angle 
         self.otherPt1 = self.getotherPt1()
         self.otherPt2 = self.getotherPt2()

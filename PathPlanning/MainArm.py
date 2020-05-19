@@ -2,21 +2,16 @@ from Point import Point
 import math
 import cv2
 
-########################
-### Robot Parameters ###
-########################
-
-MAIN_MIN_LENGTH = 150
-MAIN_MAX_LENGTH = 300
-
-########################
-
+import sys
+import os
+sys.path.insert(1, os.getcwd())
+import GlobalParameters as gp
 class MainArm:
     def __init__(self, pt:Point, length=100, angle=0):
         self.basePt = pt
         self.length = length
-        self.min_length = MAIN_MIN_LENGTH
-        self.max_length = MAIN_MAX_LENGTH
+        self.min_length = gp.MAIN_MIN_LENGTH
+        self.max_length = gp.MAIN_MAX_LENGTH
         self.angle = angle 
         self.otherPt = self.getOtherPt()
 

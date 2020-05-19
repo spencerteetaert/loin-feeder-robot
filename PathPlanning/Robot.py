@@ -3,17 +3,13 @@ from MainTrack import MainTrack
 from MainArm import MainArm 
 from SecondaryArm import SecondaryArm
 
-########################
-### Robot Parameters ###
-########################
-
-ROBOT_BASE_POINT = Point(300, 500)
-
-########################
-
+import sys
+import os
+sys.path.insert(1, os.getcwd())
+import GlobalParameters as gp
 class Robot:
     def __init__(self):
-        self.basePt = ROBOT_BASE_POINT
+        self.basePt = gp.ROBOT_BASE_POINT
         self.main_track = MainTrack(self.basePt, 100)
         self.main_arm = MainArm(self.main_track.otherPt, 200)
         self.secondary_arm = SecondaryArm(self.main_arm.otherPt, 150, 100, angle=45)
@@ -26,7 +22,7 @@ class Robot:
         self.main_track.moveBase(self.basePt)
         self.main_arm.moveBase(self.main_track.otherPt)
         self.secondary_arm.moveBase(self.main_arm.otherPt)
-        
+
     def draw(self, canvas):
         self.main_track.draw(canvas)
         self.main_arm.draw(canvas)

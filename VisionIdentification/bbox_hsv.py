@@ -10,25 +10,11 @@ import random as r
 import image_sizing as imgsz 
 from meat import Meat 
 import time
+
 import sys
-
-##############
-# Parameters #
-##############
-MINIMUM_AREA = 40000 # Pixel area for an acceptable contour 
-EROSION_SCALE = 0.01 # Erosion kernel scale factor
-DILATION_SCALE = 0.1 # Dilation kernel scale factor
-
-# LOWER_MASK = np.array([0, 51, 51]) # Default lower mask
-# UPPER_MASK = np.array([15, 204, 255]) # Default upper mask
-LOWER_MASK = np.array([0, 71, 99]) # Default lower mask
-UPPER_MASK = np.array([9, 191, 212]) # Default upper mask
-# temp1 = np.array([0, 0, 0]) # Default lower mask
-# temp2 = np.array([5, 4, 15]) # Default upper mask
-
-# temp3 = np.array([140, 64, 201]) # Default lower mask
-# temp4 = np.array([179, 255, 255]) # Default upper mask
-##############
+import os
+sys.path.insert(1, os.getcwd())
+import GlobalParameters as gp
 
 r.seed(12345)
 
@@ -36,7 +22,7 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\test"
 THRESHOLD = 255
 
-def get_bbox(img, threshold=THRESHOLD, draw=False, lower_mask=LOWER_MASK, upper_mask=UPPER_MASK, source="Image"):
+def get_bbox(img, threshold=THRESHOLD, draw=False, lower_mask=gp.LOWER_MASK, upper_mask=gp.UPPER_MASK, source="Image"):
     '''
     Returns single bounding polygon for the given middle image
     A larger threshold value will result in larger bbox
@@ -73,7 +59,7 @@ def preprocess(img):
 
     return ret 
 
-def gen_mask(img, lower_mask=LOWER_MASK, upper_mask=UPPER_MASK, bitwise_and=False, process=True):
+def gen_mask(img, lower_mask=gp.LOWER_MASK, upper_mask=gp.UPPER_MASK, bitwise_and=False, process=True):
     '''
     Masks input img based off HSV colour ranges provided 
     '''
@@ -131,7 +117,7 @@ def thresh_callback(val, img):
         return 0
 
     # contours = np.concatenate(contours)
-    hulls = [cv2.convexHull(contours[i]) for i in range(0, len(contours)) if cv2.contourArea(cv2.convexHull(contours[i])) > MINIMUM_AREA]
+    hulls = [cv2.convexHull(contours[i]) for i in range(0, len(contours)) if cv2.contourArea(cv2.convexHull(contours[i])) > gp.MINIMUM_AREA]
 
     if (len(hulls) == 0):
         return 0

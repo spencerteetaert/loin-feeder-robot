@@ -2,21 +2,17 @@ from Point import Point
 import math
 import cv2
 
-########################
-### Robot Parameters ###
-########################
-
-MAIN_TRACK_MIN_LENGTH = 10
-MAIN_TRACK_MAX_LENGTH = 300
-
-########################
+import sys
+import os
+sys.path.insert(1, os.getcwd())
+import GlobalParameters as gp
 
 class MainTrack:
     def __init__(self, pt:Point, length=100):
         self.basePt = pt
         self.length = length
-        self.min_length = MAIN_TRACK_MIN_LENGTH
-        self.max_length = MAIN_TRACK_MAX_LENGTH
+        self.min_length = gp.MAIN_TRACK_MIN_LENGTH
+        self.max_length = gp.MAIN_TRACK_MAX_LENGTH
         self.otherPt = self.getOtherPt()
 
     def __repr__(self):

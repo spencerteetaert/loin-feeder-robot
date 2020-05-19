@@ -4,14 +4,6 @@ import math
 from Robot import Robot
 from Point import Point
 
-########################
-### Robot Parameters ###
-########################
-
-# All currently in pxs
-
-########################
-
 canvas = np.zeros([1000, 1000, 3])
 otherPt = Point(500, 500)
 
@@ -30,6 +22,7 @@ def mouseEvent(event, x, y, flags, param):
 
 def main():
     global canvas
+
     win_name = "Inverse Kinematics"
     cv2.namedWindow(win_name)
     cv2.moveWindow(win_name, 500, 500)
