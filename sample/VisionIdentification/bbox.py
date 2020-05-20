@@ -2,27 +2,24 @@
 Altered from bbox example on opencv documentation site 
 https://docs.opencv.org/3.4/da/d0c/tutorial_bounding_rects_circles.html 
 '''
+import time
+import argparse 
+import random
+import time
 
 import numpy as np
 import cv2
-import argparse 
-import random as r 
-import image_sizing as imgsz 
-from meat import Meat 
-import time
 
-import sys
-import os
-sys.path.insert(1, os.getcwd())
-import GlobalParameters as gp
+from . import image_sizing
+from .. import GlobalParameters
 
-r.seed(12345)
+random.seed(12345)
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\test"
 THRESHOLD = 255
 
-def get_bbox(img, threshold=THRESHOLD, draw=False, lower_mask=gp.LOWER_MASK, upper_mask=gp.UPPER_MASK, source="Image"):
+def get_bbox(img, threshold=THRESHOLD, draw=False, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParameters.UPPER_MASK, source="Image"):
     '''
     Returns single bounding polygon for the given middle image
     A larger threshold value will result in larger bbox
@@ -52,14 +49,14 @@ def preprocess(img):
     Grayscales image to reduce computation time
     '''
     ret = img.copy()
-    # ret = imgsz.crop(ret)
-    ret = imgsz.scale(ret)
+    # ret = image_sizing.crop(ret)
+    ret = image_sizing.scale(ret)
 
     # ret = cv2.copyMakeBorder(ret, 300, 300, 0, 0, cv2.BORDER_CONSTANT, value=0)
 
     return ret 
 
-def gen_mask(img, lower_mask=gp.LOWER_MASK, upper_mask=gp.UPPER_MASK, bitwise_and=False, process=True):
+def gen_mask(img, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParameters.UPPER_MASK, bitwise_and=False, process=True):
     '''
     Masks input img based off HSV colour ranges provided 
     '''
@@ -117,7 +114,7 @@ def thresh_callback(val, img):
         return 0
 
     # contours = np.concatenate(contours)
-    hulls = [cv2.convexHull(contours[i]) for i in range(0, len(contours)) if cv2.contourArea(cv2.convexHull(contours[i])) > gp.MINIMUM_AREA]
+    hulls = [cv2.convexHull(contours[i]) for i in range(0, len(contours)) if cv2.contourArea(cv2.convexHull(contours[i])) > GlobalParameters.MINIMUM_AREA]
 
     if (len(hulls) == 0):
         return 0

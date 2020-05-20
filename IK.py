@@ -1,9 +1,11 @@
+import math 
+import time
+
 import numpy as np 
 import cv2 
-import math 
-from Robot import Robot
-from Point import Point
-import time
+
+from sample.PathPlanning.Robot import Robot
+from sample.PathPlanning.Point import Point
 
 canvas = np.zeros([1000, 1000, 3], dtype=np.uint8)
 

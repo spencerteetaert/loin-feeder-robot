@@ -1,18 +1,17 @@
-from Point import Point
 import math
+
 import cv2
 import numpy as np
 
-import sys
-import os
-sys.path.insert(1, os.getcwd())
-import GlobalParameters as gp
+from .Point import Point
+from .. import GlobalParameters
+
 class Carriage:
     def __init__(self, pt:Point, scale, length=100, angle=0):
         self.scale = scale
         self.basePt = pt
-        self.width = gp.CARRIAGE_WIDTH * scale
-        self.length = gp.CARRIAGE_LENGTH * scale
+        self.width = GlobalParameters.CARRIAGE_WIDTH * scale
+        self.length = GlobalParameters.CARRIAGE_LENGTH * scale
         self.angle = angle 
         self.relative_angle = 0
         self.otherPt = self.getOtherPt()

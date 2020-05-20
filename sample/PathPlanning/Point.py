@@ -1,4 +1,5 @@
 import math
+
 import cv2
 import numpy as np
 
@@ -85,4 +86,3 @@ class Point:
             self.steps_remaining -= 1
             return True
         return False
-
