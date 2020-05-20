@@ -13,10 +13,10 @@ This software aims at solving three challenges:
 ### Vision System
 bbox_hsv.py can take an image with a piece of meat in it and identify the bounding box of the meat. 
 meat.py is a class for a meat object. Given a bounding box, it can find all the significant edges and identify where the cut line should be. 
-![Meat object identification](/images/meat_identified.png)
+![Meat object identification](/images/meat_identified.PNG)
 from_vid.py creates an application of the above files and implements it from a video stream. 
 
 ### Inverse Kinematics 
 robot.py creates a model of the actual robot (to scale). It uses inverse kinematics to be able to follow two points at once with both of its carriages. 
 IK.py is an implementation of robot.py 
-![Robot model implementation](/images/model.png)
+![Robot model implementation](/images/model.PNG)
