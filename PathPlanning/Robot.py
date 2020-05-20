@@ -16,6 +16,8 @@ class Robot:
         self.carriage2 = Carriage(self.secondary_arm.otherPt2, scale)
 
     def moveTo(self, pt1, pt2):
+        if pt1.y < pt2.y:
+            pt1, pt2 = pt2, pt1
         self.secondary_arm.follow(pt1, pt2)
         self.main_arm.follow(self.secondary_arm.basePt, self.secondary_arm.angle)
         self.main_track.follow(self.main_arm.basePt)
