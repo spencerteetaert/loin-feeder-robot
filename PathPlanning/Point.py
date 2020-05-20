@@ -1,5 +1,6 @@
 import math
 import cv2
+import numpy as np
 
 class Point:
     def __init__(self, x, y, angle=None, steps=0, vec=None):
@@ -61,6 +62,8 @@ class Point:
             cv2.line(canvas, self.toTuple(), (round(self.x + 20*math.cos(math.radians(self.angle))), round(self.y - 20*math.sin(math.radians(self.angle)))), color)
     def toTuple(self):
         return (round(self.x), round(self.y))
+    def toArray(self):
+        return np.array([self.x, self.y])
 
 
     def moveTo(self, otherPt, dt):
@@ -68,14 +71,12 @@ class Point:
         dY = (otherPt.y - self.y)/dt
         dA = 0
         if self.angle != None and otherPt.angle != None:
-            print("FFLLAAAGGGAGA")
             dA = (otherPt.angle - self.angle)/dt
 
         self.update_vec = Point(dX, dY, angle=dA)
         self.steps_remaining = dt
         
     def update(self):
-        # print(self.update_vec)
         if self.steps_remaining != 0:
             self.x += self.update_vec.x
             self.y += self.update_vec.y

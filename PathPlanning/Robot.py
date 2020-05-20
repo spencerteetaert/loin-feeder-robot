@@ -18,6 +18,8 @@ class Robot:
     def moveTo(self, pt2, pt1):
         # if pt1.y < pt2.y:
             # pt1, pt2 = pt2, pt1
+        self.carriage1.follow(pt1)
+        self.carriage2.follow(pt2)
         self.secondary_arm.follow(pt1, pt2)
         self.main_arm.follow(self.secondary_arm.basePt, self.secondary_arm.angle)
         self.main_track.follow(self.main_arm.basePt)

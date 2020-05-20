@@ -1,6 +1,7 @@
 from Point import Point
 import math
 import cv2
+import numpy as np
 
 import sys
 import os
@@ -25,22 +26,24 @@ class Carriage:
         return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))))
 
     def draw(self, canvas):
-        cv2.rectangle(canvas, (self.basePt - Point(self.width/2, self.length/2)).toTuple(), (self.basePt + Point(self.width/2, self.length/2)).toTuple(), (255, 255, 255))
-        # cv2.circle(canvas, self.basePt.toTuple(), 3, (255, 255, 255))
-    
+        points = []
+
+        k = np.array([self.length*math.cos(math.radians(self.angle))/2, -1 * self.length*math.sin(math.radians(self.angle))/2])
+        x = np.array([(k / np.linalg.norm(k))[1] * self.width/2, -1 * self.width * (k / np.linalg.norm(k))[0]/2])  # Find perpendicular normal
+
+        points += [(self.basePt.toArray() + k + x)]
+        points += [(self.basePt.toArray() + k - x)]
+        points += [(self.basePt.toArray() - k - x)]
+        points += [(self.basePt.toArray() - k + x)]
+
+        
+        contour = np.array(points).reshape((-1, 1, 2)).astype(np.int32)
+        cv2.drawContours(canvas, [contour], 0, (255, 255, 255))
+
     def follow(self, pt:Point):
-        pass
-        # dr = pt - self.basePt
-        # if dr.mag() <= self.min_length:
-        #     self.length = self.min_length
-        # elif dr.mag() <= self.max_length:
-        #     self.length = dr.mag()
-        # else:
-        #     self.length = self.max_length
-
-        # self.otherPt = pt
-        # self.basePt = self.otherPt - dr.norm() * self.length
-
+        if pt.angle != None:
+            self.angle = pt.angle
+        
     def moveBase(self, pt:Point):
         # self.refresh()
         self.basePt = pt

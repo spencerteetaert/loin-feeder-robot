@@ -6,22 +6,20 @@ from Point import Point
 import time
 
 canvas = np.zeros([1000, 1000, 3], dtype=np.uint8)
-pt1 = Point(497, 261)
-pt2 = Point(501, 504)
 
 model = Robot(Point(300, 500), 200)
-points1 = [Point(498, 327, angle=50), Point(496, 406, angle=100), Point(498, 466), Point(500, 517), Point(510, 562), Point(543, 614), Point(582, 640), Point(622, 665)]
-points2 = [Point(500, 546), Point(460, 600), Point(417, 632), Point(368, 647), Point(339, 659), Point(316, 662), Point(297, 666), Point(282, 665)]
+points1 = [Point(497, 261, angle=0), Point(498, 327, angle=15), Point(496, 406, angle=30), Point(498, 466, angle=45), Point(500, 517, angle=60), Point(561, 591, angle=75), Point(622, 665, angle=90)]
+points2 = [Point(501, 504, angle=180), Point(500, 546, angle=165), Point(460, 600, angle=150), Point(417, 632, angle=135), Point(368, 647, angle=120), Point(339, 659, angle=105), Point(282, 665, angle=90)]
 i = 0
-
+pt1 = Point(497, 261, angle=0)
+pt2 = Point(501, 504, angle=180)
 times = []
 
-# out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output8.mp4', 0x7634706d, 60, (1000,1000))
+# out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output10.mp4', 0x7634706d, 120, (1000,1000))
 
 def mouseEvent(event, x, y, flags, param):
-    global canvas, pt1, pt2, i, points1, points2, times
+    global canvas, i, pt1, pt2, points1, points2, times
     if event==cv2.EVENT_MOUSEMOVE:
-
         start = time.time()
 
         pt2.update()
@@ -31,7 +29,9 @@ def mouseEvent(event, x, y, flags, param):
                 pt2.moveTo(points2[i], 50)
                 i+= 1
             else:
-                i = 0
+                pt1.moveTo(points1[0], 150)
+                pt2.moveTo(points2[0], 150)
+                i = 1
 
         model.moveTo(pt1, pt2)
 
