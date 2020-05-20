@@ -1,5 +1,4 @@
 from sample.VisionIdentification import bbox
-from sample.VisionIdentification import from_vid
 from sample.VisionIdentification import image_sizing
 from sample.VisionIdentification import meat
 

@@ -5,8 +5,8 @@ import numpy as np
 import cv2 
 
 from context import sample
-from sample.PathPlanning.Robot import Robot
-from sample.PathPlanning.Point import Point
+from sample.Model.Robot import Robot
+from sample.Model.Point import Point
 
 canvas = np.zeros([1000, 1000, 3], dtype=np.uint8)
 
