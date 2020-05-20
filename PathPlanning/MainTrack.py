@@ -12,12 +12,14 @@ class MainTrack:
         self.scale = scale
         self.basePt = pt
         self.length = length
+        self.last_pos = self.length/self.scale
+        self.delta_pos = 0
         self.min_length = gp.MAIN_TRACK_MIN_LENGTH * scale
         self.max_length = gp.MAIN_TRACK_MAX_LENGTH * scale
         self.otherPt = self.getOtherPt()
 
     def __repr__(self):
-        return "Main Track\n\tExtension " + str(round(self.length/self.scale, 3)) + "m\n"
+        return "Main Track\n\tExtension " + str(round(self.length/self.scale, 3)) + "m\n\tdL " + str(round(self.delta_pos, 3)) + "m/frame\n"
 
     def getOtherPt(self):
         return Point(self.basePt.x, self.basePt.y - self.length)
@@ -37,6 +39,9 @@ class MainTrack:
 
         self.otherPt = Point(self.basePt.x, pt.y)
         self.basePt = Point(self.otherPt.x, self.otherPt.y + self.length)
+
+        self.delta_pos = self.length/self.scale - self.last_pos
+        self.last_pos = self.length/self.scale
 
     def moveBase(self, pt:Point):
         self.basePt = pt

@@ -63,9 +63,7 @@ def main():
         if k == ord('q'):
             break
 
-    print(points1)
-    print(points2)
-    print("Avaerage time", np.average(times)) 
+    print("Average time", np.average(times)) 
 
 if __name__=="__main__":
     main()
