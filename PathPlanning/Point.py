@@ -1,25 +1,4 @@
 import math
-<<<<<<< HEAD
-
-class Point:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __repr__(self):
-        return "Point (" + str(self.x) + ", " + str(self.y) + ")"
-
-    def __add__(self, other):
-        return Point(self.x + other.x, self.y + other.y)
-    def __sub__(self, other):
-        return Point(self.x - other.x, self.y - other.y)
-    def __mul__(self, factor):
-        return Point(self.x * factor, self.y * factor)
-    def __truediv__(self, factor):
-        return Point(self.x / factor, self.y / factor)
-    def __floordiv__(self, factor):
-        return Point(self.x // factor, self.y // factor)
-=======
 import cv2
 import numpy as np
 
@@ -48,18 +27,12 @@ class Point:
         return Point(self.x / factor, self.y / factor, angle=self.angle, steps=self.steps_remaining, vec=self.update_vec)
     def __floordiv__(self, factor):
         return Point(self.x // factor, self.y // factor, angle=self.angle, steps=self.steps_remaining, vec=self.update_vec)
->>>>>>> path_planning2
 
     def mag(self):
         return (self.x**2 + self.y**2)**0.5
     def norm(self):
-<<<<<<< HEAD
-        return Point(self.x / self.mag(), self.y / self.mag())
-    def angle(self):
-=======
         return Point(self.x / self.mag(), self.y / self.mag(), angle=self.angle, steps=self.steps_remaining, vec=self.update_vec)
     def vector_angle(self):
->>>>>>> path_planning2
         if self.x < 0:
             return (math.degrees(math.atan((-1*self.y)/self.x)) + 180 + 360) % 360
         elif self.x == 0:
@@ -79,14 +52,6 @@ class Point:
            temp.x * math.sin(angle_r) + temp.y * math.cos(angle_r))
 
         ret += ref_pt
-<<<<<<< HEAD
-
-        self.x = ret.x
-        self.y = ret.y
-
-    def toTuple(self):
-        return (round(self.x), round(self.y))
-=======
         
         self.x = ret.x
         self.y = ret.y
@@ -121,4 +86,3 @@ class Point:
             return True
         return False
 
->>>>>>> path_planning2

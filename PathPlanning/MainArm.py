@@ -11,10 +11,6 @@ class MainArm:
         self.scale = scale
         self.basePt = pt
         self.length = length
-<<<<<<< HEAD
-=======
-
->>>>>>> path_planning2
         self.min_length = gp.MAIN_ARM_MIN_LENGTH * scale
         self.max_length = gp.MAIN_ARM_MAX_LENGTH * scale
         self.angle = angle 
@@ -24,13 +20,6 @@ class MainArm:
     def __repr__(self):
         return "Main Arm\n\tExtension " + str(round(self.length/self.scale, 3)) + "m\n\tAngle " + str(round(self.angle, 1)) + "\n"
 
-    def refresh(self):
-        self.angle = (self.otherPt - self.basePt).angle()
-=======
-        self.last_pos = self.length/self.scale
-        self.delta_pos = 0
-        self.last_angle = self.angle
-        self.delta_angle = 0
 
     def __repr__(self):
         return "Main Arm\n\tExtension " + str(round(self.length/self.scale, 3)) + "m\n\tAngle " + str(round(self.angle, 1)) + "\n\tdL " + str(round(self.delta_pos, 3)) + "m/frame\n\tdA " + str(round(self.delta_angle, 3)) + "\n" 
@@ -41,7 +30,6 @@ class MainArm:
 
     def getOtherPt(self):
         return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))))
-    def get_max_pt_vector(self):
         return Point(round(self.basePt.x + self.max_length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.max_length * math.sin(math.radians(self.angle))))
 
     def draw(self, canvas):
@@ -68,14 +56,11 @@ class MainArm:
         elif rel_angle > gp.MAIN_ARM_MAX_ANGLE:
             self.basePt.rotate(gp.MAIN_ARM_MAX_ANGLE - rel_angle, self.otherPt)
 
-<<<<<<< HEAD
-=======
         self.delta_pos = self.length/self.scale - self.last_pos
         self.last_pos = self.length/self.scale
         self.delta_angle = self.angle - self.last_angle
         self.last_angle = self.angle
 
->>>>>>> path_planning2
     def moveBase(self, pt:Point):
         self.refresh()
         self.basePt = pt

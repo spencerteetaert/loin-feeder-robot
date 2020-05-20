@@ -20,13 +20,6 @@ class SecondaryArm:
         self.otherPt1 = self.getotherPt1()
         self.otherPt2 = self.getotherPt2()
 
-<<<<<<< HEAD
-    def __repr__(self):
-        return "Seconday Arm\n\tLength1 " + str(round(self.length1/self.scale, 3)) + "m\n\tLength2 " + str(round(self.length2/self.scale, 3))+ "m\n\tAngle " + str(round(self.relative_angle, 1)) + "\n"
-
-    def refresh(self, main_arm_angle=None):
-        self.angle = (self.otherPt1 - self.basePt).angle()
-=======
         self.last_pos = self.length1/self.scale
         self.delta_pos = 0
         self.last_angle = self.angle
@@ -37,7 +30,6 @@ class SecondaryArm:
 
     def refresh(self, main_arm_angle=None):
         self.angle = (self.otherPt1 - self.basePt).vector_angle()
->>>>>>> path_planning2
         if main_arm_angle != None:
             self.relative_angle = (self.angle - main_arm_angle + 360) % 360
 
@@ -73,14 +65,11 @@ class SecondaryArm:
 
         self.refresh()
 
-<<<<<<< HEAD
-=======
         self.delta_pos = self.length1/self.scale - self.last_pos
         self.last_pos = self.length1/self.scale
         self.delta_angle = self.angle - self.last_angle
         self.last_angle = self.angle
 
->>>>>>> path_planning2
     def moveBase(self, pt:Point, main_arm_angle):
         self.refresh(main_arm_angle)
         self.basePt = pt
