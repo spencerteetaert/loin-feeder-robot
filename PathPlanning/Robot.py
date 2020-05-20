@@ -27,8 +27,8 @@ class Robot:
         self.main_track.moveBase(self.basePt)
         self.main_arm.moveBase(self.main_track.otherPt)
         self.secondary_arm.moveBase(self.main_arm.otherPt, self.main_arm.angle)
-        self.carriage1.moveBase(self.secondary_arm.otherPt1)
-        self.carriage2.moveBase(self.secondary_arm.otherPt2)
+        self.carriage1.moveBase(self.secondary_arm.otherPt1, self.secondary_arm.angle)
+        self.carriage2.moveBase(self.secondary_arm.otherPt2, self.secondary_arm.angle)
 
     def draw(self, canvas):
         self.main_track.draw(canvas)
@@ -54,4 +54,6 @@ class Robot:
         ret += self.main_track.__repr__()
         ret += self.main_arm.__repr__()
         ret += self.secondary_arm.__repr__()
+        ret += self.carriage2.__repr__()
+        ret += self.carriage1.__repr__()
         return ret

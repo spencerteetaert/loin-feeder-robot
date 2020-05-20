@@ -14,13 +14,19 @@ class Carriage:
         self.width = gp.CARRIAGE_WIDTH * scale
         self.length = gp.CARRIAGE_LENGTH * scale
         self.angle = angle 
+        self.relative_angle = 0
         self.otherPt = self.getOtherPt()
 
-    def __repr__(self):
-        return "MainArm with:\n\tBase (" + str(self.basePt.x) + ", " + str(self.basePt.y) + ")\n\tLength " + str(self.length) + "\n\tAngle " + str(self.angle) + "°"
+        self.last_angle = self.relative_angle
+        self.delta_angle = 0
 
-    def refresh(self):
-        self.angle = (self.otherPt - self.basePt).vector_angle()
+    def __repr__(self):
+        return "Carriage\n\tAngle " + str(round(self.relative_angle, 1)) + "\n\tdA " + str(round(self.delta_angle, 3)) + "\n" 
+
+    def refresh(self, secondary_arm_angle=None):
+        # self.angle = (self.otherPt - self.basePt).vector_angle()
+        if secondary_arm_angle != None:
+            self.relative_angle = (self.angle - secondary_arm_angle + 360) % 360
 
     def getOtherPt(self):
         return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))))
@@ -43,8 +49,11 @@ class Carriage:
     def follow(self, pt:Point):
         if pt.angle != None:
             self.angle = pt.angle
+
+        self.delta_angle = self.relative_angle - self.last_angle
+        self.last_angle = self.relative_angle
         
-    def moveBase(self, pt:Point):
-        # self.refresh()
+    def moveBase(self, pt:Point, secondary_arm_angle):
+        self.refresh(secondary_arm_angle)
         self.basePt = pt
         # self.otherPt = self.getOtherPt()
