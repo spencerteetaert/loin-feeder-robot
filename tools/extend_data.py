@@ -1,17 +1,18 @@
 import os
-import glob 
+import glob
 import random as r
-import cv2
 from datetime import datetime
-import numpy as np
 import skimage.measure as skim
+
+import numpy as np
+import cv2
 
 #Distortion parameter limits 
 MIN_WIDTH = 0.5
 MIN_HEIGHT = 0.5
 MAX_NOISE = 20
 MAX_SKEW = 0.8
-MIN_QUALITY_REDUCTIION = 2
+MIN_QUALITY_REDUCTION = 2
 MAX_QUALITY_REDUCTION = 15
 MAX_BRIGHTNESS_DISTORT = 0.5
 MAX_CONTRAST_DISTORT = 0.5

@@ -1,11 +1,9 @@
-import numpy as np
-import cv2
 import math
 
-import sys
-import os
-sys.path.insert(1, os.getcwd())
-import GlobalParameters as gp
+import numpy as np
+import cv2
+
+from .. import GlobalParameters
 
 class Meat():
     def __init__(self, bbox, conveyor_speed=4, side="Left", center=(0,0)):
@@ -81,12 +79,12 @@ class Meat():
                     direction = 1
         elif line == "shoulder": # Yellow
             start_index = min_x_index
-            thresh_factor = gp.SHORT_END_FACTOR
+            thresh_factor = GlobalParameters.SHORT_END_FACTOR
             if ys[start_index] > self.center[1]:
                 direction = 1
         elif line == "ham": # Blue
             start_index = max_x_index
-            thresh_factor = gp.SHORT_END_FACTOR
+            thresh_factor = GlobalParameters.SHORT_END_FACTOR
             if ys[start_index] < self.center[1]:
                 direction = 1
         elif line == "belly": # Magenta 
@@ -105,7 +103,7 @@ class Meat():
             if self.side == "Left":
                 x *= -1
 
-            dir_vect = x * gp.LOIN_WIDTH
+            dir_vect = x * GlobalParameters.LOIN_WIDTH
             ret = np.around(self.loin_line + dir_vect).astype(int)
 
             return ret
@@ -114,10 +112,10 @@ class Meat():
 
         rotated_index = (start_index + len(self.bbox) + direction) % len(self.bbox)
         temp = start_index
-        threshold = gp.LINE_THRESHOLD * thresh_factor
+        threshold = GlobalParameters.LINE_THRESHOLD * thresh_factor
 
         while(self.distance(self.bbox[start_index], self.bbox[rotated_index]) < threshold):
-            if gp.CHANGING_START_INDEX:
+            if GlobalParameters.CHANGING_START_INDEX:
                 start_index = rotated_index
             rotated_index = (rotated_index + len(self.bbox) + direction) % len(self.bbox)
 

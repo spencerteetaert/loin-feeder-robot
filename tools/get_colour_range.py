@@ -1,7 +1,8 @@
 import threading as threading
+import math
+
 import cv2
 import numpy as np
-import math
 
 class Point(object):
     def __init__(self, x=0,y=0):
@@ -32,7 +33,6 @@ def display():
             break
         elif k == ord('d'):
             points = points[:-1]
-
 
 hB = [180, 0]
 sB = [255, 0]

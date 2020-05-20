@@ -1,11 +1,9 @@
-from Point import Point
 import math
+
 import cv2
 
-import sys
-import os
-sys.path.insert(1, os.getcwd())
-import GlobalParameters as gp
+from .Point import Point
+from .. import GlobalParameters
 
 class MainTrack:
     def __init__(self, pt:Point, scale, length=100):
@@ -14,8 +12,8 @@ class MainTrack:
         self.length = length
         self.last_pos = self.length/self.scale
         self.delta_pos = 0
-        self.min_length = gp.MAIN_TRACK_MIN_LENGTH * scale
-        self.max_length = gp.MAIN_TRACK_MAX_LENGTH * scale
+        self.min_length = GlobalParameters.MAIN_TRACK_MIN_LENGTH * scale
+        self.max_length = GlobalParameters.MAIN_TRACK_MAX_LENGTH * scale
         self.otherPt = self.getOtherPt()
 
     def __repr__(self):

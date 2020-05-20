@@ -1,8 +1,10 @@
+import time
+
 import numpy as np 
 import cv2
-import bbox_hsv as bbox 
-from meat import Meat 
-import time
+
+from . import bbox
+from . import meat 
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 

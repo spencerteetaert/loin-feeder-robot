@@ -1,9 +1,10 @@
-from Point import Point
-from MainTrack import MainTrack
-from MainArm import MainArm 
-from SecondaryArm import SecondaryArm
-from Carriage import Carriage
 import cv2
+
+from .Point import Point
+from .MainTrack import MainTrack
+from .MainArm import MainArm 
+from .SecondaryArm import SecondaryArm
+from .Carriage import Carriage
 
 class Robot:
     def __init__(self, ROBOT_BASE_POINT, scale):
