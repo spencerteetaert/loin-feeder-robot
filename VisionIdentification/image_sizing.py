@@ -34,7 +34,7 @@ def crop(img):
 def scale(img):
     iH, iW, iD = img.shape
 
-    final_window_width = 1280
+    final_window_width = 500
 
     dest_width = final_window_width
     dest_height = round((final_window_width / iW) * iH)
