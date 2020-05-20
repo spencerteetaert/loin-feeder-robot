@@ -33,6 +33,19 @@ class Point:
                 return 270
         else:
             return (math.degrees(math.atan((-1*self.y)/self.x)) + 360) % 360
+    def rotate(self, angle, ref_pt):
+        temp = Point(self.x, self.y)
+        temp -= ref_pt
+
+        angle_r = math.radians(angle)
+
+        ret = Point(temp.x * math.cos(angle_r) - temp.y * math.sin(angle_r), 
+           temp.x * math.sin(angle_r) + temp.y * math.cos(angle_r))
+
+        ret += ref_pt
+        
+        self.x = ret.x
+        self.y = ret.y
 
     def toTuple(self):
         return (round(self.x), round(self.y))

@@ -17,12 +17,12 @@ class Robot:
 
     def moveTo(self, pt1, pt2):
         self.secondary_arm.follow(pt1, pt2)
-        self.main_arm.follow(self.secondary_arm.basePt)
+        self.main_arm.follow(self.secondary_arm.basePt, self.secondary_arm.angle)
         self.main_track.follow(self.main_arm.basePt)
 
         self.main_track.moveBase(self.basePt)
         self.main_arm.moveBase(self.main_track.otherPt)
-        self.secondary_arm.moveBase(self.main_arm.otherPt)
+        self.secondary_arm.moveBase(self.main_arm.otherPt, self.main_arm.angle)
         self.carriage1.moveBase(self.secondary_arm.otherPt1)
         self.carriage2.moveBase(self.secondary_arm.otherPt2)
 

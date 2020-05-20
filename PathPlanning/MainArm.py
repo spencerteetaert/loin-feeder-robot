@@ -31,7 +31,7 @@ class MainArm:
         cv2.line(canvas, self.get_max_pt_vector().toTuple(), self.basePt.toTuple(), (255, 255, 255), 8) 
         cv2.circle(canvas, self.otherPt.toTuple(), self.scale//15, (255, 255, 255))
     
-    def follow(self, pt:Point):
+    def follow(self, pt:Point, secondary_arm_angle):
         dr = pt - self.basePt
         if dr.mag() <= self.min_length:
             self.length = self.min_length
@@ -42,6 +42,14 @@ class MainArm:
 
         self.otherPt = pt
         self.basePt = self.otherPt - dr.norm() * self.length
+
+        # Rotational bounds 
+        self.refresh()
+        rel_angle = (secondary_arm_angle - self.angle + 360) % 360 
+        if rel_angle < gp.MAIN_ARM_MIN_ANGLE:
+            self.basePt.rotate(gp.MAIN_ARM_MIN_ANGLE - rel_angle, self.otherPt)
+        elif rel_angle > gp.MAIN_ARM_MAX_ANGLE:
+            self.basePt.rotate(gp.MAIN_ARM_MAX_ANGLE - rel_angle, self.otherPt)
 
     def moveBase(self, pt:Point):
         self.refresh()
