@@ -24,7 +24,7 @@ class SecondaryArm:
         return "Seconday Arm\n\tLength1 " + str(round(self.length1/self.scale, 3)) + "m\n\tLength2 " + str(round(self.length2/self.scale, 3))+ "m\n\tAngle " + str(round(self.relative_angle, 1)) + "\n"
 
     def refresh(self, main_arm_angle=None):
-        self.angle = (self.otherPt1 - self.basePt).angle()
+        self.angle = (self.otherPt1 - self.basePt).vector_angle()
         if main_arm_angle != None:
             self.relative_angle = (self.angle - main_arm_angle + 360) % 360
 

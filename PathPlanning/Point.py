@@ -1,29 +1,37 @@
 import math
+import cv2
 
 class Point:
-    def __init__(self, x, y):
+    def __init__(self, x, y, angle=None, steps=0, vec=None):
         self.x = x
         self.y = y
+        self.angle = angle
+        self.steps_remaining = steps
+        self.update_vec = vec
 
     def __repr__(self):
-        return "Point (" + str(self.x) + ", " + str(self.y) + ")"
+        ret = "Point(" + str(self.x) + ", " + str(self.y)
+        if self.angle != None:
+            ret += ", angle=" + str(self.angle)
+        ret += ")"
+        return ret
 
     def __add__(self, other):
-        return Point(self.x + other.x, self.y + other.y)
+        return Point(self.x + other.x, self.y + other.y, angle=self.angle, steps=self.steps_remaining, vec=self.update_vec)
     def __sub__(self, other):
-        return Point(self.x - other.x, self.y - other.y)
+        return Point(self.x - other.x, self.y - other.y, angle=self.angle, steps=self.steps_remaining, vec=self.update_vec)
     def __mul__(self, factor):
-        return Point(self.x * factor, self.y * factor)
+        return Point(self.x * factor, self.y * factor, angle=self.angle, steps=self.steps_remaining, vec=self.update_vec)
     def __truediv__(self, factor):
-        return Point(self.x / factor, self.y / factor)
+        return Point(self.x / factor, self.y / factor, angle=self.angle, steps=self.steps_remaining, vec=self.update_vec)
     def __floordiv__(self, factor):
-        return Point(self.x // factor, self.y // factor)
+        return Point(self.x // factor, self.y // factor, angle=self.angle, steps=self.steps_remaining, vec=self.update_vec)
 
     def mag(self):
         return (self.x**2 + self.y**2)**0.5
     def norm(self):
-        return Point(self.x / self.mag(), self.y / self.mag())
-    def angle(self):
+        return Point(self.x / self.mag(), self.y / self.mag(), angle=self.angle, steps=self.steps_remaining, vec=self.update_vec)
+    def vector_angle(self):
         if self.x < 0:
             return (math.degrees(math.atan((-1*self.y)/self.x)) + 180 + 360) % 360
         elif self.x == 0:
@@ -47,5 +55,33 @@ class Point:
         self.x = ret.x
         self.y = ret.y
 
+    def draw(self, canvas, color=(0, 0, 255)):
+        cv2.circle(canvas, self.toTuple(), 3, color)
+        if self.angle != None:
+            cv2.line(canvas, self.toTuple(), (round(self.x + 20*math.cos(math.radians(self.angle))), round(self.y - 20*math.sin(math.radians(self.angle)))), color)
     def toTuple(self):
         return (round(self.x), round(self.y))
+
+
+    def moveTo(self, otherPt, dt):
+        dX = (otherPt.x - self.x)/dt
+        dY = (otherPt.y - self.y)/dt
+        dA = 0
+        if self.angle != None and otherPt.angle != None:
+            print("FFLLAAAGGGAGA")
+            dA = (otherPt.angle - self.angle)/dt
+
+        self.update_vec = Point(dX, dY, angle=dA)
+        self.steps_remaining = dt
+        
+    def update(self):
+        # print(self.update_vec)
+        if self.steps_remaining != 0:
+            self.x += self.update_vec.x
+            self.y += self.update_vec.y
+            if self.angle != None:
+                self.angle += self.update_vec.angle
+            self.steps_remaining -= 1
+            return True
+        return False
+

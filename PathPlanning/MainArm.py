@@ -20,7 +20,7 @@ class MainArm:
         return "Main Arm\n\tExtension " + str(round(self.length/self.scale, 3)) + "m\n\tAngle " + str(round(self.angle, 1)) + "\n"
 
     def refresh(self):
-        self.angle = (self.otherPt - self.basePt).angle()
+        self.angle = (self.otherPt - self.basePt).vector_angle()
 
     def getOtherPt(self):
         return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))))

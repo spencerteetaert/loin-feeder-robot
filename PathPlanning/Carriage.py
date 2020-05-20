@@ -19,7 +19,7 @@ class Carriage:
         return "MainArm with:\n\tBase (" + str(self.basePt.x) + ", " + str(self.basePt.y) + ")\n\tLength " + str(self.length) + "\n\tAngle " + str(self.angle) + "°"
 
     def refresh(self):
-        self.angle = (self.otherPt - self.basePt).angle()
+        self.angle = (self.otherPt - self.basePt).vector_angle()
 
     def getOtherPt(self):
         return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))))
