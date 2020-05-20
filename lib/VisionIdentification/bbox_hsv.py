@@ -7,8 +7,8 @@ import numpy as np
 import cv2
 import argparse 
 import random as r 
-import image_sizing as imgsz 
-from meat import Meat 
+from . import image_sizing as imgsz 
+from .meat import Meat 
 import time
 
 import sys
