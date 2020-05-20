@@ -43,7 +43,7 @@ class Point:
            temp.x * math.sin(angle_r) + temp.y * math.cos(angle_r))
 
         ret += ref_pt
-        
+
         self.x = ret.x
         self.y = ret.y
 
