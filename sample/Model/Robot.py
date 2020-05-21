@@ -23,6 +23,15 @@ class Robot:
         self.follow_pt1 = Point(0, 0)
         self.follow_pt2 = Point(0, 0)
 
+    def __repr__(self):
+        ret = ""
+        ret += self.main_track.__repr__()
+        ret += self.main_arm.__repr__()
+        ret += self.secondary_arm.__repr__()
+        ret += self.carriage2.__repr__()
+        ret += self.carriage1.__repr__()
+        return ret
+
     def moveTo(self, pt2, pt1):
         self.carriage1.follow(pt1)
         self.carriage2.follow(pt2)
@@ -36,7 +45,38 @@ class Robot:
         self.carriage1.moveBase(self.secondary_arm.otherPt1, self.secondary_arm.angle)
         self.carriage2.moveBase(self.secondary_arm.otherPt2, self.secondary_arm.angle)
 
-    def followPath(self, path1, path2, execution_time):
+    def followPath(self, path1, path2, execution_time, start_time, frame):
+        def auto_step(pts, dts, start_time, number, frame):
+            d = execution_time / len(dts)
+            i = 0
+            c = start_time
+
+            print(d)
+
+            while i < len(dts):
+                if time.time() > c:
+                    # print("Yaya")
+                    if number == 1:
+                        flag = self.follow_pt1.update()
+                        if flag == False:
+                            self.follow_pt1.moveTo(pts[i], dts[i])
+                            i += 1
+                            c += d
+                    elif number == 2:
+                        
+                        flag = self.follow_pt2.update()
+                        if flag == False:
+                            self.follow_pt2.moveTo(pts[i], dts[i])
+                            i += 1
+                            c += d
+                self.moveTo(self.follow_pt2, self.follow_pt1)
+
+                if number == 1:
+                    self.draw(frame)
+                    cv2.imshow("Test", frame)
+                    cv2.waitKey(1)
+            print("Move executed.")
+
         self.follow_pt1 = path1[0]
         self.follow_pt2 = path2[0]
 
@@ -50,28 +90,16 @@ class Robot:
             dt2 += [(path2[i + 1] - path2[i]).mag()]
         np.divide(dt2 * execution_time, np.sum(dt2))
 
-        follow1 = Thread(target=self.auto_step, args=(path1, dt1, 1))
-        follow2 = Thread(target=self.auto_step, args=(path2, dt2, 2))
+        follow1 = Thread(target=auto_step, args=(path1, dt1, start_time, 1, frame))
+        follow2 = Thread(target=auto_step, args=(path2, dt2, start_time, 2, frame))
+        follow1.daemon = True # This is just for testing and should be removed come implementation 
+        follow2.daemon = True
         
+        print("Excuting move...")
         follow1.start()
         follow2.start()
-        # Start two threads, one to update each follow point 
-
-    def auto_step(self, pts, dts, number):
-        start = time.time()
-        i = 0
-        while i < len(dts):
-            if (time.time() - start) % 0.0333 == 0:
-                if number == 1:
-                    flag = self.follow_pt1.update()
-                    if flag == False:
-                        self.follow_pt1.moveTo(pts[i], dts[i])
-                        i += 1
-                elif number == 2:
-                    flag = self.follow_pt2.update()
-                    if flag == False:
-                        self.follow_pt2.moveTo(pts[i], dts[i])
-                        i += 1
+        follow1.join()
+        follow2.join()
 
     def draw(self, canvas):
         self.main_track.draw(canvas)
@@ -91,12 +119,3 @@ class Robot:
                     cv2.putText(canvas, line, (15, y), font, 0.6, (255, 255, 0))
             except:
                 cv2.putText(canvas, line, (15, y), font, 0.6, (255, 255, 0))
-
-    def __repr__(self):
-        ret = ""
-        ret += self.main_track.__repr__()
-        ret += self.main_arm.__repr__()
-        ret += self.secondary_arm.__repr__()
-        ret += self.carriage2.__repr__()
-        ret += self.carriage1.__repr__()
-        return ret

@@ -5,7 +5,7 @@ import numpy as np
 ################################
 
 RUNTIME_LIMIT = 300                                                         # Maximum number of path points before program breaks 
-SAFE_ENVIRONMENT = [[[440, 190], [440, 730]], [[145, 735], [665, 735]]]     # Lines that are safe to travel on
+SAFE_ENVIRONMENT = [[[440, 190], [440, 730]], [[145, 735], [665, 735]], [[440, 600], [300, 735]], [[440, 600], [580, 735]]]#[[[440, 190], [440, 730]], [[145, 735], [665, 735]]]     # Lines that are safe to travel on
 
 ###########################
 ### Physical Parameters ###

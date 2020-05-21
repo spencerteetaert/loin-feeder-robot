@@ -14,21 +14,22 @@ from sample import GlobalParameters
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 model = Robot(Point(280, 600), GlobalParameters.VIDEO_SCALE)
 path_finder = PathFinder()
+path2 = path_finder(Point(400,200, angle=0), Point(600, 735, angle=270), 10)
+path1 = path_finder(Point(450,500, angle=0), Point(300, 735, angle=270), 10)
 
 def on_mouse(event, pX, pY, flags, param):
     if event == cv2.EVENT_LBUTTONUP:
         print("Clicked", pX, pY)
 
 def main(data_path=DATA_PATH):
+    global path1, path2
+    switch = True
     cap = cv2.VideoCapture(data_path)
     # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output11.mp4', 0x7634706d, 30, (850,830))
 
     win = "Window"
     cv2.namedWindow(win)
     cv2.setMouseCallback(win, on_mouse)
-
-    pt1 = Point(500, 300, angle=0)
-    pt2 = Point(500, 600, angle=0)
 
     delay = 0
     times = []
@@ -75,33 +76,14 @@ def main(data_path=DATA_PATH):
                     except:
                         pass
 
-        if len(meats) % 2 == 0 and len(meats) > 3:
-            t1 = (meats[-1].get_center_as_point() - pt1).mag()
-            t2 = (meats[-2].get_center_as_point() - pt2).mag()
+        if switch:
+            model.followPath(path1, path2, 5, time.time(), frame)
+            switch = False
 
-            f1 = 8
-            f2 = 8
-            if t1 < 10:
-                f1 = 2
-            if t2 < 10:
-                f2 = 2
-
-            pt1.moveTo(meats[-1].get_center_as_point(), t1/f1)
-            pt2.moveTo(meats[-2].get_center_as_point(), t2/f2)
-        elif len(meats) > 4:
-            t1 = (meats[-2].get_center_as_point() - pt1).mag()
-            t2 = (meats[-3].get_center_as_point() - pt2).mag()
-
-            pt1.moveTo(meats[-2].get_center_as_point(), t1/2)
-            pt2.moveTo(meats[-3].get_center_as_point(), t2/2)
-        
-        pt1.update()
-        pt2.update()
-        # print(pt1.update_vec)
-        pt1.draw(frame)
-        pt2.draw(frame)
-        model.moveTo(pt1, pt2)
-
+        for i in range(0, len(path1)):
+            path1[i].draw(frame)
+        for i in range(0, len(path2)):
+            path2[i].draw(frame, color=(0, 255, 0))
         try:   
             model.draw(frame)
             for i in range(1, len(meats)):

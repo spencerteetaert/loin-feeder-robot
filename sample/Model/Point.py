@@ -85,7 +85,7 @@ class Point:
         self.steps_remaining = dt
         
     def update(self):
-        if self.steps_remaining != 0:
+        if self.steps_remaining > 0:
             self.x += self.update_vec.x
             self.y += self.update_vec.y
             if self.angle != None:
