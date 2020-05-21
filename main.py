@@ -13,10 +13,21 @@ from sample import GlobalParameters
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 model = Robot(Point(280, 600), GlobalParameters.VIDEO_SCALE)
 
+temp = []
+
+def on_mouse(event, pX, pY, flags, param):
+    global temp
+    if event == cv2.EVENT_LBUTTONUP:
+        temp += [[pX, pY]]
+        print("Clicked", pX, pY)
 
 def main(data_path=DATA_PATH):
     cap = cv2.VideoCapture(data_path)
     # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output11.mp4', 0x7634706d, 30, (850,830))
+
+    win = "Window"
+    cv2.namedWindow(win)
+    cv2.setMouseCallback(win, on_mouse)
 
     pt1 = Point(500, 300, angle=0)
     pt2 = Point(500, 600, angle=0)
@@ -97,10 +108,10 @@ def main(data_path=DATA_PATH):
             model.draw(frame)
             for i in range(1, len(meats)):
                 meats[i].draw(frame)
-            cv2.imshow("Test", frame)
+            cv2.imshow(win, frame)
         except:
             model.draw(frame)
-            cv2.imshow("Test", frame)              
+            cv2.imshow(win, frame)              
 
         for i in range(1, len(meats)):
             meats[i].step()
@@ -124,3 +135,5 @@ def main(data_path=DATA_PATH):
 
 if __name__=='__main__':
     main()
+
+print(temp)
