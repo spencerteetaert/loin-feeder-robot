@@ -1,6 +1,11 @@
-import sys
-
 import numpy as np
+
+################################
+### Path Planning Parameters ###
+################################
+
+RUNTIME_LIMIT = 300                                                         # Maximum number of path points before program breaks 
+SAFE_ENVIRONMENT = [[[440, 190], [440, 730]], [[145, 735], [665, 735]]]     # Lines that are safe to travel on
 
 ###########################
 ### Physical Parameters ###
@@ -25,16 +30,15 @@ CARRIAGE_WIDTH = 0.406
 ### Vision Parameters ###
 #########################
 
-VIDEO_SCALE = 212
+VIDEO_SCALE = 212                                       # Pixels / m 
 
-MINIMUM_AREA = 8000 # Pixel area for an acceptable contour 
+MINIMUM_MIDDLE_SIZE = 0.18                              # Minimum middle size in m^2
+MINIMUM_AREA = MINIMUM_MIDDLE_SIZE * VIDEO_SCALE**2     # Pixel area for an acceptable contour 
 
-# LOWER_MASK = np.array([0, 51, 51]) # Default lower mask
-# UPPER_MASK = np.array([15, 204, 255]) # Default upper mask
-LOWER_MASK = np.array([0, 71, 99]) # Default lower mask
-UPPER_MASK = np.array([9, 191, 212]) # Default upper mask
+LOWER_MASK = np.array([0, 71, 99])      # Default lower mask
+UPPER_MASK = np.array([9, 191, 212])    # Default upper mask
 
-LOIN_WIDTH = 45 # How far from loin side to make cut in pixels
-LINE_THRESHOLD = 100 # Distance between points to be considered a valid line 
-SHORT_END_FACTOR = 0.35
-CHANGING_START_INDEX = False # Toggles whether to iterated start indeces 
+LOIN_WIDTH = 45                         # How far from loin side to make cut in pixels
+LINE_THRESHOLD = 100                    # Distance between points to be considered a valid line 
+SHORT_END_FACTOR = 0.35                 # Factor for short ends of hog
+CHANGING_START_INDEX = False            # Toggles whether to iterated start indeces 
