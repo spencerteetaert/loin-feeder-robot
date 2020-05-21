@@ -8,17 +8,15 @@ from sample.VisionIdentification import image_sizing
 from sample.VisionIdentification import meat
 from sample.Model.Robot import Robot
 from sample.Model.Point import Point
+from sample.PathPlanning.Path import PathFinder
 from sample import GlobalParameters
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 model = Robot(Point(280, 600), GlobalParameters.VIDEO_SCALE)
-
-temp = []
+path_finder = PathFinder()
 
 def on_mouse(event, pX, pY, flags, param):
-    global temp
     if event == cv2.EVENT_LBUTTONUP:
-        temp += [[pX, pY]]
         print("Clicked", pX, pY)
 
 def main(data_path=DATA_PATH):
@@ -135,5 +133,3 @@ def main(data_path=DATA_PATH):
 
 if __name__=='__main__':
     main()
-
-print(temp)

@@ -1,4 +1,8 @@
+from threading import Thread
+import time
+
 import cv2
+import numpy as np
 
 from .Point import Point
 from .MainTrack import MainTrack
@@ -16,9 +20,10 @@ class Robot:
         self.carriage1 = Carriage(self.secondary_arm.otherPt1, scale)
         self.carriage2 = Carriage(self.secondary_arm.otherPt2, scale)
 
+        self.follow_pt1 = Point(0, 0)
+        self.follow_pt2 = Point(0, 0)
+
     def moveTo(self, pt2, pt1):
-        # if pt1.y < pt2.y:
-            # pt1, pt2 = pt2, pt1
         self.carriage1.follow(pt1)
         self.carriage2.follow(pt2)
         self.secondary_arm.follow(pt1, pt2)
@@ -30,6 +35,43 @@ class Robot:
         self.secondary_arm.moveBase(self.main_arm.otherPt, self.main_arm.angle)
         self.carriage1.moveBase(self.secondary_arm.otherPt1, self.secondary_arm.angle)
         self.carriage2.moveBase(self.secondary_arm.otherPt2, self.secondary_arm.angle)
+
+    def followPath(self, path1, path2, execution_time):
+        self.follow_pt1 = path1[0]
+        self.follow_pt2 = path2[0]
+
+        dt1 = []
+        for i in range(0, len(path1)-1):
+            dt1 += [(path1[i + 1] - path1[i]).mag()]
+        np.divide(dt1 * execution_time, np.sum(dt1))
+
+        dt2 = []
+        for i in range(0, len(path2)-1):
+            dt2 += [(path2[i + 1] - path2[i]).mag()]
+        np.divide(dt2 * execution_time, np.sum(dt2))
+
+        follow1 = Thread(target=self.auto_step, args=(path1, dt1, 1))
+        follow2 = Thread(target=self.auto_step, args=(path2, dt2, 2))
+        
+        follow1.start()
+        follow2.start()
+        # Start two threads, one to update each follow point 
+
+    def auto_step(self, pts, dts, number):
+        start = time.time()
+        i = 0
+        while i < len(dts):
+            if (time.time() - start) % 0.0333 == 0:
+                if number == 1:
+                    flag = self.follow_pt1.update()
+                    if flag == False:
+                        self.follow_pt1.moveTo(pts[i], dts[i])
+                        i += 1
+                elif number == 2:
+                    flag = self.follow_pt2.update()
+                    if flag == False:
+                        self.follow_pt2.moveTo(pts[i], dts[i])
+                        i += 1
 
     def draw(self, canvas):
         self.main_track.draw(canvas)
