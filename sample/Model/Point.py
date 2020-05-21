@@ -72,7 +72,14 @@ class Point:
         dY = (otherPt.y - self.y)/dt
         dA = 0
         if self.angle != None and otherPt.angle != None:
-            dA = (otherPt.angle - self.angle)/dt
+            temp = otherPt.angle - self.angle
+            if temp > 180:
+                dA = -1*(360 - temp)/dt
+            elif temp < -180:
+                dA = -1*(360 + temp)/dt
+            else:
+                dA = temp/dt
+
 
         self.update_vec = Point(dX, dY, angle=dA)
         self.steps_remaining = dt

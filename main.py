@@ -16,7 +16,7 @@ model = Robot(Point(280, 600), GlobalParameters.VIDEO_SCALE)
 
 def main(data_path=DATA_PATH):
     cap = cv2.VideoCapture(data_path)
-    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output6.mp4', 0x7634706d, 30, (500,1059))
+    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output11.mp4', 0x7634706d, 30, (850,830))
 
     pt1 = Point(500, 300, angle=0)
     pt2 = Point(500, 600, angle=0)
@@ -66,7 +66,7 @@ def main(data_path=DATA_PATH):
                     except:
                         pass
 
-        if len(meats) % 2 == 1 and len(meats) > 2:
+        if len(meats) % 2 == 0 and len(meats) > 3:
             t1 = (meats[-1].get_center_as_point() - pt1).mag()
             t2 = (meats[-2].get_center_as_point() - pt2).mag()
 
@@ -79,7 +79,7 @@ def main(data_path=DATA_PATH):
 
             pt1.moveTo(meats[-1].get_center_as_point(), t1/f1)
             pt2.moveTo(meats[-2].get_center_as_point(), t2/f2)
-        elif len(meats) > 3:
+        elif len(meats) > 4:
             t1 = (meats[-2].get_center_as_point() - pt1).mag()
             t2 = (meats[-3].get_center_as_point() - pt2).mag()
 
@@ -99,7 +99,7 @@ def main(data_path=DATA_PATH):
                 meats[i].draw(frame)
             cv2.imshow("Test", frame)
         except:
-            # model.draw(frame)
+            model.draw(frame)
             cv2.imshow("Test", frame)              
 
         for i in range(1, len(meats)):
@@ -113,6 +113,8 @@ def main(data_path=DATA_PATH):
 
         delay += 1
         times += [time.time() - start]
+
+        # out.write(frame)
 
     print("Average frame processing time:", np.average(times))
 
