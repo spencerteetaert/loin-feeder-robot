@@ -3,10 +3,13 @@ import math
 import numpy as np
 import cv2
 
+from ..Model.Point import Point 
 from .. import GlobalParameters
 
+font = cv2.FONT_HERSHEY_SIMPLEX
+
 class Meat():
-    def __init__(self, bbox, conveyor_speed=4, side="Left", center=(0,0)):
+    def __init__(self, bbox, conveyor_speed=2, side="Left", center=(0,0)):
         self.conveyor_speed = conveyor_speed
         self.side = side
         self.bbox = bbox
@@ -140,8 +143,12 @@ class Meat():
         else:
             return [ret_pt2, ret_pt1]
 
-    def get_center(self):
-        return self.center
+    def get_center_as_point(self):
+        dy = self.loin_line[1][1] - self.loin_line[0][1]
+        dx = self.loin_line[1][0] - self.loin_line[0][0]
+
+        return Point(self.center[0], self.center[1], angle=Point(dx, dy).vector_angle()) 
+
     def get_lines(self):
         return self.lines
     def get_bbox(self):
@@ -153,3 +160,29 @@ class Meat():
 
     def distance(self, pt1, pt2):
         return math.sqrt((pt2[0][1] - pt1[0][1])**2 + (pt2[0][0] - pt1[0][0])**2)
+
+    def draw(self, img):
+        try:
+            #Draws convex hull
+            cv2.circle(img, (int(self.center[0]), int(self.center[1])), 3, (255, 255, 255))
+            cv2.drawContours(img, [self.bbox], 0, (31, 255, 49), 2)
+            y0, dy = self.center[1] - 50, 18
+            for i, line in enumerate(self.__repr__().split('\n')):
+                y = y0 + i*dy
+                cv2.putText(img, line, (self.center[0] + 120, y), font, 0.7, (255, 255, 0))
+
+            #Draws identified lines of interest
+            # line_pts = self.get_lines()
+
+            #Red - Loin
+            # cv2.line(img, (line_pts[0][0][0],line_pts[0][0][1]), (line_pts[0][1][0],line_pts[0][1][1]), (0, 0, 255), thickness=2)
+            #Yellow - Shoulder
+            # cv2.line(img, (line_pts[1][0][0],line_pts[1][0][1]), (line_pts[1][1][0],line_pts[1][1][1]), (0, 255, 255), thickness=2)
+            #Blue - Ham
+            # cv2.line(img, (line_pts[2][0][0],line_pts[2][0][1]), (line_pts[2][1][0],line_pts[2][1][1]), (255, 0, 0), thickness=2)
+            #Magenta - Belly 
+            # cv2.line(img, (line_pts[3][0][0],line_pts[3][0][1]), (line_pts[3][1][0],line_pts[3][1][1]), (255, 0, 255), thickness=2)
+            #White - Cut 
+            # cv2.line(img, (line_pts[4][0][0],line_pts[4][0][1]), (line_pts[4][1][0],line_pts[4][1][1]), (100, 205, 205), thickness=2)
+        except TypeError as err:
+            print("Error: {0}".format(err))

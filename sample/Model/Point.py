@@ -60,9 +60,9 @@ class Point:
     def draw(self, canvas, color=(0, 0, 255)):
         cv2.circle(canvas, self.toTuple(), 3, color)
         if self.angle != None:
-            cv2.line(canvas, self.toTuple(), (round(self.x + 20*math.cos(math.radians(self.angle))), round(self.y - 20*math.sin(math.radians(self.angle)))), color)
+            cv2.line(canvas, self.toTuple(), (int(round(self.x + 20*math.cos(math.radians(self.angle)))), int(round(self.y - 20*math.sin(math.radians(self.angle))))), color)
     def toTuple(self):
-        return (round(self.x), round(self.y))
+        return (int(round(self.x)), int(round(self.y)))
     def toArray(self):
         return np.array([self.x, self.y])
 

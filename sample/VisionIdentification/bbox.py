@@ -15,7 +15,6 @@ from .. import GlobalParameters
 
 random.seed(12345)
 
-font = cv2.FONT_HERSHEY_SIMPLEX
 THRESHOLD = 255
 
 def get_bbox(img, threshold=THRESHOLD, draw=False, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParameters.UPPER_MASK, source="Image"):
@@ -51,7 +50,7 @@ def preprocess(img):
     # ret = image_sizing.crop(ret)
     ret = image_sizing.scale(ret)
 
-    # ret = cv2.copyMakeBorder(ret, 300, 300, 0, 0, cv2.BORDER_CONSTANT, value=0)
+    ret = cv2.copyMakeBorder(ret, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
     return ret 
 
@@ -75,7 +74,7 @@ def gen_mask(img, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParam
     cv2.bitwise_not(mask)
 
     if process:
-        mask = cv2.copyMakeBorder(mask, 0, 0, 0, 300, cv2.BORDER_CONSTANT, value=0)
+        mask = cv2.copyMakeBorder(mask, 0, 0, 100, 100, cv2.BORDER_CONSTANT, value=0)
 
         kernel = np.ones([round(iW*0.013),round(iH*0.013)])
         refined = cv2.dilate(mask, kernel)
@@ -83,7 +82,7 @@ def gen_mask(img, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParam
         kernel = np.ones([round(iW*0.02),round(iH*0.02)])
         refined = cv2.erode(refined, kernel)
 
-        kernel = np.ones([round(iW*0.08),round(iH*0.08)])
+        kernel = np.ones([round(iW*0.035),round(iH*0.035)])
         refined = cv2.dilate(refined, kernel)
         refined = cv2.erode(refined, kernel)
 
@@ -97,7 +96,7 @@ def gen_mask(img, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParam
 
     if bitwise_and:
         return cv2.bitwise_and(ret, ret, mask=refined)
-    return refined
+    return refined[:,101:-101]
 
 def thresh_callback(val, img):
     '''
@@ -131,37 +130,3 @@ def thresh_callback(val, img):
     ret = [hulls[i] for i in range(0, len(hulls)) if filt[i]==True]
 
     return ret
-
-def draw_results(img, boundPolys, source, meat=0, extra_data=""):
-    drawing = img.copy()
-
-    try:
-        for i in range(0, len(boundPolys)):
-            #Draws convex hull
-            cv2.drawContours(drawing, boundPolys, i, (31, 255, 49), 2)
-            y0, dy = 30, 21
-            for i, line in enumerate(extra_data.split('\n')):
-                y = y0 + i*dy
-                cv2.putText(drawing, line, (10, y), font, 0.7, (255, 255, 0))
-
-            if meat != 0:
-                #Draws identified lines of interest
-                line_pts = meat.get_lines()
-
-                #Red - Loin
-                cv2.line(drawing, (line_pts[0][0][0],line_pts[0][0][1]), (line_pts[0][1][0],line_pts[0][1][1]), (0, 0, 255), thickness=2)
-                #Yellow - Shoulder
-                # cv2.line(drawing, (line_pts[1][0][0],line_pts[1][0][1]), (line_pts[1][1][0],line_pts[1][1][1]), (0, 255, 255), thickness=2)
-                #Blue - Ham
-                # cv2.line(drawing, (line_pts[2][0][0],line_pts[2][0][1]), (line_pts[2][1][0],line_pts[2][1][1]), (255, 0, 0), thickness=2)
-                #Magenta - Belly 
-                cv2.line(drawing, (line_pts[3][0][0],line_pts[3][0][1]), (line_pts[3][1][0],line_pts[3][1][1]), (255, 0, 255), thickness=2)
-                #White - Cut 
-                cv2.line(drawing, (line_pts[4][0][0],line_pts[4][0][1]), (line_pts[4][1][0],line_pts[4][1][1]), (100, 205, 205), thickness=2)
-    except TypeError as err:
-        print("Error: {0}".format(err))
-        # raise
-
-    cv2.imshow(source, drawing)
-
-    return drawing

@@ -25,14 +25,16 @@ CARRIAGE_WIDTH = 0.406
 ### Vision Parameters ###
 #########################
 
-MINIMUM_AREA = 40000 # Pixel area for an acceptable contour 
+VIDEO_SCALE = 212
+
+MINIMUM_AREA = 8000 # Pixel area for an acceptable contour 
 
 # LOWER_MASK = np.array([0, 51, 51]) # Default lower mask
 # UPPER_MASK = np.array([15, 204, 255]) # Default upper mask
 LOWER_MASK = np.array([0, 71, 99]) # Default lower mask
 UPPER_MASK = np.array([9, 191, 212]) # Default upper mask
 
-LOIN_WIDTH = 90 # How far from loin side to make cut in pixels
-LINE_THRESHOLD = 200 # Distance between points to be considered a valid line 
+LOIN_WIDTH = 45 # How far from loin side to make cut in pixels
+LINE_THRESHOLD = 100 # Distance between points to be considered a valid line 
 SHORT_END_FACTOR = 0.35
 CHANGING_START_INDEX = False # Toggles whether to iterated start indeces 
