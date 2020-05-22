@@ -93,7 +93,7 @@ def main(data_path=DATA_PATH):
         if model.phase != 0:
             model.update()
 
-        ###############q
+        ###############
         ### Display ###
         ###############        
         
@@ -102,7 +102,6 @@ def main(data_path=DATA_PATH):
                 meats[i].draw(frame, color=(255, 255, 0))
         model.draw(frame)
         cv2.imshow(win, frame)         
-
 
         ################
         ### Controls ###

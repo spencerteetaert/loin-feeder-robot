@@ -82,9 +82,8 @@ class Robot:
     Phase 1: Moving to predicted meat location >> Phase 2
     Phase 2: Grabbing >> Phase 3
     Phase 3: "Step 0" -> Rotating meat according to pre-set path >> Phase 4
-    Phase 4: "Step 1" -> Moving to extension area >> Phase 5
-    Phase 5: "Step 2" -> Extending >> Phase 0 
-    Phase 6: Moving to "Ready Position" >> Phase 0
+    Phase 4: "Step 2" -> Extending >> Phase 5
+    Phase 5: Moving to "Ready Position" >> Phase 0
     '''
 
     def moveMeat(self, s1, s2, e1, e2, delay):
@@ -173,11 +172,18 @@ class Robot:
         # Phase 3: "Step 0" -> Rotating meat according to pre-set path
         elif self.phase == 3:
             if self.switched:
-                self.start = time.time()
                 self.switched = False
                 self.followPath(GlobalParameters.PHASE_3_PATH1, GlobalParameters.PHASE_3_PATH2, GlobalParameters.PHASE_3_SPEED)
                 self.follow_pt1.moveTo(GlobalParameters.PHASE_3_PATH1[0], GlobalParameters.PHASE_3_INITIAL_SPEED)
                 self.follow_pt2.moveTo(GlobalParameters.PHASE_3_PATH2[0], GlobalParameters.PHASE_3_INITIAL_SPEED)
+
+            if not flag1 and not flag2 and self.follow1_index >= len(GlobalParameters.PHASE_3_PATH1)-1 and self.follow2_index >= len(GlobalParameters.PHASE_3_PATH2)-1: # End of step condition 
+                self.switched = True 
+                self.phase = 4
+
+                #Stops robot in its tracks
+                self.follow_pt1.moveTo(self.follow_pt1, 1)
+                self.follow_pt2.moveTo(self.follow_pt2, 1)
 
             if not flag1 and self.follow1_index < len(GlobalParameters.PHASE_3_PATH1) - 1:
                 self.follow1_index += 1
@@ -186,35 +192,19 @@ class Robot:
                 self.follow2_index += 1
                 self.follow_pt2.moveTo(GlobalParameters.PHASE_3_PATH2[self.follow2_index], self.dt2[self.follow2_index - 1])
 
-            if not flag1 and not flag2 and self.follow1_index >= len(GlobalParameters.PHASE_3_PATH1) - 1 and self.follow2_index >= len(GlobalParameters.PHASE_3_PATH2) - 1: # End of step condition 
-                self.switched = True 
-                self.phase = 4
-                print("Phase 3 time", time.time() - self.start)
-
-        # TBC
-        # Phase 4: "Step 1" -> Moving to extension area
+        # Phase 4: "Step 2" -> Extending
         elif self.phase == 4:
             if self.switched:
                 self.switched = False
-                # Initialize Path 
-            if False: # End of step condition 
+                self.follow_pt1.moveTo(self.e1, GlobalParameters.PHASE_4_SPEED)
+                self.follow_pt2.moveTo(self.e2, GlobalParameters.PHASE_4_SPEED)
+            if not flag1 and not flag2: # End of step condition 
                 self.switched = True 
                 self.phase = 5
 
-
-        # Phase 5: "Step 2" -> Extending
-        elif self.phase == 5:
-            if self.switched:
-                self.switched = False
-                self.follow_pt1.moveTo(self.e1, GlobalParameters.PHASE_5_SPEED)
-                self.follow_pt2.moveTo(self.e2, GlobalParameters.PHASE_5_SPEED)
-            if not flag1 and not flag2: # End of step condition 
-                self.switched = True 
-                self.phase = 6
-
         # TBC
-        # Phase 6: Moving to "Ready Position"
-        elif self.phase == 6:
+        # Phase 5: Moving to "Ready Position"
+        elif self.phase == 5:
             if self.switched:
                 self.switched = False
                 # Initialize Path 
