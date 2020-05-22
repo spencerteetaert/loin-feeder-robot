@@ -91,5 +91,7 @@ class Point:
             if self.angle != None:
                 self.angle += self.update_vec.angle
             self.steps_remaining -= 1
+            if self.steps_remaining <= 0:
+                return False
             return True
         return False

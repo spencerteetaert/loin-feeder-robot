@@ -30,7 +30,7 @@ class Carriage:
     def getOtherPt(self):
         return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))))
 
-    def draw(self, canvas):
+    def draw(self, canvas, color=(255, 255, 255)):
         points = []
 
         k = np.array([self.length*math.cos(math.radians(self.angle))/2, -1 * self.length*math.sin(math.radians(self.angle))/2])
@@ -43,7 +43,7 @@ class Carriage:
 
         
         contour = np.array(points).reshape((-1, 1, 2)).astype(np.int32)
-        cv2.drawContours(canvas, [contour], 0, (255, 255, 255), 3)
+        cv2.drawContours(canvas, [contour], 0, color, 3)
 
     def follow(self, pt:Point):
         if pt.angle != None:

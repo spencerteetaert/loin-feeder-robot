@@ -164,7 +164,7 @@ class Meat():
     def draw(self, img):
         try:
             #Draws convex hull
-            cv2.circle(img, (int(self.center[0]), int(self.center[1])), 3, (255, 255, 255))
+            self.get_center_as_point().draw(img)
             cv2.drawContours(img, [self.bbox], 0, (31, 255, 49), 2)
             y0, dy = self.center[1] - 50, 18
             for i, line in enumerate(self.__repr__().split('\n')):

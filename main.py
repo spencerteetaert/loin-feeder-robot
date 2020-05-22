@@ -14,8 +14,8 @@ from sample import GlobalParameters
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 model = Robot(Point(280, 600), GlobalParameters.VIDEO_SCALE)
 path_finder = PathFinder()
-path2 = path_finder(Point(400,200, angle=0), Point(600, 735, angle=270), 10)
-path1 = path_finder(Point(450,500, angle=0), Point(300, 735, angle=270), 10)
+path1 = path_finder(Point(440,100, angle=40), Point(655, 735, angle=90), 40)
+path2 = path_finder(Point(440,500, angle=0), Point(250, 735, angle=90), 40)
 
 def on_mouse(event, pX, pY, flags, param):
     if event == cv2.EVENT_LBUTTONUP:
@@ -77,13 +77,17 @@ def main(data_path=DATA_PATH):
                         pass
 
         if switch:
-            model.followPath(path1, path2, 5, time.time(), frame)
+            model.followPath(path1, path2, 150)
             switch = False
+        model.update()
 
         for i in range(0, len(path1)):
             path1[i].draw(frame)
         for i in range(0, len(path2)):
             path2[i].draw(frame, color=(0, 255, 0))
+        for i in range(0, len(GlobalParameters.SAFE_ENVIRONMENT)):
+            cv2.line(frame, (GlobalParameters.SAFE_ENVIRONMENT[i][0][0], GlobalParameters.SAFE_ENVIRONMENT[i][0][1]), (GlobalParameters.SAFE_ENVIRONMENT[i][1][0], GlobalParameters.SAFE_ENVIRONMENT[i][1][1]), (50, 50, 50))
+    
         try:   
             model.draw(frame)
             for i in range(1, len(meats)):

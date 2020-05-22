@@ -63,7 +63,7 @@ class PathFinder:
         elif diff < -180:
             dA = -1*(360 + diff)/(len(ret) - 3)
         else:
-            dA = diff/(len(ret) - 2)
+            dA = diff/(len(ret) - 3)
 
         for i in range(0, len(ret)-2):
             ret[i+1].angle = start_point.angle + dA*i

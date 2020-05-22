@@ -1,4 +1,3 @@
-from threading import Thread
 import time
 
 import cv2
@@ -45,68 +44,47 @@ class Robot:
         self.carriage1.moveBase(self.secondary_arm.otherPt1, self.secondary_arm.angle)
         self.carriage2.moveBase(self.secondary_arm.otherPt2, self.secondary_arm.angle)
 
-    def followPath(self, path1, path2, execution_time, start_time, frame):
-        def auto_step(pts, dts, start_time, number, frame):
-            d = execution_time / len(dts)
-            i = 0
-            c = start_time
-
-            print(d)
-
-            while i < len(dts):
-                if time.time() > c:
-                    # print("Yaya")
-                    if number == 1:
-                        flag = self.follow_pt1.update()
-                        if flag == False:
-                            self.follow_pt1.moveTo(pts[i], dts[i])
-                            i += 1
-                            c += d
-                    elif number == 2:
-                        
-                        flag = self.follow_pt2.update()
-                        if flag == False:
-                            self.follow_pt2.moveTo(pts[i], dts[i])
-                            i += 1
-                            c += d
-                self.moveTo(self.follow_pt2, self.follow_pt1)
-
-                if number == 1:
-                    self.draw(frame)
-                    cv2.imshow("Test", frame)
-                    cv2.waitKey(1)
-            print("Move executed.")
-
+    def followPath(self, path1, path2, execution_time):
         self.follow_pt1 = path1[0]
         self.follow_pt2 = path2[0]
 
-        dt1 = []
+        self.follow1_index = 0
+        self.follow2_index = 0
+
+        self.path1 = path1
+        self.path2 = path2
+
+        self.dt1 = []
         for i in range(0, len(path1)-1):
-            dt1 += [(path1[i + 1] - path1[i]).mag()]
-        np.divide(dt1 * execution_time, np.sum(dt1))
+            self.dt1 += [(path1[i + 1] - path1[i]).mag()]
+        self.dt1 = np.divide(np.multiply(self.dt1, execution_time), np.sum(self.dt1))
 
-        dt2 = []
+        self.dt2 = []
         for i in range(0, len(path2)-1):
-            dt2 += [(path2[i + 1] - path2[i]).mag()]
-        np.divide(dt2 * execution_time, np.sum(dt2))
+            self.dt2 += [(path2[i + 1] - path2[i]).mag()]
+        self.dt2 = np.divide(np.multiply(self.dt2, execution_time), np.sum(self.dt2))
 
-        follow1 = Thread(target=auto_step, args=(path1, dt1, start_time, 1, frame))
-        follow2 = Thread(target=auto_step, args=(path2, dt2, start_time, 2, frame))
-        follow1.daemon = True # This is just for testing and should be removed come implementation 
-        follow2.daemon = True
-        
-        print("Excuting move...")
-        follow1.start()
-        follow2.start()
-        follow1.join()
-        follow2.join()
+    def update(self):
+        flag1 = self.follow_pt1.update()
+        flag2 = self.follow_pt2.update()
+
+        if not flag1:
+            self.follow1_index += 1
+            if self.follow1_index < len(self.dt1):
+                self.follow_pt1.moveTo(self.path1[self.follow1_index+1], self.dt1[self.follow1_index])
+        if not flag2:
+            self.follow2_index += 1
+            if self.follow2_index < len(self.dt2):
+                self.follow_pt2.moveTo(self.path2[self.follow2_index+1], self.dt2[self.follow2_index])
+
+        self.moveTo(self.follow_pt1, self.follow_pt2)
 
     def draw(self, canvas):
         self.main_track.draw(canvas)
         self.main_arm.draw(canvas)
         self.secondary_arm.draw(canvas)
-        self.carriage1.draw(canvas)
-        self.carriage2.draw(canvas)
+        self.carriage1.draw(canvas, color=(0, 255, 0))
+        self.carriage2.draw(canvas, color=(0, 0, 255))
 
         font = cv2.FONT_HERSHEY_SIMPLEX
         y0, dy = 30, 18
