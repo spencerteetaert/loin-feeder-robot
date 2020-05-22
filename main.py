@@ -82,50 +82,21 @@ def main(data_path=DATA_PATH):
         ep1 = Point(625, 735, angle=90)
         ep2 = Point(250, 735, angle=90)
 
-        # if len(meats) > 3:
-        #     if len(meats) % 2 == 0 and delay == 1:
-        #         #First move to meat location
-        #         sp1 = meats[-1].get_center_as_point().copy() + Point(0, GlobalParameters.CONVEYOR_SPEED * 60)
-        #         sp2 = meats[-2].get_center_as_point().copy() + Point(0, GlobalParameters.CONVEYOR_SPEED * 60)
+        if len(meats) > 3:
+            if len(meats) % 2 == 0 and delay == 1:
+                #First move to meat location
+                sp1 = meats[-1].get_center_as_point().copy() + Point(0, GlobalParameters.CONVEYOR_SPEED * 60)
+                sp2 = meats[-2].get_center_as_point().copy() + Point(0, GlobalParameters.CONVEYOR_SPEED * 60)
 
-        #         path1 = path_finder(model.get_current_point(1), sp1, 30)
-        #         path2 = path_finder(model.get_current_point(2), sp2, 30) 
+                model.moveMeat(sp1, sp2, ep1, ep2, 60)
                 
-        #         model.followPath(path1, path2, 50, delay=1)
-        #         active = True
-        #         first_movement = True
-        #         counter = 0
-
-        
-        # if active:
-        #     # temp == False indicates a movement is complete 
-        #     temp = model.update(frame)
-        #     if temp == False and first_movement == True and counter == 60:
-        #         cv2.waitKey(0)
-        #         #Second move to final location 
-        #         path1 = path_finder(sp1, ep1, 30)
-        #         path2 = path_finder(sp2, ep2, 30) 
-        #         model.followPath(path1, path2, 60, delay=2)
-        #         first_movement = False
-        #         counter = 0
-        #     elif temp == False and first_movement == False:
-        #         active = False
+        if model.phase != 0:
+            model.update()
 
         ###############q
         ### Display ###
-        ###############
-
-        # model.get_current_point(1).draw(frame, color=(255, 0, 0))
-        # model.get_current_point(2).draw(frame, color=(255, 0, 0))
+        ###############        
         
-        # if active:
-            # for i in range(0, len(path1)):
-            #     path1[i].draw(frame, color=(0, 255, 0), size=5)
-            # for i in range(0, len(path2)):
-            #     path2[i].draw(frame, color=(0, 0, 255), size=5)
-        
-        ep1.draw(frame)
-        ep2.draw(frame)
         if (len(meats) != 1):
             for i in range(1, len(meats)):
                 meats[i].draw(frame, color=(255, 255, 0))

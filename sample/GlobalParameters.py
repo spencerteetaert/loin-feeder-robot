@@ -30,10 +30,25 @@ DELAY_FACTOR = 2
 RUNTIME_LIMIT = 300 # Maximum number of path points before program breaks 
 SAFE_ENVIRONMENT = [[[440, 190], [440, 730]], [[100, 735], [800, 735]], [[440, 600], [300, 735]], [[440, 600], [580, 735]]]#[[[440, 190], [440, 730]], [[145, 735], [665, 735]]]     # Lines that are safe to travel on
 
-PHASE_1_SPEED = 1 * FRAME_RATE
+READY_POS_1 = Point(439, 479)
+READY_POS_2 = Point(439, 697)
 
-PHASE_3_PATH1 = [Point(440, 410), Point(440, 489), Point(440, 565), Point(480, 650), Point(520, 735)]
-PHASE_3_PATH2 = [Point(440, 655), Point(360, 735)]
+'''
+    Phase 0: Not moving >> Phase 1 on Function call 
+    Phase 1: Moving to predicted meat location >> Phase 2
+    Phase 2: Grabbing >> Phase 3
+    Phase 3: "Step 0" -> Rotating meat according to pre-set path >> Phase 4
+    Phase 4: "Step 1" -> Moving to extension area >> Phase 5
+    Phase 5: "Step 2" -> Extending >> Phase 0 
+    Phase 6: Moving to "Ready Position" >> Phase 0
+'''
+
+PHASE_1_SPEED = 0.5 * FRAME_RATE
+
+PHASE_3_PATH1 = [Point(440, 410, angle=30), Point(440, 489, angle=75), Point(440, 565, angle=120), Point(480, 650, angle=105), Point(520, 735, angle=90)]
+PHASE_3_PATH2 = [Point(440, 735, angle=45), Point(360, 735, angle=90)]
+PHASE_3_SPEED = 2.88 * FRAME_RATE
+PHASE_3_INITIAL_SPEED = 0.1 * FRAME_RATE
 
 PHASE_5_SPEED = 0.2 * FRAME_RATE
 
