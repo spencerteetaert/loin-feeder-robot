@@ -9,7 +9,7 @@ from .. import GlobalParameters
 font = cv2.FONT_HERSHEY_SIMPLEX
 
 class Meat():
-    def __init__(self, bbox, conveyor_speed=2, side="Left", center=(0,0)):
+    def __init__(self, bbox, conveyor_speed=GlobalParameters.CONVEYOR_SPEED, side="Left", center=(0,0)):
         self.conveyor_speed = conveyor_speed
         self.side = side
         self.bbox = bbox
@@ -164,7 +164,7 @@ class Meat():
     def draw(self, img):
         try:
             #Draws convex hull
-            self.get_center_as_point().draw(img)
+            self.get_center_as_point().draw(img, color=(255, 255, 255))
             cv2.drawContours(img, [self.bbox], 0, (31, 255, 49), 2)
             y0, dy = self.center[1] - 50, 18
             for i, line in enumerate(self.__repr__().split('\n')):

@@ -6,17 +6,18 @@ from .Point import Point
 from .. import GlobalParameters
 
 class SecondaryArm:
-    def __init__(self, pt:Point, scale, length1=100, length2=100, angle=0):
+    def __init__(self, pt:Point, scale, length1=0.47, length2=0.47, angle=90):
         self.scale = scale
         self.basePt = pt
-        self.length1 = length1
-        self.length2 = length2
+        self.length1 = length1 * scale
+        self.length2 = length2 * scale
         self.min_length = GlobalParameters.SECONDARY_ARM_MIN_LENGTH * scale
         self.max_length = GlobalParameters.SECONDARY_ARM_MAX_LENGTH * scale
         self.angle = angle 
-        self.relative_angle = 0
+        self.relative_angle = 270
         self.otherPt1 = self.getotherPt1()
         self.otherPt2 = self.getotherPt2()
+        self.refresh()
 
         self.last_pos = self.length1/self.scale
         self.delta_pos = 0

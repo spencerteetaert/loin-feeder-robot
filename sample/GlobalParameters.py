@@ -4,6 +4,7 @@ import numpy as np
 ### Path Planning Parameters ###
 ################################
 
+CONVEYOR_SPEED = 2 #Px/frame
 RUNTIME_LIMIT = 300                                                         # Maximum number of path points before program breaks 
 SAFE_ENVIRONMENT = [[[440, 190], [440, 730]], [[100, 735], [800, 735]], [[440, 600], [300, 735]], [[440, 600], [580, 735]]]#[[[440, 190], [440, 730]], [[145, 735], [665, 735]]]     # Lines that are safe to travel on
 
@@ -20,7 +21,8 @@ MAIN_ARM_MAX_LENGTH = 1.089
 MAIN_ARM_MIN_ANGLE = 200
 MAIN_ARM_MAX_ANGLE = 340
 
-SECONDARY_ARM_MIN_LENGTH = 0.354
+# SECONDARY_ARM_MIN_LENGTH = 0.354
+SECONDARY_ARM_MIN_LENGTH = 0.1
 SECONDARY_ARM_MAX_LENGTH = 0.973
 
 CARRIAGE_LENGTH = 0.875

@@ -7,13 +7,13 @@ from .Point import Point
 from .. import GlobalParameters
 
 class Carriage:
-    def __init__(self, pt:Point, scale, length=100, angle=0):
+    def __init__(self, pt:Point, scale, angle=0):
         self.scale = scale
         self.basePt = pt
         self.width = GlobalParameters.CARRIAGE_WIDTH * scale
         self.length = GlobalParameters.CARRIAGE_LENGTH * scale
         self.angle = angle 
-        self.relative_angle = 0
+        self.relative_angle = 270
         self.otherPt = self.getOtherPt()
 
         self.last_angle = self.relative_angle

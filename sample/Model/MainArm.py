@@ -6,14 +6,15 @@ from .Point import Point
 from .. import GlobalParameters
 
 class MainArm:
-    def __init__(self, pt:Point, scale, length=100, angle=0):
+    def __init__(self, pt:Point, scale, length=0.75, angle=0):
         self.scale = scale
         self.basePt = pt
-        self.length = length
+        self.length = length * scale
         self.min_length = GlobalParameters.MAIN_ARM_MIN_LENGTH * scale
         self.max_length = GlobalParameters.MAIN_ARM_MAX_LENGTH * scale
         self.angle = angle 
         self.otherPt = self.getOtherPt()
+        self.refresh()
 
         self.last_pos = 0
         self.delta_pos = self.length/self.scale - self.last_pos
@@ -50,7 +51,7 @@ class MainArm:
 
         # Rotational bounds 
         self.refresh()
-        rel_angle = (secondary_arm_angle - self.angle + 360) % 360 
+        rel_angle = (secondary_arm_angle - self.angle + 360 + 180) % 360 
         if rel_angle < GlobalParameters.MAIN_ARM_MIN_ANGLE:
             self.basePt.rotate(GlobalParameters.MAIN_ARM_MIN_ANGLE - rel_angle, self.otherPt)
         elif rel_angle > GlobalParameters.MAIN_ARM_MAX_ANGLE:

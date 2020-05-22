@@ -6,10 +6,10 @@ from .Point import Point
 from .. import GlobalParameters
 
 class MainTrack:
-    def __init__(self, pt:Point, scale, length=100):
+    def __init__(self, pt:Point, scale, length=0.1):
         self.scale = scale
         self.basePt = pt
-        self.length = length
+        self.length = length * scale
         self.last_pos = self.length/self.scale
         self.delta_pos = 0
         self.min_length = GlobalParameters.MAIN_TRACK_MIN_LENGTH * scale

@@ -10,12 +10,12 @@ from .SecondaryArm import SecondaryArm
 from .Carriage import Carriage
 
 class Robot:
-    def __init__(self, ROBOT_BASE_POINT, scale):
+    def __init__(self, robot_base_pt, scale):
         self.scale = scale
-        self.basePt = ROBOT_BASE_POINT
+        self.basePt = robot_base_pt
         self.main_track = MainTrack(self.basePt, scale)
         self.main_arm = MainArm(self.main_track.otherPt, scale)
-        self.secondary_arm = SecondaryArm(self.main_arm.otherPt, scale, angle=45)
+        self.secondary_arm = SecondaryArm(self.main_arm.otherPt, scale)
         self.carriage1 = Carriage(self.secondary_arm.otherPt1, scale)
         self.carriage2 = Carriage(self.secondary_arm.otherPt2, scale)
 
@@ -31,7 +31,7 @@ class Robot:
         ret += self.carriage1.__repr__()
         return ret
 
-    def moveTo(self, pt2, pt1):
+    def moveTo(self, pt1, pt2):
         self.carriage1.follow(pt1)
         self.carriage2.follow(pt2)
         self.secondary_arm.follow(pt1, pt2)
@@ -45,8 +45,8 @@ class Robot:
         self.carriage2.moveBase(self.secondary_arm.otherPt2, self.secondary_arm.angle)
 
     def followPath(self, path1, path2, execution_time):
-        self.follow_pt1 = path1[0]
-        self.follow_pt2 = path2[0]
+        self.follow_pt1 = path1[0].copy()
+        self.follow_pt2 = path2[0].copy()
 
         self.follow1_index = 0
         self.follow2_index = 0
@@ -57,27 +57,45 @@ class Robot:
         self.dt1 = []
         for i in range(0, len(path1)-1):
             self.dt1 += [(path1[i + 1] - path1[i]).mag()]
-        self.dt1 = np.divide(np.multiply(self.dt1, execution_time), np.sum(self.dt1))
-
         self.dt2 = []
         for i in range(0, len(path2)-1):
             self.dt2 += [(path2[i + 1] - path2[i]).mag()]
-        self.dt2 = np.divide(np.multiply(self.dt2, execution_time), np.sum(self.dt2))
 
-    def update(self):
+        dt1_sum = np.sum(self.dt1)
+        dt2_sum = np.sum(self.dt2)
+
+        # longest = max(dt1_sum, dt2_sum)
+
+        self.dt1 = np.divide(np.multiply(self.dt1, execution_time), dt1_sum)
+        self.dt2 = np.divide(np.multiply(self.dt2, execution_time), dt2_sum)
+
+    def update(self, frame):
+        self.follow_pt1.draw(frame, color=(255, 255, 0))
+        self.follow_pt2.draw(frame, color=(255, 255, 0))
         flag1 = self.follow_pt1.update()
         flag2 = self.follow_pt2.update()
+        flag = flag1 or flag2
 
         if not flag1:
             self.follow1_index += 1
-            if self.follow1_index < len(self.dt1):
-                self.follow_pt1.moveTo(self.path1[self.follow1_index+1], self.dt1[self.follow1_index])
+            if self.follow1_index <= len(self.dt1):
+                self.follow_pt1.moveTo(self.path1[self.follow1_index], self.dt1[self.follow1_index-1])
+                flag = True
         if not flag2:
             self.follow2_index += 1
-            if self.follow2_index < len(self.dt2):
-                self.follow_pt2.moveTo(self.path2[self.follow2_index+1], self.dt2[self.follow2_index])
+            if self.follow2_index <= len(self.dt2):
+                self.follow_pt2.moveTo(self.path2[self.follow2_index], self.dt2[self.follow2_index-1])
+                flag = True
 
         self.moveTo(self.follow_pt1, self.follow_pt2)
+        return flag
+
+    def get_current_point(self, num):
+        if num == 1:
+            return Point(self.secondary_arm.otherPt1.x, self.secondary_arm.otherPt1.y, angle=self.carriage1.angle)
+        elif num == 2:
+            return Point(self.secondary_arm.otherPt2.x, self.secondary_arm.otherPt2.y, angle=self.carriage2.angle)
+
 
     def draw(self, canvas):
         self.main_track.draw(canvas)
