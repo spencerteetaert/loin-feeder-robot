@@ -22,8 +22,14 @@ class MainTrack:
     def getOtherPt(self):
         return Point(self.basePt.x, self.basePt.y - self.length)
 
+    def get_min_pt_vector(self):
+        return Point(round(self.basePt.x), round(self.basePt.y - self.min_length))
+    def get_max_pt_vector(self):
+        return Point(round(self.basePt.x), round(self.basePt.y - self.max_length))
+
     def draw(self, canvas):
-        cv2.line(canvas, self.basePt.toTuple(), Point(self.basePt.x, self.basePt.y - self.max_length).toTuple(), (255, 255, 255), 1) 
+        cv2.line(canvas, self.get_max_pt_vector().toTuple(), self.basePt.toTuple(), (255, 255, 255), 8) 
+        cv2.line(canvas, self.get_max_pt_vector().toTuple(), self.get_min_pt_vector().toTuple(), (0, 0, 0), 3) 
         cv2.circle(canvas, self.otherPt.toTuple(), self.scale//10, (255, 255, 255))
     
     def follow(self, pt:Point):

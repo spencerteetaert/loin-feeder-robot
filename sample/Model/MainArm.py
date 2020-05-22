@@ -30,11 +30,14 @@ class MainArm:
     def getOtherPt(self):
         return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))))
 
+    def get_min_pt_vector(self):
+        return Point(round(self.basePt.x + self.min_length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.min_length * math.sin(math.radians(self.angle))))
     def get_max_pt_vector(self):
         return Point(round(self.basePt.x + self.max_length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.max_length * math.sin(math.radians(self.angle))))
 
     def draw(self, canvas):
         cv2.line(canvas, self.get_max_pt_vector().toTuple(), self.basePt.toTuple(), (255, 255, 255), 8) 
+        cv2.line(canvas, self.get_max_pt_vector().toTuple(), self.get_min_pt_vector().toTuple(), (0, 0, 0), 3) 
         cv2.circle(canvas, self.otherPt.toTuple(), self.scale//15, (255, 255, 255))
     
     def follow(self, pt:Point, secondary_arm_angle):

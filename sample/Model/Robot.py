@@ -8,6 +8,7 @@ from .MainTrack import MainTrack
 from .MainArm import MainArm 
 from .SecondaryArm import SecondaryArm
 from .Carriage import Carriage
+from .. import GlobalParameters
 
 class Robot:
     def __init__(self, robot_base_pt, scale):
@@ -44,7 +45,7 @@ class Robot:
         self.carriage1.moveBase(self.secondary_arm.otherPt1, self.secondary_arm.angle)
         self.carriage2.moveBase(self.secondary_arm.otherPt2, self.secondary_arm.angle)
 
-    def followPath(self, path1, path2, execution_time):
+    def followPath(self, path1, path2, execution_time, delay=0):
         self.follow_pt1 = path1[0].copy()
         self.follow_pt2 = path2[0].copy()
 
@@ -64,10 +65,20 @@ class Robot:
         dt1_sum = np.sum(self.dt1)
         dt2_sum = np.sum(self.dt2)
 
-        # longest = max(dt1_sum, dt2_sum)
+        longest = max(dt1_sum, dt2_sum)
 
-        self.dt1 = np.divide(np.multiply(self.dt1, execution_time), dt1_sum)
-        self.dt2 = np.divide(np.multiply(self.dt2, execution_time), dt2_sum)
+        self.dt1 = np.divide(np.multiply(self.dt1, execution_time), longest)
+        self.dt2 = np.divide(np.multiply(self.dt2, execution_time), longest)
+
+        if delay == 1:
+            temp = np.sum(self.dt1[1:-1]) - np.sum(self.dt1[1:-1])/GlobalParameters.DELAY_FACTOR
+            self.dt1[0] += temp
+            self.dt1[1:-1] = np.divide(self.dt1[1:-1], GlobalParameters.DELAY_FACTOR)
+        elif delay == 2:
+            temp = np.sum(self.dt2[1:-1]) - np.sum(self.dt2[1:-1])/GlobalParameters.DELAY_FACTOR
+            self.dt2[0] += temp
+            self.dt2[1:-1] = np.divide(self.dt2[1:-1], GlobalParameters.DELAY_FACTOR)
+
 
     def update(self, frame):
         self.follow_pt1.draw(frame, color=(255, 255, 0))
@@ -99,11 +110,11 @@ class Robot:
 
     def draw(self, canvas):
         self.main_track.draw(canvas)
-        self.main_arm.draw(canvas)
-        self.secondary_arm.draw(canvas)
         self.carriage1.draw(canvas, color=(0, 255, 0))
         self.carriage2.draw(canvas, color=(0, 0, 255))
-
+        self.secondary_arm.draw(canvas)
+        self.main_arm.draw(canvas)
+        
         font = cv2.FONT_HERSHEY_SIMPLEX
         y0, dy = 30, 18
         for i, line in enumerate(self.__repr__().split('\n')):

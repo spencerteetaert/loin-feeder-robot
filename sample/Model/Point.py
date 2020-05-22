@@ -11,6 +11,7 @@ class Point:
         self.angle = angle
         self.steps_remaining = steps
         self.update_vec = vec
+        self.delay = 0
 
     def __repr__(self):
         ret = "Point(" + str(self.x) + ", " + str(self.y)
@@ -73,7 +74,7 @@ class Point:
         return ret
 
 
-    def moveTo(self, otherPt, dt):
+    def moveTo(self, otherPt, dt, delay=0):
         dX = (otherPt.x - self.x)/dt
         dY = (otherPt.y - self.y)/dt
         dA = 0
@@ -88,9 +89,13 @@ class Point:
 
         self.update_vec = Point(dX, dY, angle=dA)
         self.steps_remaining = dt
+        self.delay = delay
         
     def update(self):
         if self.steps_remaining > 0:
+            if self.delay > 0:
+                self.delay -= 1
+                return True 
             self.x += self.update_vec.x
             self.y += self.update_vec.y
             if self.angle != None:

@@ -12,7 +12,7 @@ from sample.PathPlanning.Path import PathFinder
 from sample import GlobalParameters
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
-model = Robot(Point(280, 600), GlobalParameters.VIDEO_SCALE)
+model = Robot(Point(260, 600), GlobalParameters.VIDEO_SCALE)
 path_finder = PathFinder()
 
 def on_mouse(event, pX, pY, flags, param):
@@ -79,8 +79,8 @@ def main(data_path=DATA_PATH):
         ### Path planning and Robot Movement ###
         ########################################
 
-        ep1 = Point(655, 735, angle=90)
-        ep2 = Point(250, 735, angle=90)
+        ep1 = Point(625, 735, angle=90)
+        ep2 = Point(270, 735, angle=90)
 
         if len(meats) > 3:
             if len(meats) % 2 == 0 and delay == 1:
@@ -88,10 +88,10 @@ def main(data_path=DATA_PATH):
                 sp1 = meats[-1].get_center_as_point().copy() + Point(0, GlobalParameters.CONVEYOR_SPEED * 60)
                 sp2 = meats[-2].get_center_as_point().copy() + Point(0, GlobalParameters.CONVEYOR_SPEED * 60)
 
-                path1 = path_finder(model.get_current_point(1), sp1, 40)
-                path2 = path_finder(model.get_current_point(2), sp2, 40) 
+                path1 = path_finder(model.get_current_point(1), sp1, 5)
+                path2 = path_finder(model.get_current_point(2), sp2, 5) 
                 
-                model.followPath(path1, path2, 60)
+                model.followPath(path1, path2, 60, delay=2)
                 active = True
                 first_movement = True
 
@@ -101,9 +101,9 @@ def main(data_path=DATA_PATH):
             temp = model.update(frame)
             if temp == False and first_movement == True:
                 #Second move to final location 
-                path1 = path_finder(sp1, ep1, 40)
-                path2 = path_finder(sp2, ep2, 40) 
-                model.followPath(path1, path2, 60)
+                path1 = path_finder(sp1, ep1, 5)
+                path2 = path_finder(sp2, ep2, 5) 
+                model.followPath(path1, path2, 60, delay=1)
                 first_movement = False
             elif temp == False and first_movement == False:
                 active = False
@@ -115,14 +115,14 @@ def main(data_path=DATA_PATH):
         model.get_current_point(1).draw(frame, color=(255, 0, 0))
         model.get_current_point(2).draw(frame, color=(255, 0, 0))
 
-        if active:
-            for i in range(0, len(path1)):
-                path1[i].draw(frame, color=(0, 255, 0), size=i)
-            for i in range(0, len(path2)):
-                path2[i].draw(frame, color=(0, 0, 255), size=i)
+        
         for i in range(0, len(GlobalParameters.SAFE_ENVIRONMENT)):
             cv2.line(frame, (GlobalParameters.SAFE_ENVIRONMENT[i][0][0], GlobalParameters.SAFE_ENVIRONMENT[i][0][1]), (GlobalParameters.SAFE_ENVIRONMENT[i][1][0], GlobalParameters.SAFE_ENVIRONMENT[i][1][1]), (50, 50, 50))
-
+        if active:
+            for i in range(0, len(path1)):
+                path1[i].draw(frame, color=(0, 255, 0), size=i//2)
+            for i in range(0, len(path2)):
+                path2[i].draw(frame, color=(0, 0, 255), size=i//2)
         try:   
             model.draw(frame)
             for i in range(1, len(meats)):
