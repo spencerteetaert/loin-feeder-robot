@@ -22,7 +22,7 @@ def on_mouse(event, pX, pY, flags, param):
 def main(data_path=DATA_PATH):
     active = False
     cap = cv2.VideoCapture(data_path)
-    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output11.mp4', 0x7634706d, 30, (850,830))
+    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output14.mp4', 0x7634706d, 30, (850,830))
 
     win = "Window"
     cv2.namedWindow(win)
@@ -33,6 +33,7 @@ def main(data_path=DATA_PATH):
     meats = [0]
     flip_flop = False 
     counter = 0
+    queue = []
 
     while(cap.isOpened()):
         start = time.time()
@@ -84,14 +85,21 @@ def main(data_path=DATA_PATH):
 
         if len(meats) > 3:
             if len(meats) % 2 == 0 and delay == 1:
-                #First move to meat location
-                sp1 = meats[-1].get_center_as_point().copy() + Point(0, GlobalParameters.CONVEYOR_SPEED * 60)
-                sp2 = meats[-2].get_center_as_point().copy() + Point(0, GlobalParameters.CONVEYOR_SPEED * 60)
-
-                model.moveMeat(sp1, sp2, ep1, ep2, 60)
+                # Queue [P1 index, P2 index]
+                queue += [[len(meats) - 1, len(meats) - 2]]
                 
+        if model.phase == 0 and len(queue) > 0:
+            dist = (GlobalParameters.PICKUP_POINT - meats[queue[0][1]].get_center_as_point()).y
+
+            sp1 = meats[queue[0][0]].get_center_as_point().copy() + Point(0, dist)
+            sp2 = meats[queue[0][1]].get_center_as_point().copy() + Point(0, dist)
+            model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED)
+            queue = queue[1:]
+
+            print("Queue length:", len(queue))
+
         if model.phase != 0:
-            model.update()
+            model.update(frame)
 
         ###############
         ### Display ###
@@ -116,6 +124,9 @@ def main(data_path=DATA_PATH):
             break
         elif k == ord('p'):
             cv2.waitKey(0)
+        elif k == ord('r'):
+            model.phase = 0
+
 
         times += [time.time() - start]
         # out.write(frame)

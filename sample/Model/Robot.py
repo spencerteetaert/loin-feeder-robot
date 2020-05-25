@@ -141,7 +141,7 @@ class Robot:
         if self.phase == 0:
             if self.follow_pt1 != GlobalParameters.READY_POS_1 or self.follow_pt2 != GlobalParameters.READY_POS_2:
                 self.switched = True
-                self.phase = 6
+                self.phase = 5
             else:
                 return False
 
@@ -159,12 +159,14 @@ class Robot:
                 self.switched = True 
                 self.phase = 2
 
-        # Phase 2: Grabbing (Pause right now)
+        # Phase 2: Grabbing (Follow meat)
         elif self.phase == 2:
             self.delay -= 1
             if self.switched:
                 self.switched = False
-                self.delay = 5
+                self.delay = GlobalParameters.PHASE_2_DELAY
+                self.follow_pt1.moveTo(self.follow_pt1 + Point(0, self.delay * GlobalParameters.CONVEYOR_SPEED), GlobalParameters.PHASE_2_DELAY)
+                self.follow_pt2.moveTo(self.follow_pt2 + Point(0, self.delay * GlobalParameters.CONVEYOR_SPEED), GlobalParameters.PHASE_2_DELAY)
             if self.delay < 1: # End of step condition 
                 self.switched = True 
                 self.phase = 3
@@ -176,8 +178,11 @@ class Robot:
                 self.followPath(GlobalParameters.PHASE_3_PATH1, GlobalParameters.PHASE_3_PATH2, GlobalParameters.PHASE_3_SPEED)
                 self.follow_pt1.moveTo(GlobalParameters.PHASE_3_PATH1[0], GlobalParameters.PHASE_3_INITIAL_SPEED)
                 self.follow_pt2.moveTo(GlobalParameters.PHASE_3_PATH2[0], GlobalParameters.PHASE_3_INITIAL_SPEED)
+                self.follow1_index = 0
+                self.follow2_index = 0
 
-            if not flag1 and not flag2 and self.follow1_index >= len(GlobalParameters.PHASE_3_PATH1)-1 and self.follow2_index >= len(GlobalParameters.PHASE_3_PATH2)-1: # End of step condition 
+            # End condition 
+            if not flag1 and not flag2 and self.follow1_index >= len(GlobalParameters.PHASE_3_PATH1)-1 and self.follow2_index >= len(GlobalParameters.PHASE_3_PATH2)-1: 
                 self.switched = True 
                 self.phase = 4
 
@@ -202,14 +207,34 @@ class Robot:
                 self.switched = True 
                 self.phase = 5
 
-        # TBC
         # Phase 5: Moving to "Ready Position"
         elif self.phase == 5:
+            self.delay -= 1
             if self.switched:
                 self.switched = False
-                # Initialize Path 
-            if False: # End of step condition 
+                self.followPath(GlobalParameters.PHASE_5_PATH1, GlobalParameters.PHASE_5_PATH2, GlobalParameters.PHASE_5_SPEED)
+                self.follow_pt1.moveTo(GlobalParameters.PHASE_5_PATH1[0], GlobalParameters.PHASE_5_INITIAL_SPEED)
+                # self.follow_pt2.moveTo(GlobalParameters.PHASE_5_PATH2[0], GlobalParameters.PHASE_5_INITIAL_SPEED)
+                self.follow1_index = 0
+                self.follow2_index = 0
+                self.delay = round(np.sum(self.dt1))//4
+            if self.delay == 0:
+                self.follow_pt2.moveTo(GlobalParameters.PHASE_5_PATH2[0], GlobalParameters.PHASE_5_INITIAL_SPEED)
+
+            # End condition 
+            if not flag1 and not flag2 and self.follow1_index >= len(GlobalParameters.PHASE_5_PATH1)-1 and self.follow2_index >= len(GlobalParameters.PHASE_5_PATH2)-1: 
                 self.switched = True 
                 self.phase = 0
+
+                #Stops robot in its tracks
+                self.follow_pt1.moveTo(self.follow_pt1, 1)
+                self.follow_pt2.moveTo(self.follow_pt2, 1)
+
+            if not flag1 and self.follow1_index < len(GlobalParameters.PHASE_5_PATH1) - 1:
+                self.follow1_index += 1
+                self.follow_pt1.moveTo(GlobalParameters.PHASE_5_PATH1[self.follow1_index], self.dt1[self.follow1_index - 1])
+            if not flag2 and self.follow2_index < len(GlobalParameters.PHASE_5_PATH2) - 1 and self.delay <= 0:
+                self.follow2_index += 1
+                self.follow_pt2.moveTo(GlobalParameters.PHASE_5_PATH2[self.follow2_index], self.dt2[self.follow2_index - 1])
 
         self.moveTo(self.follow_pt1, self.follow_pt2)
