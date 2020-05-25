@@ -31,8 +31,8 @@ RUNTIME_LIMIT = 300 # Maximum number of path points before program breaks
 SAFE_ENVIRONMENT = [[[440, 190], [440, 730]], [[100, 735], [800, 735]], [[440, 600], [300, 735]], [[440, 600], [580, 735]]]#[[[440, 190], [440, 730]], [[145, 735], [665, 735]]]     # Lines that are safe to travel on
 
 # Points 
-READY_POS_1 = Point(439, 479, angle=0)
-READY_POS_2 = Point(439, 697, angle=0)
+READY_POS_1 = Point(439, 504, angle=0)
+READY_POS_2 = Point(439, 654, angle=0)
 PICKUP_POINT = Point(440, 480)
 
 # Phase Parameters 
@@ -58,8 +58,8 @@ PHASE_3_INITIAL_SPEED = 0.8 * FRAME_RATE
 
 PHASE_4_SPEED = 0.5 * FRAME_RATE
 
-PHASE_5_PATH1 = [Point(450, 435, angle=45), Point(439, 479, angle=0)]#, Point(440, 580, angle=50), Point(440, 435, angle=30)]
-PHASE_5_PATH2 = [Point(439, 697, angle=0)]#, Point(440, 730, angle=60)]
+PHASE_5_PATH1 = [Point(450, 435, angle=0), Point(439, 504, angle=0)]#, Point(440, 580, angle=50), Point(440, 435, angle=30)]
+PHASE_5_PATH2 = [Point(345, 695, angle=0), Point(439, 654, angle=0)]#, Point(440, 730, angle=60)]
 PHASE_5_SPEED = 0.85 * FRAME_RATE
 PHASE_5_INITIAL_SPEED = 0.85 * FRAME_RATE
 

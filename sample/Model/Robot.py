@@ -213,7 +213,7 @@ class Robot:
                 # self.follow_pt2.moveTo(GlobalParameters.PHASE_5_PATH2[0], GlobalParameters.PHASE_5_INITIAL_SPEED)
                 self.follow1_index = 0
                 self.follow2_index = 0
-                self.delay = round(np.sum(self.dt1))//4
+                self.delay = round(np.sum(self.dt1))//3
             if self.delay == 0:
                 self.follow_pt2.moveTo(GlobalParameters.PHASE_5_PATH2[0], GlobalParameters.PHASE_5_INITIAL_SPEED)
 

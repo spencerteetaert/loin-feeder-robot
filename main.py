@@ -50,21 +50,18 @@ def main(data_path=DATA_PATH):
 
         tstart = time.time()
         start = time.time()
-        frame = streamer.read()
+        
         qsize = streamer.Q.qsize()
-
         if qsize < 40:
             streamer.sleep_time = 0
         elif qsize > 80:
             streamer.sleep_time = 0.005
         
         # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
-        try:
-            frame = image_sizing.scale(frame)
-            frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
-        except:
-            print("End of video")
-            break
+
+        frame = streamer.read()
+        frame = image_sizing.scale(frame)
+        frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
         iH, iW, _ = frame.shape
         box, mask = bbox.get_bbox(frame)
@@ -154,11 +151,11 @@ def main(data_path=DATA_PATH):
 
         # out.write(frame)
 
-    print("Processing frame time:", np.average(processing_times))
-    print("Path planning frame time:", np.average(path_times))
-    print("Display frame time:", np.average(display_times))
-    print("Total frame time:", np.average(processing_times) + np.average(path_times) + np.average(display_times))
-    print("\nTotal real runtime:", np.sum(times_that_matter))
+    print("Processing frame time:", round(np.average(processing_times), 4)) 
+    print("Path planning frame time:", round(np.average(path_times), 4))
+    print("Display frame time:", round(np.average(display_times), 4))
+    print("Total frame time:", round(np.average(processing_times) + np.average(path_times), 4))
+    print("Worst case scenario:", round(np.max(processing_times) + np.max(path_times), 4))
 
     # out.release()
     streamer.stop()
