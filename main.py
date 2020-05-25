@@ -26,16 +26,11 @@ def on_mouse(event, pX, pY, flags, param):
 
 def main(data_path=DATA_PATH):
     global streamer
-    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output14.mp4', 0x7634706d, 30, (850,830))
+    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output15.mp4', 0x7634706d, 30, (850,830))
 
     win = "Window"
     cv2.namedWindow(win)
     cv2.setMouseCallback(win, on_mouse)
-
-    processing_times = []
-    path_times = []
-    display_times = []
-    times_that_matter = []
 
     delay = 0
     flip_flop = False 
@@ -47,9 +42,6 @@ def main(data_path=DATA_PATH):
         ################################################
         ### Video Processing and Meat Identification ###
         ################################################
-
-        tstart = time.time()
-        start = time.time()
         
         qsize = streamer.Q.qsize()
         if qsize < 40:
@@ -63,8 +55,8 @@ def main(data_path=DATA_PATH):
         frame = image_sizing.scale(frame)
         frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
-        iH, iW, _ = frame.shape
-        box, mask = bbox.get_bbox(frame)
+        iH, _, _ = frame.shape
+        box, _ = bbox.get_bbox(frame)
 
         if (box != 0):
             for i in range(0, len(box)):
@@ -85,13 +77,11 @@ def main(data_path=DATA_PATH):
                     except:
                         pass
         delay += 1
-        processing_times += [time.time() - start]
 
         ########################################
         ### Path planning and Robot Movement ###
         ########################################
 
-        start = time.time()
         ep1 = Point(625, 735, angle=90)
         ep2 = Point(250, 735, angle=90)
 
@@ -104,6 +94,7 @@ def main(data_path=DATA_PATH):
             dist = (GlobalParameters.PICKUP_POINT - meats[queue[0][0]].get_center_as_point()).y
 
             if dist > 0:
+                print("Dist", dist // GlobalParameters.CONVEYOR_SPEED)
                 sp1 = meats[queue[0][0]].get_center_as_point().copy() + Point(0, dist)
                 sp2 = meats[queue[0][1]].get_center_as_point().copy() + Point(0, dist)
                 model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED)
@@ -119,20 +110,16 @@ def main(data_path=DATA_PATH):
 
         if model.phase != 0:
             model.update()
-        path_times += [time.time() - start]
-        times_that_matter += [time.time() - tstart]
 
         ###############
         ### Display ###
         ###############        
         
-        start = time.time()
         if (len(meats) != 1):
             for i in range(1, len(meats)):
                 meats[i].draw(frame, color=(255, 255, 0))
         model.draw(frame)
         cv2.imshow(win, frame)
-        display_times += [time.time() - start]
 
         ################
         ### Controls ###
@@ -150,12 +137,7 @@ def main(data_path=DATA_PATH):
             model.phase = 0
 
         # out.write(frame)
-
-    print("Processing frame time:", round(np.average(processing_times), 4)) 
-    print("Path planning frame time:", round(np.average(path_times), 4))
-    print("Display frame time:", round(np.average(display_times), 4))
-    print("Total frame time:", round(np.average(processing_times) + np.average(path_times), 4))
-    print("Worst case scenario:", round(np.max(processing_times) + np.max(path_times), 4))
+        # cv2.waitKey(15)
 
     # out.release()
     streamer.stop()

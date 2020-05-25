@@ -33,7 +33,7 @@ SAFE_ENVIRONMENT = [[[440, 190], [440, 730]], [[100, 735], [800, 735]], [[440, 6
 # Points 
 READY_POS_1 = Point(439, 504, angle=0)
 READY_POS_2 = Point(439, 654, angle=0)
-PICKUP_POINT = Point(440, 480)
+PICKUP_POINT = Point(440, 504)
 
 # Phase Parameters 
 '''
@@ -42,26 +42,27 @@ PICKUP_POINT = Point(440, 480)
     Phase 2: Grabbing >> Phase 3
     Phase 3: "Step 0" -> Rotating meat according to pre-set path >> Phase 4
     Phase 4: "Step 2" -> Extending >> Phase 5
-    Phase 5: Moving to "Ready Position" >> Phase 0
+    Phase 5: Releasing >> Phase 6
+    Phase 6: Moving to "Ready Position" >> Phase 0
 '''
 
 PHASE_1_SPEED = 0.5 * FRAME_RATE
 
-PHASE_2_DELAY = 0.3 * FRAME_RATE
+PHASE_2_DELAY = 0.25 * FRAME_RATE
 
-# PHASE_3_PATH1 = [Point(440, 410, angle=30), Point(440, 565, angle=120), Point(480, 650, angle=105), Point(520, 735, angle=90)]
-# PHASE_3_PATH2 = [Point(440, 735, angle=45), Point(360, 735, angle=120), Point(300, 735, angle=90)]
-PHASE_3_PATH1 = [Point(440, 435, angle=45), Point(440, 580, angle=110), Point(530, 680, angle=90)]
+PHASE_3_PATH1 = [Point(440, 435, angle=60), Point(440, 580, angle=110), Point(530, 680, angle=90)]
 PHASE_3_PATH2 = [Point(440, 730, angle=60), Point(320, 720, angle=110)]
-PHASE_3_SPEED = 1.5 * FRAME_RATE
-PHASE_3_INITIAL_SPEED = 0.8 * FRAME_RATE
+PHASE_3_SPEED = 1 * FRAME_RATE
+PHASE_3_INITIAL_SPEED = 0.5 * FRAME_RATE
 
-PHASE_4_SPEED = 0.5 * FRAME_RATE
+PHASE_4_SPEED = 0.7 * FRAME_RATE
 
-PHASE_5_PATH1 = [Point(450, 435, angle=0), Point(439, 504, angle=0)]#, Point(440, 580, angle=50), Point(440, 435, angle=30)]
-PHASE_5_PATH2 = [Point(345, 695, angle=0), Point(439, 654, angle=0)]#, Point(440, 730, angle=60)]
-PHASE_5_SPEED = 0.85 * FRAME_RATE
-PHASE_5_INITIAL_SPEED = 0.85 * FRAME_RATE
+PHASE_5_DELAY = 0.25 * FRAME_RATE
+
+# CONDITION: Last point must be Ready Pos 
+PHASE_6_PATH1 = [Point(450, 435, angle=0), READY_POS_1]
+PHASE_6_PATH2 = [Point(345, 695, angle=0), READY_POS_2]
+PHASE_6_SPEED = 1.5 * FRAME_RATE
 
 ###########################
 ### Physical Parameters ###
