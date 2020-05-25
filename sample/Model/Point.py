@@ -1,5 +1,4 @@
 import math
-from copy import deepcopy
 
 import cv2
 import numpy as np
@@ -30,6 +29,11 @@ class Point:
         return Point(self.x / factor, self.y / factor, angle=self.angle, steps=self.steps_remaining, vec=self.update_vec)
     def __floordiv__(self, factor):
         return Point(self.x // factor, self.y // factor, angle=self.angle, steps=self.steps_remaining, vec=self.update_vec)
+    def __eq__(self, other):
+        if self.x == other.x and self.y == other.y and self.angle == other.angle:
+            return True
+        else:
+            return False
 
     def mag(self):
         return (self.x**2 + self.y**2)**0.5

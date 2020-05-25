@@ -25,15 +25,17 @@ CHANGING_START_INDEX = False            # Toggles whether to iterated start inde
 ### Path Planning Parameters ###
 ################################
 
+#
 CONVEYOR_SPEED = 2 #Px/frame
-DELAY_FACTOR = 2
 RUNTIME_LIMIT = 300 # Maximum number of path points before program breaks 
 SAFE_ENVIRONMENT = [[[440, 190], [440, 730]], [[100, 735], [800, 735]], [[440, 600], [300, 735]], [[440, 600], [580, 735]]]#[[[440, 190], [440, 730]], [[145, 735], [665, 735]]]     # Lines that are safe to travel on
 
+# Points 
 READY_POS_1 = Point(439, 479, angle=0)
 READY_POS_2 = Point(439, 697, angle=0)
-PICKUP_POINT = Point(440, 700)
+PICKUP_POINT = Point(440, 480)
 
+# Phase Parameters 
 '''
     Phase 0: Not moving >> Phase 1 on Function call 
     Phase 1: Moving to predicted meat location >> Phase 2
@@ -49,7 +51,7 @@ PHASE_2_DELAY = 0.3 * FRAME_RATE
 
 # PHASE_3_PATH1 = [Point(440, 410, angle=30), Point(440, 565, angle=120), Point(480, 650, angle=105), Point(520, 735, angle=90)]
 # PHASE_3_PATH2 = [Point(440, 735, angle=45), Point(360, 735, angle=120), Point(300, 735, angle=90)]
-PHASE_3_PATH1 = [Point(440, 435, angle=30), Point(440, 580, angle=110), Point(530, 680, angle=90)]
+PHASE_3_PATH1 = [Point(440, 435, angle=45), Point(440, 580, angle=110), Point(530, 680, angle=90)]
 PHASE_3_PATH2 = [Point(440, 730, angle=60), Point(320, 720, angle=110)]
 PHASE_3_SPEED = 1.5 * FRAME_RATE
 PHASE_3_INITIAL_SPEED = 0.8 * FRAME_RATE

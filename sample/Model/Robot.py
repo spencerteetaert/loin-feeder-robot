@@ -137,13 +137,9 @@ class Robot:
         self.dt2 = np.divide(np.multiply(self.dt2, execution_time), longest)
 
     def update(self):
-        # Phase 0: Not moving, head to ready pos if not already there 
+        # Phase 0: Not moving, in ready position
         if self.phase == 0:
-            if self.follow_pt1 != GlobalParameters.READY_POS_1 or self.follow_pt2 != GlobalParameters.READY_POS_2:
-                self.switched = True
-                self.phase = 5
-            else:
-                return False
+            return False
 
         flag1 = self.follow_pt1.update()
         flag2 = self.follow_pt2.update()
@@ -222,7 +218,7 @@ class Robot:
                 self.follow_pt2.moveTo(GlobalParameters.PHASE_5_PATH2[0], GlobalParameters.PHASE_5_INITIAL_SPEED)
 
             # End condition 
-            if not flag1 and not flag2 and self.follow1_index >= len(GlobalParameters.PHASE_5_PATH1)-1 and self.follow2_index >= len(GlobalParameters.PHASE_5_PATH2)-1: 
+            if not flag1 and not flag2 and self.follow1_index >= len(GlobalParameters.PHASE_5_PATH1) - 1 and self.follow2_index >= len(GlobalParameters.PHASE_5_PATH2) - 1: 
                 self.switched = True 
                 self.phase = 0
 
@@ -238,3 +234,4 @@ class Robot:
                 self.follow_pt2.moveTo(GlobalParameters.PHASE_5_PATH2[self.follow2_index], self.dt2[self.follow2_index - 1])
 
         self.moveTo(self.follow_pt1, self.follow_pt2)
+        return True

@@ -17,27 +17,18 @@ random.seed(12345)
 
 THRESHOLD = 255
 
-def get_bbox(img, threshold=THRESHOLD, draw=False, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParameters.UPPER_MASK, source="Image"):
+def get_bbox(img, threshold=THRESHOLD, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParameters.UPPER_MASK, source="Image"):
     '''
     Returns single bounding polygon for the given middle image
     A larger threshold value will result in larger bbox
     '''
-    # img = preprocess(img)
     #Masks meat 
-    temp = gen_mask(img, lower_mask=lower_mask, upper_mask=upper_mask)
-
-    #Add border to ensure full hull is created 
-    temp = cv2.copyMakeBorder(temp, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)
     img = cv2.copyMakeBorder(img, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)
+    temp = gen_mask(img, lower_mask=lower_mask, upper_mask=upper_mask)
+    
     bound_poly = thresh_callback(threshold, temp)
 
-    drawing = 0
-
-    if draw:
-        drawing = draw_results(temp, bound_poly, source)
-        # cv2.imshow(source, drawing)
-
-    return bound_poly, temp, drawing
+    return bound_poly, temp
 
 def preprocess(img):
     '''
@@ -46,9 +37,8 @@ def preprocess(img):
     Filters out red channel (makes contour finding easier for meats for bbox later)
     Grayscales image to reduce computation time
     '''
-    ret = img.copy()
     # ret = image_sizing.crop(ret)
-    ret = image_sizing.scale(ret)
+    ret = image_sizing.scale(img)
 
     ret = cv2.copyMakeBorder(ret, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
@@ -59,10 +49,9 @@ def gen_mask(img, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParam
     Masks input img based off HSV colour ranges provided 
     '''
     iH, iW, _ = img.shape
-    ret = img.copy()
 
     #Masks colour ranges provided
-    hsv = cv2.cvtColor(ret, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
     mask = cv2.inRange(hsv, lower_mask, upper_mask)
 
@@ -95,7 +84,7 @@ def gen_mask(img, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParam
         refined = mask
 
     if bitwise_and:
-        return cv2.bitwise_and(ret, ret, mask=refined)
+        return cv2.bitwise_and(img, img, mask=refined)
     return refined[:,101:-101]
 
 def thresh_callback(val, img):

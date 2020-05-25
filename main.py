@@ -29,19 +29,22 @@ def main(data_path=DATA_PATH):
     cv2.setMouseCallback(win, on_mouse)
 
     delay = 0
-    times = []
+    processing_times = []
+    path_times = []
+    display_times = []
+    times_that_matter = []
     meats = [0]
     flip_flop = False 
     counter = 0
     queue = []
 
     while(cap.isOpened()):
-        start = time.time()
-
         ################################################
         ### Video Processing and Meat Identification ###
         ################################################
-    
+
+        tstart = time.time()
+        start = time.time()
         _, frame = cap.read()
         
         # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
@@ -52,7 +55,7 @@ def main(data_path=DATA_PATH):
             break
 
         iH, iW, _ = frame.shape
-        box, mask, _ = bbox.get_bbox(frame)
+        box, mask = bbox.get_bbox(frame)
 
         if (box != 0):
             for i in range(0, len(box)):
@@ -68,18 +71,18 @@ def main(data_path=DATA_PATH):
                             else:
                                 meats += [meat.Meat(box[i], side="Left", center=[cX, cY])]
                             flip_flop = not flip_flop
-                            # print("Meat detected")
-                            # print(meats[-1])
                             
                             delay = 0
                     except:
                         pass
         delay += 1
-        
+        processing_times += [time.time() - start]
+
         ########################################
         ### Path planning and Robot Movement ###
         ########################################
 
+        start = time.time()
         ep1 = Point(625, 735, angle=90)
         ep2 = Point(250, 735, angle=90)
 
@@ -89,27 +92,38 @@ def main(data_path=DATA_PATH):
                 queue += [[len(meats) - 1, len(meats) - 2]]
                 
         if model.phase == 0 and len(queue) > 0:
-            dist = (GlobalParameters.PICKUP_POINT - meats[queue[0][1]].get_center_as_point()).y
+            dist = (GlobalParameters.PICKUP_POINT - meats[queue[0][0]].get_center_as_point()).y
 
-            sp1 = meats[queue[0][0]].get_center_as_point().copy() + Point(0, dist)
-            sp2 = meats[queue[0][1]].get_center_as_point().copy() + Point(0, dist)
-            model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED)
-            queue = queue[1:]
+            if dist > 0:
+                sp1 = meats[queue[0][0]].get_center_as_point().copy() + Point(0, dist)
+                sp2 = meats[queue[0][1]].get_center_as_point().copy() + Point(0, dist)
+                model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED)
+                queue = queue[1:]
 
-            print("Queue length:", len(queue))
+                # temp_start = time.time()
+                # while model.update():
+                #     pass
+                # print(time.time() - temp_start)
+            else:
+                print("ERROR: Conveyor Speed too fast for current settings")
+                queue = queue[1:]
 
         if model.phase != 0:
-            model.update(frame)
+            model.update()
+        path_times += [time.time() - start]
+        times_that_matter += [time.time() - tstart]
 
         ###############
         ### Display ###
         ###############        
         
+        start = time.time()
         if (len(meats) != 1):
             for i in range(1, len(meats)):
                 meats[i].draw(frame, color=(255, 255, 0))
         model.draw(frame)
         cv2.imshow(win, frame)         
+        display_times += [time.time() - start]
 
         ################
         ### Controls ###
@@ -119,7 +133,7 @@ def main(data_path=DATA_PATH):
             meats[i].step()
         counter += 1
 
-        k = cv2.waitKey(10) & 0xFF
+        k = cv2.waitKey(1) & 0xFF
         if k == ord('q'):
             break
         elif k == ord('p'):
@@ -127,15 +141,16 @@ def main(data_path=DATA_PATH):
         elif k == ord('r'):
             model.phase = 0
 
-
-        times += [time.time() - start]
         # out.write(frame)
 
-    print("Average frame processing time:", np.average(times))
+    print("Processing frame time:", np.average(processing_times))
+    print("Path planning frame time:", np.average(path_times))
+    print("Display frame time:", np.average(display_times))
+    print("Total frame time:", np.average(processing_times) + np.average(path_times) + np.average(display_times))
+    print("\nTotal real runtime:", np.sum(times_that_matter))
 
     cap.release()
     # out.release()
     cv2.destroyAllWindows()
 
-if __name__=='__main__':
-    main()
+main()
