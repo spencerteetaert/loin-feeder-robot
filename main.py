@@ -5,6 +5,7 @@ import cv2
 
 from sample.VisionIdentification import bbox
 from sample.VisionIdentification import image_sizing
+from sample.VisionIdentification.VideoReader import FileVideoStream
 from sample.VisionIdentification import meat
 from sample.Model.Robot import Robot
 from sample.Model.Point import Point
@@ -15,41 +16,52 @@ DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 model = Robot(Point(280, 600), GlobalParameters.VIDEO_SCALE)
 path_finder = PathFinder()
 
+streamer = FileVideoStream(DATA_PATH)
+streamer.start()
+time.sleep(1)
+
 def on_mouse(event, pX, pY, flags, param):
     if event == cv2.EVENT_LBUTTONUP:
         print("Clicked", pX, pY)
 
 def main(data_path=DATA_PATH):
-    active = False
-    cap = cv2.VideoCapture(data_path)
+    global streamer
     # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output14.mp4', 0x7634706d, 30, (850,830))
 
     win = "Window"
     cv2.namedWindow(win)
     cv2.setMouseCallback(win, on_mouse)
 
-    delay = 0
     processing_times = []
     path_times = []
     display_times = []
     times_that_matter = []
-    meats = [0]
+
+    delay = 0
     flip_flop = False 
-    counter = 0
+
+    meats = [0]
     queue = []
 
-    while(cap.isOpened()):
+    while(streamer.more()):
         ################################################
         ### Video Processing and Meat Identification ###
         ################################################
 
         tstart = time.time()
         start = time.time()
-        _, frame = cap.read()
+        frame = streamer.read()
+        qsize = streamer.Q.qsize()
+
+        if qsize < 40:
+            streamer.sleep_time = 0
+        elif qsize > 80:
+            streamer.sleep_time = 0.005
         
         # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
         try:
-            frame = bbox.preprocess(frame)
+            frame = image_sizing.scale(frame)
+            frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
         except:
             print("End of video")
             break
@@ -122,7 +134,7 @@ def main(data_path=DATA_PATH):
             for i in range(1, len(meats)):
                 meats[i].draw(frame, color=(255, 255, 0))
         model.draw(frame)
-        cv2.imshow(win, frame)         
+        cv2.imshow(win, frame)
         display_times += [time.time() - start]
 
         ################
@@ -131,7 +143,6 @@ def main(data_path=DATA_PATH):
 
         for i in range(1, len(meats)):
             meats[i].step()
-        counter += 1
 
         k = cv2.waitKey(1) & 0xFF
         if k == ord('q'):
@@ -149,8 +160,8 @@ def main(data_path=DATA_PATH):
     print("Total frame time:", np.average(processing_times) + np.average(path_times) + np.average(display_times))
     print("\nTotal real runtime:", np.sum(times_that_matter))
 
-    cap.release()
     # out.release()
+    streamer.stop()
     cv2.destroyAllWindows()
 
 main()

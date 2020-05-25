@@ -19,30 +19,13 @@ THRESHOLD = 255
 
 def get_bbox(img, threshold=THRESHOLD, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParameters.UPPER_MASK, source="Image"):
     '''
-    Returns single bounding polygon for the given middle image
-    A larger threshold value will result in larger bbox
+    Returns bounding polygons for the all identified middles 
+    in the image
     '''
-    #Masks meat 
-    img = cv2.copyMakeBorder(img, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)
     temp = gen_mask(img, lower_mask=lower_mask, upper_mask=upper_mask)
-    
     bound_poly = thresh_callback(threshold, temp)
 
     return bound_poly, temp
-
-def preprocess(img):
-    '''
-    Crops image
-    Scales image
-    Filters out red channel (makes contour finding easier for meats for bbox later)
-    Grayscales image to reduce computation time
-    '''
-    # ret = image_sizing.crop(ret)
-    ret = image_sizing.scale(img)
-
-    ret = cv2.copyMakeBorder(ret, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
-
-    return ret 
 
 def gen_mask(img, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParameters.UPPER_MASK, bitwise_and=False, process=True):
     '''
@@ -55,15 +38,11 @@ def gen_mask(img, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParam
 
     mask = cv2.inRange(hsv, lower_mask, upper_mask)
 
-    # t1 = cv2.inRange(hsv, temp1, temp2)
-    # t2 = cv2.inRange(hsv, temp3, temp4)
-
-    # mask = t1 + t2
-
     cv2.bitwise_not(mask)
 
     if process:
-        mask = cv2.copyMakeBorder(mask, 0, 0, 100, 100, cv2.BORDER_CONSTANT, value=0)
+        # Expands border to ensure when dilating shape is maintained 
+        mask = cv2.copyMakeBorder(mask, 0, 0, 15, 15, cv2.BORDER_CONSTANT, value=0)
 
         kernel = np.ones([round(iW*0.013),round(iH*0.013)])
         refined = cv2.dilate(mask, kernel)
@@ -85,7 +64,7 @@ def gen_mask(img, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParam
 
     if bitwise_and:
         return cv2.bitwise_and(img, img, mask=refined)
-    return refined[:,101:-101]
+    return refined[:,16:-16]
 
 def thresh_callback(val, img):
     '''
@@ -100,7 +79,6 @@ def thresh_callback(val, img):
     if (len(contours) == 0):
         return 0
 
-    # contours = np.concatenate(contours)
     hulls = [cv2.convexHull(contours[i]) for i in range(0, len(contours)) if cv2.contourArea(cv2.convexHull(contours[i])) > GlobalParameters.MINIMUM_AREA]
 
     if (len(hulls) == 0):
