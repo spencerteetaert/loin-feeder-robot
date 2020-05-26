@@ -6,7 +6,7 @@ import time
 
 import cv2
 import numpy as np
-from statsmodels.nonparametric.kernel_regression import KernelReg
+# from statsmodels.nonparametric.kernel_regression import KernelReg
 
 from ..Model.Robot import Robot
 from .. import GlobalParameters
@@ -40,7 +40,7 @@ class PathRunner:
             if self.stopped:
                 return 
 
-        while not self.stopped:
+        if not self.stopped:
             self.model.recording = False
 
             # k = [KernelReg(temp[:,i], self.xs, 'c') for i in range(0, 8)]
@@ -49,8 +49,6 @@ class PathRunner:
             self.pos_data = np.asarray(self.model.get_data())
             self.vel_data = np.gradient(self.pos_data, axis=0)
             self.acc_data = np.gradient(self.vel_data, axis=0)
-
-            break
 
         self.running = False 
             

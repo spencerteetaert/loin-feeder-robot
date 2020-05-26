@@ -7,7 +7,7 @@ from .Model.Point import Point
 #########################
 
 VIDEO_SCALE = 212                                       # Pixels / m 
-FRAME_RATE = 33
+FRAME_RATE = 30 
 
 MINIMUM_MIDDLE_SIZE = 0.18                              # Minimum middle size in m^2
 MINIMUM_AREA = MINIMUM_MIDDLE_SIZE * VIDEO_SCALE**2     # Pixel area for an acceptable contour 
@@ -25,8 +25,7 @@ CHANGING_START_INDEX = False            # Toggles whether to iterated start inde
 ### Path Planning Parameters ###
 ################################
 
-#
-CONVEYOR_SPEED = 2 #Px/frame
+CONVEYOR_SPEED = 2  #Px/frame
 RUNTIME_LIMIT = 300 # Maximum number of path points before program breaks 
 SAFE_ENVIRONMENT = [[[440, 190], [440, 730]], [[100, 735], [800, 735]], [[440, 600], [300, 735]], [[440, 600], [580, 735]]]#[[[440, 190], [440, 730]], [[145, 735], [665, 735]]]     # Lines that are safe to travel on
 
@@ -46,7 +45,7 @@ PICKUP_POINT = Point(440, 504)
     Phase 6: Moving to "Ready Position" >> Phase 0
 '''
 
-TOTAL_EXECUTION_TIME = 5.2
+TOTAL_EXECUTION_TIME = 6
 PHASE_1_PERCENTAGE = 0.096
 PHASE_2_PERCENTAGE = 0.048
 PHASE_3_1_PERCENTAGE = 0.116

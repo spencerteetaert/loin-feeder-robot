@@ -60,9 +60,9 @@ class Robot:
         ret += [self.main_arm.angle] # Main arm rotation 
         ret += [self.secondary_arm.length1 / GlobalParameters.VIDEO_SCALE] # Secondary arm extension 1
         ret += [self.secondary_arm.length2 / GlobalParameters.VIDEO_SCALE] # Secondary arm extension 2
-        ret += [self.secondary_arm.angle] # Secondary arm rotation 
-        ret += [self.carriage1.angle] # Carriage 1 rotation
-        ret += [self.carriage2.angle] # Carriage 2 rotation
+        ret += [self.secondary_arm.relative_angle] # Secondary arm rotation 
+        ret += [self.carriage1.relative_angle] # Carriage 1 rotation
+        ret += [self.carriage2.relative_angle] # Carriage 2 rotation
 
         return ret
 
@@ -115,7 +115,7 @@ class Robot:
     Phase 6: Moving to "Ready Position" >> Phase 0
     '''
 
-    def moveMeat(self, s1, s2, e1, e2, delay):
+    def moveMeat(self, s1, s2, e1, e2, delay, counter=0):
         if self.phase != 0:
             print("ERROR: Robot in use")
             return False 
@@ -127,6 +127,7 @@ class Robot:
         self.phase = 1
         self.switched = True
         self.delay = delay
+        self.counter = counter
 
     def moveTo(self, pt1, pt2):
         # First moves all the components to the desired points
@@ -178,7 +179,7 @@ class Robot:
         if self.phase == 1:
             self.delay -= 1 # Delay here tracks time until meat is at start points 
             if self.switched:
-                self.counter = 0
+                # self.counter = 0
                 self.switched = False
                 self.follow_pt1.moveTo(self.s1, GlobalParameters.PHASE_1_SPEED)
                 self.follow_pt2.moveTo(self.s2, GlobalParameters.PHASE_1_SPEED)

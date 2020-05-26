@@ -3,6 +3,7 @@ import time
 import numpy as np 
 import cv2
 import matplotlib.pyplot as plt
+plt.rcParams.update({'text.color' : "white", 'axes.labelcolor' : "white", 'ytick.color' : "white", 'xtick.color' : "white"})
 
 from sample.VisionIdentification import bbox
 from sample.VisionIdentification import image_sizing
@@ -25,13 +26,83 @@ streamer = FileVideoStream(DATA_PATH)
 streamer.start()
 time.sleep(1)
 
+current_graph = np.zeros([830, 830, 3], dtype=np.uint8)
+
 def on_mouse(event, pX, pY, flags, param):
     if event == cv2.EVENT_LBUTTONUP:
         print("Clicked", pX, pY)
 
+def figure_to_array(fig):
+    fig.canvas.draw()
+    w,h = fig.canvas.get_width_height()
+    ret = np.frombuffer(fig.canvas.tostring_argb(), dtype=np.uint8)
+    ret.shape = (w, h, 4)
+
+    return ret[:,:,1:4]
+
+def update_current_graph():
+    global path_runner, current_graph
+    xs, ys, _, _ = path_runner.read()
+    ax1_label = "(m)"
+    ax2_label = "(°)"
+    title = "Position profiles"
+
+    fig, ax1 = plt.subplots()
+            
+    ax1.set_xlabel('Time (s)')
+    ax1.set_ylabel('Linear extension ' + ax1_label)
+    ax1.plot(xs, ys[:,0], label="Main Track linear")
+    ax1.plot(xs, ys[:,1], label="Main arm linear")
+    ax1.plot(xs, ys[:,3], label="Secondary arm linear 1")
+    ax1.plot(xs, ys[:,4], label="Secondary arm linear 2")
+    ax1.set_facecolor('black')
+    ax1.spines['bottom'].set_color('white')
+    ax1.spines['top'].set_color('white') 
+    ax1.spines['right'].set_color('white')
+    ax1.spines['left'].set_color('white')
+
+    ax2 = ax1.twinx()
+    ax2.set_ylabel('Rotation ' + ax2_label)
+    ax2.plot(xs, ys[:,2], label="Main arm rotational")
+    ax2.plot(xs, ys[:,5], label="Secondary arm rotational")
+    ax2.plot(xs, ys[:,6], label="Carriage 1 rotational")
+    ax2.plot(xs, ys[:,7], label="Carriage 2 rotational")
+    ax2.set_facecolor('black')
+    ax2.spines['bottom'].set_color('white')
+    ax2.spines['top'].set_color('white') 
+    ax2.spines['right'].set_color('white')
+    ax2.spines['left'].set_color('white')
+
+    axes = (ax1, ax2)
+    ex = [ax.get_ylim() for ax in axes]
+    top = [e[1] / (e[1] - e[0]) for e in ex]
+    # Ensure that plots (intervals) are ordered bottom to top:
+    if top[0] > top[1]:
+        axes, ex, top = [list(reversed(l)) for l in (axes, ex, top)]
+
+    # Bounds overflow from shift
+    tot_span = top[1] - top[0] + 1
+
+    temp1 = ex[0][0] + tot_span * (ex[0][1] - ex[0][0])
+    temp2 = ex[1][1] - tot_span * (ex[1][1] - ex[1][0])
+    axes[0].set_ylim(ex[0][0], temp1)
+    axes[1].set_ylim(temp2, ex[1][1])
+
+    lines, labels = ax1.get_legend_handles_labels()
+    lines2, labels2 = ax2.get_legend_handles_labels()
+    ax2.legend(lines + lines2, labels + labels2, loc="upper left")
+    plt.title(title)
+
+    fig.tight_layout()
+
+    fig.set_size_inches(830 / 100, 830 / 100)
+    fig.set_facecolor('black')
+    temp = figure_to_array(fig)
+    current_graph = temp
+
 def main(data_path=DATA_PATH):
-    global streamer, profile_model, drawing_model
-    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output15.mp4', 0x7634706d, 30, (850,830))
+    global streamer, profile_model, drawing_model, current_graph
+    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output16.mp4', 0x7634706d, 30, (1680,830))
 
     win = "Window"
     cv2.namedWindow(win)
@@ -39,9 +110,11 @@ def main(data_path=DATA_PATH):
 
     delay = 0
     flip_flop = False 
+    flip_flop2 = False
 
     meats = [0]
-    queue = []
+    queue1 = []
+    queue2 = []
 
     while(streamer.more()):
         ################################################
@@ -63,7 +136,7 @@ def main(data_path=DATA_PATH):
         frame = image_sizing.scale(frame)
         frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
-        iH, _, _ = frame.shape
+        iH, iW, iD = frame.shape
         box, _ = bbox.get_bbox(frame)
 
         if (box != 0):
@@ -96,32 +169,41 @@ def main(data_path=DATA_PATH):
         if len(meats) > 3:
             if len(meats) % 2 == 0 and delay == 1:
                 # Queue [P1 index, P2 index], so that meat can be accounted for even if robot is currently in motion 
-                queue += [[len(meats) - 1, len(meats) - 2]]
+                queue1 += [[len(meats) - 1, len(meats) - 2]]
+                queue2 += [[len(meats) - 1, len(meats) - 2]]
                 
-        if drawing_model.phase == 0 and len(queue) > 0 and not path_runner.running:
-            dist = (GlobalParameters.PICKUP_POINT - meats[queue[0][0]].get_center_as_point()).y
+        # Profiler model creates motion profiles, it updates as fast as possible in a separate thread
+        if profile_model.phase == 0 and len(queue1) > 0 and not path_runner.running:
+            dist = (GlobalParameters.PICKUP_POINT - meats[queue1[0][0]].get_center_as_point()).y
 
             if dist > 0:
-                sp1 = meats[queue[0][0]].get_center_as_point().copy() + Point(0, dist)
-                sp2 = meats[queue[0][1]].get_center_as_point().copy() + Point(0, dist)
+                sp1 = meats[queue1[0][0]].get_center_as_point().copy() + Point(0, dist)
+                sp2 = meats[queue1[0][1]].get_center_as_point().copy() + Point(0, dist)
                 profile_model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED)
-                drawing_model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED)
-                queue = queue[1:]
+                queue1 = queue1[1:]
 
                 # Given the start and end conditions, calculate the profile_model motor profiles
                 path_runner.start()
-                # while profile_model.update():
-                #     pass
+                flip_flop2 = True
+                temp = dist
+        
+        if flip_flop2 and not path_runner.running:
+            update_current_graph()
+            flip_flop2 = False
+        
+        # Drawing model is just for drawing purposes, it updates at the frame rate displayed
+        if drawing_model.phase == 0 and len(queue2) > 0:
+            dist = (GlobalParameters.PICKUP_POINT - meats[queue2[0][0]].get_center_as_point()).y
 
-                
+            if dist > 0:
+                sp1 = meats[queue2[0][0]].get_center_as_point().copy() + Point(0, dist)
+                sp2 = meats[queue2[0][1]].get_center_as_point().copy() + Point(0, dist)
+                drawing_model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED, counter=temp-dist)
+                queue2 = queue2[1:]
             else:
                 print("ERROR: Conveyor Speed too fast for current settings")
-                queue = queue[1:]
-
-        # Use this code if you want to see the robot in real time
-        if drawing_model.phase != 0:
-            drawing_model.update()
-        # profile_model = path_runner.profile_model
+                queue2 = queue2[1:]
+        drawing_model.update()
 
         ###############
         ### Display ###
@@ -131,6 +213,8 @@ def main(data_path=DATA_PATH):
             for i in range(1, len(meats)):
                 meats[i].draw(frame, color=(255, 255, 0))
         drawing_model.draw(frame)
+
+        frame = np.concatenate((frame, current_graph), axis=1)
         cv2.imshow(win, frame)
 
         ################
@@ -145,62 +229,7 @@ def main(data_path=DATA_PATH):
             break
         elif k == ord('p'):
             cv2.waitKey(0)
-        elif k == ord('s'):
-            k2 = cv2.waitKey(0) & 0xFF
-            if k2 == ord('p'):
-                xs, ys, _, _ = path_runner.read()
-                ax1_label = "(m)"
-                ax2_label = "(°)"
-                title = "Position profiles"
-            elif k2 == ord('v'):
-                xs, _, ys, _ = path_runner.read()
-                ax1_label = "(m/s)"
-                ax2_label = "(°/s)"
-                title = "Velocity profiles"
-            elif k2 == ord('a'):
-                xs, _, _, ys = path_runner.read()
-                ax1_label = "(m/s^2)"
-                ax2_label = "(°/s^2)"
-                title = "Acceleration profiles"
-
-            fig, ax1 = plt.subplots()
-            ax1.set_xlabel('Time (s)')
-            ax1.set_ylabel('Linear extension ' + ax1_label)
-            ax1.plot(xs, ys[:,0], label="Main Track linear")
-            ax1.plot(xs, ys[:,1], label="Main arm linear")
-            ax1.plot(xs, ys[:,3], label="Secondary arm linear 1")
-            ax1.plot(xs, ys[:,4], label="Secondary arm linear 2")
-
-            ax2 = ax1.twinx()
-            ax2.set_ylabel('Rotation ' + ax2_label)
-            ax2.plot(xs, ys[:,2], label="Main arm rotational")
-            ax2.plot(xs, ys[:,5], label="Secondary arm rotational")
-            ax2.plot(xs, ys[:,6], label="Carriage 1 rotational")
-            ax2.plot(xs, ys[:,7], label="Carriage 2 rotational")
-
-            axes = (ax1, ax2)
-            ex = [ax.get_ylim() for ax in axes]
-            top = [e[1] / (e[1] - e[0]) for e in ex]
-            # Ensure that plots (intervals) are ordered bottom to top:
-            if top[0] > top[1]:
-                axes, ex, top = [list(reversed(l)) for l in (axes, ex, top)]
-
-            # Bounds overflow from shift
-            tot_span = top[1] - top[0] + 1
-
-            temp1 = ex[0][0] + tot_span * (ex[0][1] - ex[0][0])
-            temp2 = ex[1][1] - tot_span * (ex[1][1] - ex[1][0])
-            axes[0].set_ylim(ex[0][0], temp1)
-            axes[1].set_ylim(temp2, ex[1][1])
-
-            lines, labels = ax1.get_legend_handles_labels()
-            lines2, labels2 = ax2.get_legend_handles_labels()
-            ax2.legend(lines + lines2, labels + labels2, loc="upper left")
-            plt.title(title)
-
-            fig.tight_layout()
-            plt.show()
-
+        
         # out.write(frame)
 
         # Artifically slow the program to the desired frame rate
