@@ -96,7 +96,7 @@ class Point:
         self.delay = delay
         
     def update(self):
-        if self.steps_remaining > 0:
+        if self.steps_remaining > 1:
             if self.delay > 0:
                 self.delay -= 1
                 return True 
@@ -105,7 +105,7 @@ class Point:
             if self.angle != None:
                 self.angle += self.update_vec.angle
             self.steps_remaining -= 1
-            if self.steps_remaining <= 0:
+            if self.steps_remaining <= 1:
                 return False
             return True
         return False

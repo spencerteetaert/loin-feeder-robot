@@ -43,6 +43,7 @@ def main(data_path=DATA_PATH):
         ### Video Processing and Meat Identification ###
         ################################################
         
+        force_timer = time.time()
         qsize = streamer.Q.qsize()
         if qsize < 40:
             streamer.sleep_time = 0
@@ -94,7 +95,6 @@ def main(data_path=DATA_PATH):
             dist = (GlobalParameters.PICKUP_POINT - meats[queue[0][0]].get_center_as_point()).y
 
             if dist > 0:
-                print("Dist", dist // GlobalParameters.CONVEYOR_SPEED)
                 sp1 = meats[queue[0][0]].get_center_as_point().copy() + Point(0, dist)
                 sp2 = meats[queue[0][1]].get_center_as_point().copy() + Point(0, dist)
                 model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED)
@@ -137,7 +137,9 @@ def main(data_path=DATA_PATH):
             model.phase = 0
 
         # out.write(frame)
-        # cv2.waitKey(15)
+
+        # Artifically slow the program to the desired frame rate
+        # cv2.waitKey(max(GlobalParameters.FRAME_RATE - round((time.time() - force_timer )*1000 + 1), 1))
 
     # out.release()
     streamer.stop()

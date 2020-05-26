@@ -34,8 +34,6 @@ class Robot:
         self.switched = False
         self.delay = 0
 
-        self.counter = 0
-
     def __repr__(self):
         ret = ""
         ret += "PHASE:" + str(self.phase) + "\n\t" + "Delay:" + str(self.delay) + "\n"
@@ -144,41 +142,36 @@ class Robot:
         if self.phase == 0:
             return False
 
-        flag1 = self.follow_pt1.update()
-        flag2 = self.follow_pt2.update()
+        self.follow_pt1.update()
+        self.follow_pt2.update()
 
-        # Phase 1: Moving to predicted meat location
+        # Phase 1: Moving to predicted meat location - PASS
         if self.phase == 1:
             self.delay -= 1 # Delay here tracks time until meat is at start points 
             if self.switched:
-                print("Start Phase 1:", self.counter)
-                self.counter = 0
                 self.switched = False
                 self.follow_pt1.moveTo(self.s1, GlobalParameters.PHASE_1_SPEED)
                 self.follow_pt2.moveTo(self.s2, GlobalParameters.PHASE_1_SPEED)
-            if self.follow_pt1.steps_remaining <= 0 and self.follow_pt2.steps_remaining <= 0 and self.delay < 1: # End of step condition 
+            if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 and self.delay < 1: # End of step condition 
                 self.switched = True 
                 self.phase = 2
 
-        # Phase 2: Grabbing (Follow meat)
+        # Phase 2: Grabbing (Follow meat) - PASS
         if self.phase == 2:
             self.delay -= 1
             if self.switched:
-                print("Start Phase 2:", self.counter)
-                self.counter = 0
                 self.switched = False
                 self.delay = GlobalParameters.PHASE_2_DELAY
                 self.follow_pt1.moveTo(self.follow_pt1 + Point(0, self.delay * GlobalParameters.CONVEYOR_SPEED), GlobalParameters.PHASE_2_DELAY)
                 self.follow_pt2.moveTo(self.follow_pt2 + Point(0, self.delay * GlobalParameters.CONVEYOR_SPEED), GlobalParameters.PHASE_2_DELAY)
-            if self.delay <= 0: # End of step condition 
+            if self.delay <= 1: # End of step condition 
                 self.switched = True 
                 self.phase = 3
+            
 
-        # Phase 3: "Step 0" -> Rotating meat according to pre-set path
+        # Phase 3: "Step 0" -> Rotating meat according to pre-set path - 
         if self.phase == 3:
             if self.switched:
-                print("Start Phase 3:", self.counter)
-                self.counter = 0
                 self.switched = False
                 self.followPath(GlobalParameters.PHASE_3_PATH1, GlobalParameters.PHASE_3_PATH2, GlobalParameters.PHASE_3_SPEED)
                 self.follow_pt1.moveTo(GlobalParameters.PHASE_3_PATH1[0], GlobalParameters.PHASE_3_INITIAL_SPEED)
@@ -187,7 +180,7 @@ class Robot:
                 self.follow2_index = 0
 
             # End condition 
-            if self.follow_pt1.steps_remaining <= 0 and self.follow_pt2.steps_remaining <= 0 \
+            if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 \
                 and self.follow1_index >= len(GlobalParameters.PHASE_3_PATH1)-1 \
                     and self.follow2_index >= len(GlobalParameters.PHASE_3_PATH2)-1: 
                 self.switched = True 
@@ -197,22 +190,20 @@ class Robot:
                 self.follow_pt1.moveTo(self.follow_pt1, 1)
                 self.follow_pt2.moveTo(self.follow_pt2, 1)
 
-            if self.follow_pt1.steps_remaining <= 0 and self.follow1_index < len(GlobalParameters.PHASE_3_PATH1) - 1:
+            if self.follow_pt1.steps_remaining <= 1 and self.follow1_index < len(GlobalParameters.PHASE_3_PATH1) - 1:
                 self.follow1_index += 1
                 self.follow_pt1.moveTo(GlobalParameters.PHASE_3_PATH1[self.follow1_index], self.dt1[self.follow1_index - 1])
-            if self.follow_pt2.steps_remaining <= 0 and self.follow2_index < len(GlobalParameters.PHASE_3_PATH2) - 1:
+            if self.follow_pt2.steps_remaining <= 1 and self.follow2_index < len(GlobalParameters.PHASE_3_PATH2) - 1:
                 self.follow2_index += 1
                 self.follow_pt2.moveTo(GlobalParameters.PHASE_3_PATH2[self.follow2_index], self.dt2[self.follow2_index - 1])
 
         # Phase 4: "Step 2" -> Extending
         if self.phase == 4:
             if self.switched:
-                print("Start Phase 4:", self.counter)
-                self.counter = 0
                 self.switched = False
                 self.follow_pt1.moveTo(self.e1, GlobalParameters.PHASE_4_SPEED)
                 self.follow_pt2.moveTo(self.e2, GlobalParameters.PHASE_4_SPEED)
-            if self.follow_pt1.steps_remaining <= 0 and self.follow_pt2.steps_remaining <= 0: # End of step condition 
+            if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1: # End of step condition 
                 self.switched = True 
                 self.phase = 5
 
@@ -220,8 +211,6 @@ class Robot:
         if self.phase == 5:
             self.delay -= 1
             if self.switched:
-                print("Start Phase 5:", self.counter)
-                self.counter = 0
                 self.switched = False
                 self.delay = GlobalParameters.PHASE_5_DELAY
             if self.delay <= 0: # End of step condition 
@@ -232,16 +221,14 @@ class Robot:
         if self.phase == 6:
             self.delay -= 1
             if self.switched:
-                print("Start Phase 6:", self.counter, "\n")
-                self.counter = 0
                 self.switched = False
-                self.followPath(GlobalParameters.PHASE_6_PATH1, GlobalParameters.PHASE_6_PATH2, GlobalParameters.PHASE_6_SPEED)
+                self.delay = round(np.sum(self.dt1))//3
+                self.followPath(GlobalParameters.PHASE_6_PATH1, GlobalParameters.PHASE_6_PATH2, GlobalParameters.PHASE_6_SPEED-self.delay)
                 self.follow1_index = 0
                 self.follow2_index = 0
-                self.delay = round(np.sum(self.dt1))//3
 
             # End condition 
-            if self.follow_pt1.steps_remaining <= 0 and self.follow_pt2.steps_remaining <= 0 \
+            if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 \
                 and self.follow1_index >= len(GlobalParameters.PHASE_6_PATH1) - 1 \
                     and self.follow2_index >= len(GlobalParameters.PHASE_6_PATH2) - 1: 
                 self.switched = True 
@@ -251,13 +238,13 @@ class Robot:
                 self.follow_pt1.moveTo(self.follow_pt1, 1)
                 self.follow_pt2.moveTo(self.follow_pt2, 1)
 
-            if self.follow_pt1.steps_remaining <= 0 and self.follow1_index < len(GlobalParameters.PHASE_6_PATH1) - 1:
+            if self.follow_pt1.steps_remaining <= 1 and self.follow1_index < len(GlobalParameters.PHASE_6_PATH1) - 1:
                 self.follow1_index += 1
                 self.follow_pt1.moveTo(GlobalParameters.PHASE_6_PATH1[self.follow1_index], self.dt1[self.follow1_index - 1])
-            if self.follow_pt2.steps_remaining <= 0 and self.follow2_index < len(GlobalParameters.PHASE_6_PATH2) - 1 and self.delay <= 0:
+            if self.follow_pt2.steps_remaining <= 1 and self.follow2_index < len(GlobalParameters.PHASE_6_PATH2) - 1 \
+                and self.delay <= 0:
                 self.follow2_index += 1
                 self.follow_pt2.moveTo(GlobalParameters.PHASE_6_PATH2[self.follow2_index], self.dt2[self.follow2_index - 1])
 
         self.moveTo(self.follow_pt1, self.follow_pt2)
-        self.counter += 1
         return True
