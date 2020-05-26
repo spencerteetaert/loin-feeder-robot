@@ -9,12 +9,12 @@ from sample.VisionIdentification.VideoReader import FileVideoStream
 from sample.VisionIdentification import meat
 from sample.Model.Robot import Robot
 from sample.Model.Point import Point
-from sample.PathPlanning.Path import PathFinder
+from sample.PathPlanning.PathRunner import PathRunner
 from sample import GlobalParameters
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 model = Robot(Point(280, 600), GlobalParameters.VIDEO_SCALE)
-path_finder = PathFinder()
+path_runner = PathRunner(model)
 
 streamer = FileVideoStream(DATA_PATH)
 streamer.start()
@@ -25,7 +25,7 @@ def on_mouse(event, pX, pY, flags, param):
         print("Clicked", pX, pY)
 
 def main(data_path=DATA_PATH):
-    global streamer
+    global streamer, model
     # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output15.mp4', 0x7634706d, 30, (850,830))
 
     win = "Window"
@@ -100,16 +100,16 @@ def main(data_path=DATA_PATH):
                 model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED)
                 queue = queue[1:]
 
-                # temp_start = time.time()
-                # while model.update():
-                #     pass
-                # print(time.time() - temp_start)
+                # Given the start and end conditions, calculate the model motor profiles
+                path_runner.start()
             else:
                 print("ERROR: Conveyor Speed too fast for current settings")
                 queue = queue[1:]
 
-        if model.phase != 0:
-            model.update()
+        # Use this code if you want to see the robot in real time
+        # if model.phase != 0:
+        #     model.update()
+        # model = path_runner.model
 
         ###############
         ### Display ###

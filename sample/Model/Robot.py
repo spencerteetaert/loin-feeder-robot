@@ -34,6 +34,9 @@ class Robot:
         self.switched = False
         self.delay = 0
 
+        self.data = []
+        self.recording = False
+
     def __repr__(self):
         ret = ""
         ret += "PHASE:" + str(self.phase) + "\n\t" + "Delay:" + str(self.delay) + "\n"
@@ -43,6 +46,30 @@ class Robot:
         ret += self.carriage2.__repr__()
         ret += self.carriage1.__repr__()
         return ret
+
+    #########################
+    ### Profile Functions ###
+    #########################
+
+    def get_current_state(self):
+        ret = []
+        
+        ret += [self.main_track.length] # Main track extension
+        ret += [self.main_arm.length] # Main arm extension
+        ret += [self.main_arm.angle] # Main arm rotation 
+        ret += [self.secondary_arm.length1] # Secondary arm extension 1
+        ret += [self.secondary_arm.length2] # Secondary arm extension 2
+        ret += [self.secondary_arm.angle] # Secondary arm rotation 
+        ret += [self.carriage1.angle] # Carriage 1 rotation
+        ret += [self.carriage2.angle] # Carriage 2 rotation
+
+        return ret
+
+    def clear_history(self):
+        self.data = []
+
+    def get_data(self):
+        return self.data
 
     ########################
     ### Helper Functions ###
@@ -247,4 +274,9 @@ class Robot:
                 self.follow_pt2.moveTo(GlobalParameters.PHASE_6_PATH2[self.follow2_index], self.dt2[self.follow2_index - 1])
 
         self.moveTo(self.follow_pt1, self.follow_pt2)
+
+        if self.recording:
+            self.data += [self.get_current_state()]
+            # self.data += [1]
+
         return True
