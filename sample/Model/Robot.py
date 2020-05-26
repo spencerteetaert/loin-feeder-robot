@@ -115,7 +115,7 @@ class Robot:
     Phase 6: Moving to "Ready Position" >> Phase 0
     '''
 
-    def moveMeat(self, s1, s2, e1, e2, delay, counter=0):
+    def moveMeat(self, s1, s2, e1, e2, delay, counter=0, phase_1_delay=True):
         if self.phase != 0:
             print("ERROR: Robot in use")
             return False 
@@ -128,6 +128,7 @@ class Robot:
         self.switched = True
         self.delay = delay
         self.counter = counter
+        self.PHASE_1_DELAY = phase_1_delay
 
     def moveTo(self, pt1, pt2):
         # First moves all the components to the desired points
@@ -175,7 +176,7 @@ class Robot:
         self.follow_pt1.update()
         self.follow_pt2.update()
 
-        # Phase 1: Moving to predicted meat location - PASS
+        # Phase 1: Moving to predicted meat location
         if self.phase == 1:
             self.delay -= 1 # Delay here tracks time until meat is at start points 
             if self.switched:
@@ -183,11 +184,14 @@ class Robot:
                 self.switched = False
                 self.follow_pt1.moveTo(self.s1, GlobalParameters.PHASE_1_SPEED)
                 self.follow_pt2.moveTo(self.s2, GlobalParameters.PHASE_1_SPEED)
-            if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 and self.delay < 1: # End of step condition 
+            if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 and self.delay < 1 and self.PHASE_1_DELAY: # End of step condition 
+                self.switched = True 
+                self.phase = 2
+            if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 and not self.PHASE_1_DELAY: # End of step condition 
                 self.switched = True 
                 self.phase = 2
 
-        # Phase 2: Grabbing (Follow meat) - PASS
+        # Phase 2: Grabbing (Follow meat)
         if self.phase == 2:
             self.delay -= 1
             if self.switched:
@@ -200,7 +204,7 @@ class Robot:
                 self.phase = 3
             
 
-        # Phase 3: "Step 0" -> Rotating meat according to pre-set path - 
+        # Phase 3: "Step 0" -> Rotating meat according to pre-set path
         if self.phase == 3:
             if self.switched:
                 self.switched = False

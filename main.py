@@ -15,18 +15,21 @@ from sample.PathPlanning.PathRunner import PathRunner
 from sample import GlobalParameters
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
+DISPLAY_TOGGLE = True
 
 # Model for creating acceleration profiles
 profile_model = Robot(Point(280, 600), GlobalParameters.VIDEO_SCALE)
 path_runner = PathRunner(profile_model)
 # Model for display
-drawing_model = Robot(Point(280, 600), GlobalParameters.VIDEO_SCALE)
+if DISPLAY_TOGGLE:
+    drawing_model = Robot(Point(280, 600), GlobalParameters.VIDEO_SCALE)
+    current_graph = np.zeros([830, 830, 3], dtype=np.uint8)
 
 streamer = FileVideoStream(DATA_PATH)
 streamer.start()
 time.sleep(1)
 
-current_graph = np.zeros([830, 830, 3], dtype=np.uint8)
+
 
 def on_mouse(event, pX, pY, flags, param):
     if event == cv2.EVENT_LBUTTONUP:
@@ -51,10 +54,10 @@ def update_current_graph():
             
     ax1.set_xlabel('Time (s)')
     ax1.set_ylabel('Linear extension ' + ax1_label)
-    ax1.plot(xs, ys[:,0], label="Main Track linear")
-    ax1.plot(xs, ys[:,1], label="Main arm linear")
-    ax1.plot(xs, ys[:,3], label="Secondary arm linear 1")
-    ax1.plot(xs, ys[:,4], label="Secondary arm linear 2")
+    ax1.plot(xs, ys[:,0], label="Main Track linear", color='#ff0000') 
+    ax1.plot(xs, ys[:,1], label="Main arm linear", color='#ffb300')
+    ax1.plot(xs, ys[:,3], label="Secondary arm linear 1", color='#00ff1a')
+    ax1.plot(xs, ys[:,4], label="Secondary arm linear 2", color='#00ffcc')
     ax1.set_facecolor('black')
     ax1.spines['bottom'].set_color('white')
     ax1.spines['top'].set_color('white') 
@@ -63,10 +66,10 @@ def update_current_graph():
 
     ax2 = ax1.twinx()
     ax2.set_ylabel('Rotation ' + ax2_label)
-    ax2.plot(xs, ys[:,2], label="Main arm rotational")
-    ax2.plot(xs, ys[:,5], label="Secondary arm rotational")
-    ax2.plot(xs, ys[:,6], label="Carriage 1 rotational")
-    ax2.plot(xs, ys[:,7], label="Carriage 2 rotational")
+    ax2.plot(xs, ys[:,2], label="Main arm rotational", color='#007fff')
+    ax2.plot(xs, ys[:,5], label="Secondary arm rotational", color='#3300ff')
+    ax2.plot(xs, ys[:,6], label="Carriage 1 rotational", color='#e600ff')
+    ax2.plot(xs, ys[:,7], label="Carriage 2 rotational", color='#ff0066')
     ax2.set_facecolor('black')
     ax2.spines['bottom'].set_color('white')
     ax2.spines['top'].set_color('white') 
@@ -90,7 +93,7 @@ def update_current_graph():
 
     lines, labels = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
-    ax2.legend(lines + lines2, labels + labels2, loc="upper left")
+    ax2.legend(lines + lines2, labels + labels2, loc="upper left", facecolor='black')
     plt.title(title)
 
     fig.tight_layout()
@@ -101,12 +104,13 @@ def update_current_graph():
     current_graph = temp
 
 def main(data_path=DATA_PATH):
-    global streamer, profile_model, drawing_model, current_graph
-    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output16.mp4', 0x7634706d, 30, (1680,830))
+    global streamer, profile_model, drawing_model, current_graph, DISPLAY_TOGGLE
+    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output.mp4', 0x7634706d, 30, (1680,830))
 
-    win = "Window"
-    cv2.namedWindow(win)
-    cv2.setMouseCallback(win, on_mouse)
+    if DISPLAY_TOGGLE:
+        win = "Window"
+        cv2.namedWindow(win)
+        cv2.setMouseCallback(win, on_mouse)
 
     delay = 0
     flip_flop = False 
@@ -179,43 +183,45 @@ def main(data_path=DATA_PATH):
             if dist > 0:
                 sp1 = meats[queue1[0][0]].get_center_as_point().copy() + Point(0, dist)
                 sp2 = meats[queue1[0][1]].get_center_as_point().copy() + Point(0, dist)
-                profile_model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED)
+                profile_model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED, phase_1_delay=False)
                 queue1 = queue1[1:]
 
                 # Given the start and end conditions, calculate the profile_model motor profiles
                 path_runner.start()
-                flip_flop2 = True
-                temp = dist
-        
-        if flip_flop2 and not path_runner.running:
-            update_current_graph()
-            flip_flop2 = False
         
         # Drawing model is just for drawing purposes, it updates at the frame rate displayed
-        if drawing_model.phase == 0 and len(queue2) > 0:
-            dist = (GlobalParameters.PICKUP_POINT - meats[queue2[0][0]].get_center_as_point()).y
+        if DISPLAY_TOGGLE:
+            if drawing_model.phase == 0 and len(queue2) > 0:
+                dist = (GlobalParameters.PICKUP_POINT - meats[queue2[0][0]].get_center_as_point()).y
 
-            if dist > 0:
-                sp1 = meats[queue2[0][0]].get_center_as_point().copy() + Point(0, dist)
-                sp2 = meats[queue2[0][1]].get_center_as_point().copy() + Point(0, dist)
-                drawing_model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED, counter=temp-dist)
-                queue2 = queue2[1:]
-            else:
-                print("ERROR: Conveyor Speed too fast for current settings")
-                queue2 = queue2[1:]
-        drawing_model.update()
+                if dist > 0:
+                    sp1 = meats[queue2[0][0]].get_center_as_point().copy() + Point(0, dist)
+                    sp2 = meats[queue2[0][1]].get_center_as_point().copy() + Point(0, dist)
+                    drawing_model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED)
+                    queue2 = queue2[1:]
+                    flip_flop2 = True
+                else:
+                    print("ERROR: Conveyor Speed too fast for current settings")
+                    queue2 = queue2[1:]
+            drawing_model.update()
+
+        # Changes display chart
+        if DISPLAY_TOGGLE and flip_flop2 and not path_runner.running:
+            update_current_graph()
+            flip_flop2 = False
 
         ###############
         ### Display ###
         ###############        
         
-        if (len(meats) != 1):
-            for i in range(1, len(meats)):
-                meats[i].draw(frame, color=(255, 255, 0))
-        drawing_model.draw(frame)
+        if DISPLAY_TOGGLE:
+            if (len(meats) != 1):
+                for i in range(1, len(meats)):
+                    meats[i].draw(frame, color=(255, 255, 0))
+            drawing_model.draw(frame)
 
-        frame = np.concatenate((frame, current_graph), axis=1)
-        cv2.imshow(win, frame)
+            frame = np.concatenate((frame, current_graph), axis=1)
+            cv2.imshow(win, frame)
 
         ################
         ### Controls ###
@@ -224,12 +230,13 @@ def main(data_path=DATA_PATH):
         for i in range(1, len(meats)):
             meats[i].step()
 
-        k = cv2.waitKey(1) & 0xFF
-        if k == ord('q'):
-            break
-        elif k == ord('p'):
-            cv2.waitKey(0)
-        
+        if DISPLAY_TOGGLE:
+            k = cv2.waitKey(1) & 0xFF
+            if k == ord('q'):
+                break
+            elif k == ord('p'):
+                cv2.waitKey(0)
+            
         # out.write(frame)
 
         # Artifically slow the program to the desired frame rate

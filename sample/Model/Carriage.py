@@ -13,7 +13,7 @@ class Carriage:
         self.width = GlobalParameters.CARRIAGE_WIDTH * scale
         self.length = GlobalParameters.CARRIAGE_LENGTH * scale
         self.angle = angle 
-        self.relative_angle = 270
+        self.relative_angle = 90
         self.otherPt = self.getOtherPt()
 
         self.last_angle = self.relative_angle
@@ -25,7 +25,7 @@ class Carriage:
     def refresh(self, secondary_arm_angle=None):
         # self.angle = (self.otherPt - self.basePt).vector_angle()
         if secondary_arm_angle != None:
-            self.relative_angle = (self.angle - secondary_arm_angle + 360) % 360
+            self.relative_angle = (self.angle - secondary_arm_angle + 360 + 180) % 360
 
     def getOtherPt(self):
         return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))))
