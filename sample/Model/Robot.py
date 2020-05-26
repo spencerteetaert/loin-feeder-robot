@@ -33,6 +33,7 @@ class Robot:
         self.phase = 0
         self.switched = False
         self.delay = 0
+        self.counter = 0
 
         self.data = []
         self.recording = False
@@ -54,11 +55,11 @@ class Robot:
     def get_current_state(self):
         ret = []
         
-        ret += [self.main_track.length] # Main track extension
-        ret += [self.main_arm.length] # Main arm extension
+        ret += [self.main_track.length / GlobalParameters.VIDEO_SCALE] # Main track extension
+        ret += [self.main_arm.length / GlobalParameters.VIDEO_SCALE] # Main arm extension
         ret += [self.main_arm.angle] # Main arm rotation 
-        ret += [self.secondary_arm.length1] # Secondary arm extension 1
-        ret += [self.secondary_arm.length2] # Secondary arm extension 2
+        ret += [self.secondary_arm.length1 / GlobalParameters.VIDEO_SCALE] # Secondary arm extension 1
+        ret += [self.secondary_arm.length2 / GlobalParameters.VIDEO_SCALE] # Secondary arm extension 2
         ret += [self.secondary_arm.angle] # Secondary arm rotation 
         ret += [self.carriage1.angle] # Carriage 1 rotation
         ret += [self.carriage2.angle] # Carriage 2 rotation
@@ -165,6 +166,7 @@ class Robot:
         self.dt2 = np.divide(np.multiply(self.dt2, execution_time), longest)
 
     def update(self):
+        self.counter += 1
         # Phase 0: Not moving, in ready position
         if self.phase == 0:
             return False
@@ -176,6 +178,7 @@ class Robot:
         if self.phase == 1:
             self.delay -= 1 # Delay here tracks time until meat is at start points 
             if self.switched:
+                self.counter = 0
                 self.switched = False
                 self.follow_pt1.moveTo(self.s1, GlobalParameters.PHASE_1_SPEED)
                 self.follow_pt2.moveTo(self.s2, GlobalParameters.PHASE_1_SPEED)
