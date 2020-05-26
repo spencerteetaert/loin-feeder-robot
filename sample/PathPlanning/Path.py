@@ -58,14 +58,16 @@ class PathFinder:
 
         # Runs through all path points and sets an angle increment 
         diff = end_point.angle - start_point.angle
-        if diff > 180:
-            dA = -1*(360 - diff)/(len(ret) - 3)
-        elif diff < -180:
-            dA = -1*(360 + diff)/(len(ret) - 3)
-        else:
-            dA = diff/(len(ret) - 2)
 
-        for i in range(0, len(ret)-2):
-            ret[i+1].angle = start_point.angle + dA*i
+        if len(ret) > 2:
+            if diff > 180:
+                dA = -1*(360 - diff)/(len(ret)-1)
+            elif diff < -180:
+                dA = -1*(360 + diff)/(len(ret)-1)
+            else:
+                dA = diff/(len(ret)-1)
+
+            for i in range(1, len(ret)-1):
+                ret[i].angle = start_point.angle + dA*i
 
         return ret

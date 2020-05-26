@@ -17,64 +17,32 @@ random.seed(12345)
 
 THRESHOLD = 255
 
-def get_bbox(img, threshold=THRESHOLD, draw=False, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParameters.UPPER_MASK, source="Image"):
+def get_bbox(img, threshold=THRESHOLD, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParameters.UPPER_MASK, source="Image"):
     '''
-    Returns single bounding polygon for the given middle image
-    A larger threshold value will result in larger bbox
+    Returns bounding polygons for the all identified middles 
+    in the image
     '''
-    # img = preprocess(img)
-    #Masks meat 
     temp = gen_mask(img, lower_mask=lower_mask, upper_mask=upper_mask)
-
-    #Add border to ensure full hull is created 
-    temp = cv2.copyMakeBorder(temp, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)
-    img = cv2.copyMakeBorder(img, 1, 1, 1, 1, cv2.BORDER_CONSTANT, value=0)
     bound_poly = thresh_callback(threshold, temp)
 
-    drawing = 0
-
-    if draw:
-        drawing = draw_results(temp, bound_poly, source)
-        # cv2.imshow(source, drawing)
-
-    return bound_poly, temp, drawing
-
-def preprocess(img):
-    '''
-    Crops image
-    Scales image
-    Filters out red channel (makes contour finding easier for meats for bbox later)
-    Grayscales image to reduce computation time
-    '''
-    ret = img.copy()
-    # ret = image_sizing.crop(ret)
-    ret = image_sizing.scale(ret)
-
-    ret = cv2.copyMakeBorder(ret, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
-
-    return ret 
+    return bound_poly, temp
 
 def gen_mask(img, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParameters.UPPER_MASK, bitwise_and=False, process=True):
     '''
     Masks input img based off HSV colour ranges provided 
     '''
     iH, iW, _ = img.shape
-    ret = img.copy()
 
     #Masks colour ranges provided
-    hsv = cv2.cvtColor(ret, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
     mask = cv2.inRange(hsv, lower_mask, upper_mask)
-
-    # t1 = cv2.inRange(hsv, temp1, temp2)
-    # t2 = cv2.inRange(hsv, temp3, temp4)
-
-    # mask = t1 + t2
 
     cv2.bitwise_not(mask)
 
     if process:
-        mask = cv2.copyMakeBorder(mask, 0, 0, 100, 100, cv2.BORDER_CONSTANT, value=0)
+        # Expands border to ensure when dilating shape is maintained 
+        mask = cv2.copyMakeBorder(mask, 0, 0, 15, 15, cv2.BORDER_CONSTANT, value=0)
 
         kernel = np.ones([round(iW*0.013),round(iH*0.013)])
         refined = cv2.dilate(mask, kernel)
@@ -95,8 +63,8 @@ def gen_mask(img, lower_mask=GlobalParameters.LOWER_MASK, upper_mask=GlobalParam
         refined = mask
 
     if bitwise_and:
-        return cv2.bitwise_and(ret, ret, mask=refined)
-    return refined[:,101:-101]
+        return cv2.bitwise_and(img, img, mask=refined)
+    return refined[:,16:-16]
 
 def thresh_callback(val, img):
     '''
@@ -111,7 +79,6 @@ def thresh_callback(val, img):
     if (len(contours) == 0):
         return 0
 
-    # contours = np.concatenate(contours)
     hulls = [cv2.convexHull(contours[i]) for i in range(0, len(contours)) if cv2.contourArea(cv2.convexHull(contours[i])) > GlobalParameters.MINIMUM_AREA]
 
     if (len(hulls) == 0):

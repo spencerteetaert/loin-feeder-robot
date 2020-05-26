@@ -6,10 +6,10 @@ from .Point import Point
 from .. import GlobalParameters
 
 class MainTrack:
-    def __init__(self, pt:Point, scale, length=100):
+    def __init__(self, pt:Point, scale, length=0.1):
         self.scale = scale
         self.basePt = pt
-        self.length = length
+        self.length = length * scale
         self.last_pos = self.length/self.scale
         self.delta_pos = 0
         self.min_length = GlobalParameters.MAIN_TRACK_MIN_LENGTH * scale
@@ -22,8 +22,14 @@ class MainTrack:
     def getOtherPt(self):
         return Point(self.basePt.x, self.basePt.y - self.length)
 
+    def get_min_pt_vector(self):
+        return Point(round(self.basePt.x), round(self.basePt.y - self.min_length))
+    def get_max_pt_vector(self):
+        return Point(round(self.basePt.x), round(self.basePt.y - self.max_length))
+
     def draw(self, canvas):
-        cv2.line(canvas, self.basePt.toTuple(), Point(self.basePt.x, self.basePt.y - self.max_length).toTuple(), (255, 255, 255), 1) 
+        cv2.line(canvas, self.get_max_pt_vector().toTuple(), self.basePt.toTuple(), (255, 255, 255), 8) 
+        cv2.line(canvas, self.get_max_pt_vector().toTuple(), self.get_min_pt_vector().toTuple(), (0, 0, 0), 3) 
         cv2.circle(canvas, self.otherPt.toTuple(), self.scale//10, (255, 255, 255))
     
     def follow(self, pt:Point):

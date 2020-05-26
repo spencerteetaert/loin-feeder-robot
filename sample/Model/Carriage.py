@@ -7,13 +7,13 @@ from .Point import Point
 from .. import GlobalParameters
 
 class Carriage:
-    def __init__(self, pt:Point, scale, length=100, angle=0):
+    def __init__(self, pt:Point, scale, angle=0):
         self.scale = scale
         self.basePt = pt
         self.width = GlobalParameters.CARRIAGE_WIDTH * scale
         self.length = GlobalParameters.CARRIAGE_LENGTH * scale
         self.angle = angle 
-        self.relative_angle = 0
+        self.relative_angle = 270
         self.otherPt = self.getOtherPt()
 
         self.last_angle = self.relative_angle
@@ -30,7 +30,7 @@ class Carriage:
     def getOtherPt(self):
         return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))))
 
-    def draw(self, canvas):
+    def draw(self, canvas, color=(255, 255, 255)):
         points = []
 
         k = np.array([self.length*math.cos(math.radians(self.angle))/2, -1 * self.length*math.sin(math.radians(self.angle))/2])
@@ -43,7 +43,7 @@ class Carriage:
 
         
         contour = np.array(points).reshape((-1, 1, 2)).astype(np.int32)
-        cv2.drawContours(canvas, [contour], 0, (255, 255, 255), 3)
+        cv2.drawContours(canvas, [contour], 0, color, 2)
 
     def follow(self, pt:Point):
         if pt.angle != None:

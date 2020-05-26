@@ -10,6 +10,7 @@ class Point:
         self.angle = angle
         self.steps_remaining = steps
         self.update_vec = vec
+        self.delay = 0
 
     def __repr__(self):
         ret = "Point(" + str(self.x) + ", " + str(self.y)
@@ -28,6 +29,11 @@ class Point:
         return Point(self.x / factor, self.y / factor, angle=self.angle, steps=self.steps_remaining, vec=self.update_vec)
     def __floordiv__(self, factor):
         return Point(self.x // factor, self.y // factor, angle=self.angle, steps=self.steps_remaining, vec=self.update_vec)
+    def __eq__(self, other):
+        if self.x == other.x and self.y == other.y and self.angle == other.angle:
+            return True
+        else:
+            return False
 
     def mag(self):
         return (self.x**2 + self.y**2)**0.5
@@ -57,17 +63,22 @@ class Point:
         self.x = ret.x
         self.y = ret.y
 
-    def draw(self, canvas, color=(0, 0, 255)):
-        cv2.circle(canvas, self.toTuple(), 3, color)
+    def draw(self, canvas, color=(0, 0, 255), size=3):
+        cv2.circle(canvas, self.toTuple(), size, color)
         if self.angle != None:
             cv2.line(canvas, self.toTuple(), (int(round(self.x + 20*math.cos(math.radians(self.angle)))), int(round(self.y - 20*math.sin(math.radians(self.angle))))), color)
     def toTuple(self):
         return (int(round(self.x)), int(round(self.y)))
     def toArray(self):
         return np.array([self.x, self.y])
+    def copy(self):
+        ret = Point(self.x, self.y, angle=self.angle)
+        ret.steps_remaining = self.steps_remaining
+        ret.update_vec = self.update_vec
+        return ret
 
 
-    def moveTo(self, otherPt, dt):
+    def moveTo(self, otherPt, dt, delay=0):
         dX = (otherPt.x - self.x)/dt
         dY = (otherPt.y - self.y)/dt
         dA = 0
@@ -80,16 +91,21 @@ class Point:
             else:
                 dA = temp/dt
 
-
         self.update_vec = Point(dX, dY, angle=dA)
         self.steps_remaining = dt
+        self.delay = delay
         
     def update(self):
-        if self.steps_remaining != 0:
+        if self.steps_remaining > 1:
+            if self.delay > 0:
+                self.delay -= 1
+                return True 
             self.x += self.update_vec.x
             self.y += self.update_vec.y
             if self.angle != None:
                 self.angle += self.update_vec.angle
             self.steps_remaining -= 1
+            if self.steps_remaining <= 1:
+                return False
             return True
         return False
