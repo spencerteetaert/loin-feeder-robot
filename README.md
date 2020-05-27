@@ -21,7 +21,7 @@ This folder contains the necessary classes required for creating a digital model
 
 This folder contains functions for path planning. The current algorithm uses the raw position information from the inverse kinematics of the model to derive an acceleration profile. When twice integrated, this profile will closely resemble how the robot will move. We can compare the raw position data to the integrated position data to determine the accuracy of this method. 
 
-![Raw position data](/images/figure_o.png)![Integrated position data](/images/figure_i.png)
+<img src="/images/figure_o.png" width="425"/> <img src="/images/figure_i.png" width="425"/> 
 
 * graphing_tools.py contains a class to thread the graphing process. 
 * path_runner.py contains a class to thread the path finder.
