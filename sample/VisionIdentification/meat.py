@@ -9,7 +9,7 @@ from .. import GlobalParameters
 font = cv2.FONT_HERSHEY_SIMPLEX
 
 class Meat():
-    def __init__(self, bbox, conveyor_speed=GlobalParameters.CONVEYOR_SPEED, side="Left", center=(0,0)):
+    def __init__(self, bbox:np.array, conveyor_speed=GlobalParameters.CONVEYOR_SPEED, side="Left", center=(0,0)):
         self.conveyor_speed = conveyor_speed
         self.side = side
         self.bbox = bbox
@@ -162,27 +162,27 @@ class Meat():
         return math.sqrt((pt2[0][1] - pt1[0][1])**2 + (pt2[0][0] - pt1[0][0])**2)
 
     def draw(self, img, color=(0, 255, 0)):
-        try:
-            #Draws convex hull
-            self.get_center_as_point().draw(img, color=(255, 255, 255))
-            cv2.drawContours(img, [self.bbox], 0, color, 2)
-            y0, dy = self.center[1] - 50, 18
-            for i, line in enumerate(self.__repr__().split('\n')):
-                y = y0 + i*dy
-                cv2.putText(img, line, (self.center[0] + 120, y), font, 0.7, (255, 255, 0))
+        # try:
+        #Draws convex hull
+        self.get_center_as_point().draw(img, color=(255, 255, 255))
+        cv2.drawContours(img, [self.bbox.astype(int)], 0, color, 2)
+        y0, dy = int(self.center[1] - 50), 18
+        for i, line in enumerate(self.__repr__().split('\n')):
+            y = y0 + i*dy
+            cv2.putText(img, line, (int(self.center[0] + 120), y), font, 0.7, (255, 255, 0))
 
-            #Draws identified lines of interest
-            # line_pts = self.get_lines()
+        #Draws identified lines of interest
+        # line_pts = self.get_lines()
 
-            #Red - Loin
-            # cv2.line(img, (line_pts[0][0][0],line_pts[0][0][1]), (line_pts[0][1][0],line_pts[0][1][1]), (0, 0, 255), thickness=2)
-            #Yellow - Shoulder
-            # cv2.line(img, (line_pts[1][0][0],line_pts[1][0][1]), (line_pts[1][1][0],line_pts[1][1][1]), (0, 255, 255), thickness=2)
-            #Blue - Ham
-            # cv2.line(img, (line_pts[2][0][0],line_pts[2][0][1]), (line_pts[2][1][0],line_pts[2][1][1]), (255, 0, 0), thickness=2)
-            #Magenta - Belly 
-            # cv2.line(img, (line_pts[3][0][0],line_pts[3][0][1]), (line_pts[3][1][0],line_pts[3][1][1]), (255, 0, 255), thickness=2)
-            #White - Cut 
-            # cv2.line(img, (line_pts[4][0][0],line_pts[4][0][1]), (line_pts[4][1][0],line_pts[4][1][1]), (100, 205, 205), thickness=2)
-        except TypeError as err:
-            print("Error: {0}".format(err))
+        #Red - Loin
+        # cv2.line(img, (line_pts[0][0][0],line_pts[0][0][1]), (line_pts[0][1][0],line_pts[0][1][1]), (0, 0, 255), thickness=2)
+        #Yellow - Shoulder
+        # cv2.line(img, (line_pts[1][0][0],line_pts[1][0][1]), (line_pts[1][1][0],line_pts[1][1][1]), (0, 255, 255), thickness=2)
+        #Blue - Ham
+        # cv2.line(img, (line_pts[2][0][0],line_pts[2][0][1]), (line_pts[2][1][0],line_pts[2][1][1]), (255, 0, 0), thickness=2)
+        #Magenta - Belly 
+        # cv2.line(img, (line_pts[3][0][0],line_pts[3][0][1]), (line_pts[3][1][0],line_pts[3][1][1]), (255, 0, 255), thickness=2)
+        #White - Cut 
+        # cv2.line(img, (line_pts[4][0][0],line_pts[4][0][1]), (line_pts[4][1][0],line_pts[4][1][1]), (100, 205, 205), thickness=2)
+        # except TypeError as err:
+        #     print("Error: {0}".format(err))

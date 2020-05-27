@@ -180,6 +180,8 @@ class Robot:
         if self.phase == 1:
             self.delay -= 1 # Delay here tracks time until meat is at start points 
             if self.switched:
+                if self.recording:
+                    self.data += [self.get_current_state()]
                 # self.counter = 0
                 self.switched = False
                 self.follow_pt1.moveTo(self.s1, GlobalParameters.PHASE_1_SPEED)

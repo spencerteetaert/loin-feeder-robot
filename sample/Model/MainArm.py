@@ -6,7 +6,7 @@ from .Point import Point
 from .. import GlobalParameters
 
 class MainArm:
-    def __init__(self, pt:Point, scale, length=0.75, angle=0):
+    def __init__(self, pt:Point, scale, length=0.75, angle=180):
         self.scale = scale
         self.basePt = pt
         self.length = length * scale
@@ -25,15 +25,15 @@ class MainArm:
         return "Main Arm\n\tExtension " + str(round(self.length/self.scale, 3)) + "m\n\tAngle " + str(round(self.angle, 1)) + "\n\tdL " + str(round(self.delta_pos, 3)) + "m/frame\n\tdA " + str(round(self.delta_angle, 3)) + "\n" 
 
     def refresh(self):
-        self.angle = (self.otherPt - self.basePt).vector_angle()
+        self.angle = (self.otherPt - self.basePt).vector_angle() - 180
 
     def getOtherPt(self):
-        return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))))
+        return Point(round(self.basePt.x - self.length * math.cos(math.radians(self.angle))), round(self.basePt.y + self.length * math.sin(math.radians(self.angle))))
 
     def get_min_pt_vector(self):
-        return Point(round(self.basePt.x + self.min_length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.min_length * math.sin(math.radians(self.angle))))
+        return Point(round(self.basePt.x - self.min_length * math.cos(math.radians(self.angle))), round(self.basePt.y + self.min_length * math.sin(math.radians(self.angle))))
     def get_max_pt_vector(self):
-        return Point(round(self.basePt.x + self.max_length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.max_length * math.sin(math.radians(self.angle))))
+        return Point(round(self.basePt.x - self.max_length * math.cos(math.radians(self.angle))), round(self.basePt.y + self.max_length * math.sin(math.radians(self.angle))))
 
     def draw(self, canvas):
         cv2.line(canvas, self.get_max_pt_vector().toTuple(), self.basePt.toTuple(), (255, 255, 255), 8) 
@@ -54,7 +54,7 @@ class MainArm:
 
         # Rotational bounds 
         self.refresh()
-        rel_angle = (secondary_arm_angle - self.angle + 360 + 180) % 360 
+        rel_angle = (secondary_arm_angle - self.angle + 360) % 360 
         if rel_angle < GlobalParameters.MAIN_ARM_MIN_ANGLE:
             self.basePt.rotate(GlobalParameters.MAIN_ARM_MIN_ANGLE - rel_angle, self.otherPt)
         elif rel_angle > GlobalParameters.MAIN_ARM_MAX_ANGLE:

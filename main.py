@@ -2,8 +2,6 @@ import time
 
 import numpy as np 
 import cv2
-import matplotlib.pyplot as plt
-plt.rcParams.update({'text.color' : "white", 'axes.labelcolor' : "white", 'ytick.color' : "white", 'xtick.color' : "white"})
 
 from sample.VisionIdentification import bbox
 from sample.VisionIdentification import image_sizing
@@ -12,6 +10,7 @@ from sample.VisionIdentification import meat
 from sample.Model.Robot import Robot
 from sample.Model.Point import Point
 from sample.PathPlanning.PathRunner import PathRunner
+from sample.PathPlanning import graphing_tools as Graph
 from sample import GlobalParameters
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
@@ -24,87 +23,18 @@ path_runner = PathRunner(profile_model)
 if DISPLAY_TOGGLE:
     drawing_model = Robot(Point(280, 600), GlobalParameters.VIDEO_SCALE)
     current_graph = np.zeros([830, 830, 3], dtype=np.uint8)
+    grapher = Graph.Grapher()
 
 streamer = FileVideoStream(DATA_PATH)
 streamer.start()
 time.sleep(1)
 
-
-
 def on_mouse(event, pX, pY, flags, param):
     if event == cv2.EVENT_LBUTTONUP:
         print("Clicked", pX, pY)
 
-def figure_to_array(fig):
-    fig.canvas.draw()
-    w,h = fig.canvas.get_width_height()
-    ret = np.frombuffer(fig.canvas.tostring_argb(), dtype=np.uint8)
-    ret.shape = (w, h, 4)
-
-    return ret[:,:,1:4]
-
-def update_current_graph():
-    global path_runner, current_graph
-    xs, ys, _, _ = path_runner.read()
-    ax1_label = "(m)"
-    ax2_label = "(°)"
-    title = "Position profiles"
-
-    fig, ax1 = plt.subplots()
-            
-    ax1.set_xlabel('Time (s)')
-    ax1.set_ylabel('Linear extension ' + ax1_label)
-    ax1.plot(xs, ys[:,0], label="Main Track linear", color='#ff0000') 
-    ax1.plot(xs, ys[:,1], label="Main arm linear", color='#ffb300')
-    ax1.plot(xs, ys[:,3], label="Secondary arm linear 1", color='#00ff1a')
-    ax1.plot(xs, ys[:,4], label="Secondary arm linear 2", color='#00ffcc')
-    ax1.set_facecolor('black')
-    ax1.spines['bottom'].set_color('white')
-    ax1.spines['top'].set_color('white') 
-    ax1.spines['right'].set_color('white')
-    ax1.spines['left'].set_color('white')
-
-    ax2 = ax1.twinx()
-    ax2.set_ylabel('Rotation ' + ax2_label)
-    ax2.plot(xs, ys[:,2], label="Main arm rotational", color='#007fff')
-    ax2.plot(xs, ys[:,5], label="Secondary arm rotational", color='#3300ff')
-    ax2.plot(xs, ys[:,6], label="Carriage 1 rotational", color='#e600ff')
-    ax2.plot(xs, ys[:,7], label="Carriage 2 rotational", color='#ff0066')
-    ax2.set_facecolor('black')
-    ax2.spines['bottom'].set_color('white')
-    ax2.spines['top'].set_color('white') 
-    ax2.spines['right'].set_color('white')
-    ax2.spines['left'].set_color('white')
-
-    axes = (ax1, ax2)
-    ex = [ax.get_ylim() for ax in axes]
-    top = [e[1] / (e[1] - e[0]) for e in ex]
-    # Ensure that plots (intervals) are ordered bottom to top:
-    if top[0] > top[1]:
-        axes, ex, top = [list(reversed(l)) for l in (axes, ex, top)]
-
-    # Bounds overflow from shift
-    tot_span = top[1] - top[0] + 1
-
-    temp1 = ex[0][0] + tot_span * (ex[0][1] - ex[0][0])
-    temp2 = ex[1][1] - tot_span * (ex[1][1] - ex[1][0])
-    axes[0].set_ylim(ex[0][0], temp1)
-    axes[1].set_ylim(temp2, ex[1][1])
-
-    lines, labels = ax1.get_legend_handles_labels()
-    lines2, labels2 = ax2.get_legend_handles_labels()
-    ax2.legend(lines + lines2, labels + labels2, loc="upper left", facecolor='black')
-    plt.title(title)
-
-    fig.tight_layout()
-
-    fig.set_size_inches(830 / 100, 830 / 100)
-    fig.set_facecolor('black')
-    temp = figure_to_array(fig)
-    current_graph = temp
-
 def main(data_path=DATA_PATH):
-    global streamer, profile_model, drawing_model, current_graph, DISPLAY_TOGGLE
+    global streamer, grapher, profile_model, drawing_model, current_graph, DISPLAY_TOGGLE
     # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output.mp4', 0x7634706d, 30, (1680,830))
 
     if DISPLAY_TOGGLE:
@@ -200,14 +130,15 @@ def main(data_path=DATA_PATH):
                     drawing_model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED)
                     queue2 = queue2[1:]
                     flip_flop2 = True
+                    grapher.start(path_runner, (830, 830), 'o')
                 else:
                     print("ERROR: Conveyor Speed too fast for current settings")
                     queue2 = queue2[1:]
             drawing_model.update()
 
         # Changes display chart
-        if DISPLAY_TOGGLE and flip_flop2 and not path_runner.running:
-            update_current_graph()
+        if DISPLAY_TOGGLE and flip_flop2 and not path_runner.running and not grapher.running:
+            current_graph = grapher.read()
             flip_flop2 = False
 
         ###############
@@ -236,6 +167,16 @@ def main(data_path=DATA_PATH):
                 break
             elif k == ord('p'):
                 cv2.waitKey(0)
+            elif k == ord('o'):
+                grapher.start(path_runner, (830, 830), 'o')
+                while grapher.running:
+                    pass
+                current_graph = grapher.read()
+            elif k == ord('i'):
+                grapher.start(path_runner, (830, 830), 'i')
+                while grapher.running:
+                    pass
+                current_graph = grapher.read()
             
         # out.write(frame)
 

@@ -14,7 +14,7 @@ class SecondaryArm: #0.47
         self.min_length = GlobalParameters.SECONDARY_ARM_MIN_LENGTH * scale
         self.max_length = GlobalParameters.SECONDARY_ARM_MAX_LENGTH * scale
         self.angle = angle 
-        self.relative_angle = 270
+        self.relative_angle = 90
         self.otherPt1 = self.getotherPt1()
         self.otherPt2 = self.getotherPt2()
         self.refresh()
@@ -30,7 +30,7 @@ class SecondaryArm: #0.47
     def refresh(self, main_arm_angle=None):
         self.angle = (self.otherPt1 - self.basePt).vector_angle()
         if main_arm_angle != None:
-            self.relative_angle = (self.angle - main_arm_angle + 360) % 360
+            self.relative_angle = (self.angle - main_arm_angle + 360 + 180) % 360
 
     def getotherPt1(self):
         return Point(round(self.basePt.x + self.length1 * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length1 * math.sin(math.radians(self.angle))))
