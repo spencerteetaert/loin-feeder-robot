@@ -2,6 +2,7 @@ import time
 
 import numpy as np 
 import cv2
+import matplotlib.pyplot as plt
 
 from source.vision_identification import bounding_box
 from source.vision_identification import image_sizing
