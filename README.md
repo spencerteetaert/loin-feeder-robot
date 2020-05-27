@@ -21,7 +21,9 @@ This folder contains the necessary classes required for creating a digital model
 
 This folder contains functions for path planning. The current algorithm uses the raw position information from the inverse kinematics of the model to derive an acceleration profile. When twice integrated, this profile will closely resemble how the robot will move. We can compare the raw position data to the integrated position data to determine the accuracy of this method. 
 
-<img src="/images/figure_o.png" width="425"/> <img src="/images/figure_i.png" width="425"/> 
+Raw position data          |  Integrated position data
+:-------------------------:|:-------------------------:
+![](/images/figure_o.png)  |  ![](/images/figure_i.png)
 
 * graphing_tools.py contains a class to thread the graphing process. 
 * path_runner.py contains a class to thread the path finder.
@@ -46,3 +48,8 @@ Contains tools used for finding parameter values, testing functions, and timing 
 * from_vid.py accesses a video and implements a usage for the meat class. 
 * get_colour_range.py allows users to specify a range of pixels over a range of images and returns the max/min values for HSV. 
 * profiler.py runs a timing analysis on any file required. 
+
+## main.py
+main.py is a full implementation of the library. 
+
+![](/images/main.PNG)
