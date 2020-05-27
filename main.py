@@ -5,7 +5,6 @@ import cv2
 import matplotlib.pyplot as plt
 
 from source.vision_identification import bounding_box
-from source.vision_identification import image_sizing
 from source.vision_identification.video_reader import FileVideoStream
 from source.vision_identification import meat
 from source.model.robot import Robot
@@ -68,7 +67,7 @@ def main(data_path=DATA_PATH):
         # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
 
         frame = streamer.read()
-        frame = image_sizing.scale(frame)
+        frame = bounding_box.scale(frame)
         frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
         iH, iW, iD = frame.shape
