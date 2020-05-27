@@ -1,8 +1,8 @@
 import numpy as np
 import cv2
 
-from context import sample
-from sample.VisionIdentification import bbox
+from context import source
+from source.vision_identification import bounding_box
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\test"
 

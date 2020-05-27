@@ -3,9 +3,9 @@ import time
 import numpy as np 
 import cv2
 
-from context import sample
-from sample.VisionIdentification import bbox
-from sample.VisionIdentification.meat import Meat 
+from context import source
+from source.vision_identification import bounding_box
+from source.vision_identification.meat import Meat 
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 

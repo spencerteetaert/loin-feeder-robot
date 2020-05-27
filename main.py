@@ -3,25 +3,25 @@ import time
 import numpy as np 
 import cv2
 
-from sample.VisionIdentification import bbox
-from sample.VisionIdentification import image_sizing
-from sample.VisionIdentification.VideoReader import FileVideoStream
-from sample.VisionIdentification import meat
-from sample.Model.Robot import Robot
-from sample.Model.Point import Point
-from sample.PathPlanning.PathRunner import PathRunner
-from sample.PathPlanning import graphing_tools as Graph
-from sample import GlobalParameters
+from source.vision_identification import bounding_box
+from source.vision_identification import image_sizing
+from source.vision_identification.video_reader import FileVideoStream
+from source.vision_identification import meat
+from source.model.robot import Robot
+from source.model.point import Point
+from source.path_planning.path_runner import PathRunner
+from source.path_planning import graphing_tools as Graph
+from source import global_parameters
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 DISPLAY_TOGGLE = True
 
 # Model for creating acceleration profiles
-profile_model = Robot(Point(280, 600), GlobalParameters.VIDEO_SCALE)
+profile_model = Robot(Point(280, 600), global_parameters.VIDEO_SCALE)
 path_runner = PathRunner(profile_model)
 # Model for display
 if DISPLAY_TOGGLE:
-    drawing_model = Robot(Point(280, 600), GlobalParameters.VIDEO_SCALE)
+    drawing_model = Robot(Point(280, 600), global_parameters.VIDEO_SCALE)
     current_graph = np.zeros([830, 830, 3], dtype=np.uint8)
     grapher = Graph.Grapher()
 
@@ -71,7 +71,7 @@ def main(data_path=DATA_PATH):
         frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
         iH, iW, iD = frame.shape
-        box, _ = bbox.get_bbox(frame)
+        box, _ = bounding_box.get_bbox(frame)
 
         if (box != 0):
             for i in range(0, len(box)):
@@ -108,12 +108,12 @@ def main(data_path=DATA_PATH):
                 
         # Profiler model creates motion profiles, it updates as fast as possible in a separate thread
         if profile_model.phase == 0 and len(queue1) > 0 and not path_runner.running:
-            dist = (GlobalParameters.PICKUP_POINT - meats[queue1[0][0]].get_center_as_point()).y
+            dist = (global_parameters.PICKUP_POINT - meats[queue1[0][0]].get_center_as_point()).y
 
             if dist > 0:
                 sp1 = meats[queue1[0][0]].get_center_as_point().copy() + Point(0, dist)
                 sp2 = meats[queue1[0][1]].get_center_as_point().copy() + Point(0, dist)
-                profile_model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED, phase_1_delay=False)
+                profile_model.moveMeat(sp1, sp2, ep1, ep2, dist // global_parameters.CONVEYOR_SPEED, phase_1_delay=False)
                 queue1 = queue1[1:]
 
                 # Given the start and end conditions, calculate the profile_model motor profiles
@@ -122,12 +122,12 @@ def main(data_path=DATA_PATH):
         # Drawing model is just for drawing purposes, it updates at the frame rate displayed
         if DISPLAY_TOGGLE:
             if drawing_model.phase == 0 and len(queue2) > 0:
-                dist = (GlobalParameters.PICKUP_POINT - meats[queue2[0][0]].get_center_as_point()).y
+                dist = (global_parameters.PICKUP_POINT - meats[queue2[0][0]].get_center_as_point()).y
 
                 if dist > 0:
                     sp1 = meats[queue2[0][0]].get_center_as_point().copy() + Point(0, dist)
                     sp2 = meats[queue2[0][1]].get_center_as_point().copy() + Point(0, dist)
-                    drawing_model.moveMeat(sp1, sp2, ep1, ep2, dist // GlobalParameters.CONVEYOR_SPEED)
+                    drawing_model.moveMeat(sp1, sp2, ep1, ep2, dist // global_parameters.CONVEYOR_SPEED)
                     queue2 = queue2[1:]
                     flip_flop2 = True
                     grapher.start(path_runner, (830, 830), 'o')
@@ -181,7 +181,7 @@ def main(data_path=DATA_PATH):
         # out.write(frame)
 
         # Artifically slow the program to the desired frame rate
-        # cv2.waitKey(max(GlobalParameters.FRAME_RATE - round((time.time() - force_timer )*1000 + 1), 1))
+        # cv2.waitKey(max(global_parameters.FRAME_RATE - round((time.time() - force_timer )*1000 + 1), 1))
 
     # out.release()
     streamer.stop()
