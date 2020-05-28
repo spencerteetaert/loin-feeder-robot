@@ -242,6 +242,7 @@ class Robot:
             if self.switched:
                 if self.recording:
                     self.data += [self.get_current_state()]
+                    self.data += [self.get_current_state()]
                 # self.counter = 0
                 self.switched = False
                 self.follow_pt1.moveTo(self.s1, global_parameters.PHASE_1_SPEED)
@@ -335,9 +336,6 @@ class Robot:
                 self.follow_pt1.moveTo(self.follow_pt1, 1)
                 self.follow_pt2.moveTo(self.follow_pt2, 1)
 
-                if self.recording:
-                    self.data += [self.get_current_state()]
-
             if self.follow_pt1.steps_remaining <= 1 and self.follow1_index < len(global_parameters.PHASE_6_PATH1) - 1:
                 self.follow1_index += 1
                 self.follow_pt1.moveTo(global_parameters.PHASE_6_PATH1[self.follow1_index], self.dt1[self.follow1_index - 1])
@@ -356,6 +354,9 @@ class Robot:
             # 
             # else:
             self.data += [self.get_current_state()]
+            if self.phase == 0: # This only ever hits immediately after phase 6
+                self.data += [self.get_current_state()]
+                self.data += [self.get_current_state()]
             # self.data += [1]
 
         return True

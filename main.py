@@ -136,7 +136,7 @@ def main(data_path=DATA_PATH):
                     queue2 = queue2[1:]
                     flip_flop2 = True
                     if PROFILER_TOGGLE:
-                        grapher.start(path_runner, (830, 830), 'o')
+                        grapher.start(path_runner, (830, 830), 'i')
                 else:
                     print("ERROR: Conveyor Speed too fast for current settings")
                     queue2 = queue2[1:]

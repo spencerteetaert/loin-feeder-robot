@@ -102,6 +102,7 @@ class Grapher:
 
         # Converts result into an array for display 
         self.fig = figure_to_array(fig)
+        plt.close()
         self.running = False
             
     def read(self):

@@ -34,17 +34,23 @@ class PathRunner:
         start = time.time()
         self.model.clear_history()
         self.model.recording = True
-        counter = 0
-        self.xs = []
-        self.xs += [counter]
         self.constants = self.model.get_current_state()
 
+        counter = 0
+        self.xs = []
+        self.xs += [counter / global_parameters.FRAME_RATE]
+        counter += 1
+        self.xs += [counter / global_parameters.FRAME_RATE]
+        counter += 1
         while self.model.update():
             self.xs += [counter / global_parameters.FRAME_RATE]
             counter += 1
             if self.stopped:
                 return 
         self.xs += [counter / global_parameters.FRAME_RATE]
+        counter += 1
+        self.xs += [counter / global_parameters.FRAME_RATE]
+        counter += 1
 
         if not self.stopped:
             self.model.recording = False
