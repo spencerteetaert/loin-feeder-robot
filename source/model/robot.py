@@ -130,6 +130,66 @@ class Robot:
         self.counter = counter
         self.PHASE_1_DELAY = phase_1_delay
 
+    def collision_check(self):
+        ''' Checks all significant points and boundaries to see if a collision has occurred in a given state 
+        
+        How it works:
+        - regions will be defined as no entry zones for specific heights
+        - all relevant points will be run on a polygon inclusion algo to check if they fall within the regions 
+        - any single collision at any height will return True 
+        
+        Points/Vects on robot to be considered (9):
+        - four vectors for each carriage 
+        - one vector for secondary arm 
+
+        Points/Vects for no travel zones:
+        - Carriages with themselves 
+        - two defining top left corner (above and past the main arm) 
+        - any additional environmental constraints 
+
+        '''
+
+        # Gather all relevant vectors 
+        main_arm = self.main_arm.get_collision_bounds()
+        secondary_arm = self.secondary_arm.get_collision_bounds()
+        carriage1 = self.carriage1.get_collision_bounds()
+        carriage2 = self.carriage2.get_collision_bounds()
+
+        for i in range(0, len(main_arm)):
+            # Check collision between secondary arm and main arm 
+            for j in range(0, len(secondary_arm)):
+                if self.check_vector_intersect(main_arm[i][0], main_arm[i][1], secondary_arm[j][0], secondary_arm[j][1]):
+                    return True, "Collision between main arm and secondary arm"
+            # Check collision between carriage1 and main arm
+            for j in range(0, len(carriage1)):
+                if self.check_vector_intersect(main_arm[i][0], main_arm[i][1], carriage1[j][0], carriage1[j][1]):
+                    return True, "Collision between main arm and carriage1"
+            for j in range(0, len(carriage2)):
+                if self.check_vector_intersect(main_arm[i][0], main_arm[i][1], carriage2[j][0], carriage2[j][1]):
+                    return True, "Collision between main arm and carriage2"
+        # Check collisions between carriage1
+        for i in range(0, len(carriage1)):
+            for j in range(0, len(carriage2)):
+                if self.check_vector_intersect(carriage1[i][0], carriage1[i][1], carriage2[j][0], carriage2[j][1]):
+                    return True, "Collision between carriage1 and carriage2"
+            
+        return False, ""
+
+    def check_vector_intersect(self, p, r, q, s):
+        temp1 = np.subtract(q, p)
+        temp2 = np.cross(r, s)
+
+        if temp2 == 0:
+            return False
+
+        u = np.cross(temp1, r) / temp2
+        t = np.cross(temp1, s) / temp2
+
+        if u <= 0 or u >= 1 or t <= 0 or t >= 1:
+            return False
+
+        return True
+
     def moveTo(self, pt1, pt2):
         # First moves all the components to the desired points
         self.carriage1.follow(pt1)
@@ -275,6 +335,9 @@ class Robot:
                 self.follow_pt1.moveTo(self.follow_pt1, 1)
                 self.follow_pt2.moveTo(self.follow_pt2, 1)
 
+                if self.recording:
+                    self.data += [self.get_current_state()]
+
             if self.follow_pt1.steps_remaining <= 1 and self.follow1_index < len(global_parameters.PHASE_6_PATH1) - 1:
                 self.follow1_index += 1
                 self.follow_pt1.moveTo(global_parameters.PHASE_6_PATH1[self.follow1_index], self.dt1[self.follow1_index - 1])
@@ -284,8 +347,14 @@ class Robot:
                 self.follow_pt2.moveTo(global_parameters.PHASE_6_PATH2[self.follow2_index], self.dt2[self.follow2_index - 1])
 
         self.moveTo(self.follow_pt1, self.follow_pt2)
-
+        flag, report = self.collision_check()
+        if flag:
+            print("ERROR: Profile resulted in collision and was not sent.")
+            print(report)
+            # self.recording = False
         if self.recording:
+            # 
+            # else:
             self.data += [self.get_current_state()]
             # self.data += [1]
 

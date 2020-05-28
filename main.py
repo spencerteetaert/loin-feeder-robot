@@ -10,7 +10,7 @@ from source.vision_identification import meat
 from source.model.robot import Robot
 from source.model.point import Point
 from source.path_planning.path_runner import PathRunner
-from source.path_planning import graphing_tools as Graph
+from source.path_planning import graphing_tools
 from source import global_parameters
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
@@ -23,7 +23,7 @@ path_runner = PathRunner(profile_model)
 if DISPLAY_TOGGLE:
     drawing_model = Robot(Point(280, 600), global_parameters.VIDEO_SCALE)
     current_graph = np.zeros([830, 830, 3], dtype=np.uint8)
-    grapher = Graph.Grapher()
+    grapher = graphing_tools.Grapher()
 
 streamer = FileVideoStream(DATA_PATH)
 streamer.start()
@@ -127,7 +127,7 @@ def main(data_path=DATA_PATH):
                 if dist > 0:
                     sp1 = meats[queue2[0][0]].get_center_as_point().copy() + Point(0, dist)
                     sp2 = meats[queue2[0][1]].get_center_as_point().copy() + Point(0, dist)
-                    drawing_model.moveMeat(sp1, sp2, ep1, ep2, dist // global_parameters.CONVEYOR_SPEED)
+                    drawing_model.moveMeat(sp1, sp2, ep1, ep2, dist // (global_parameters.CONVEYOR_SPEED * global_parameters.RUNTIME_FACTOR))
                     queue2 = queue2[1:]
                     flip_flop2 = True
                     grapher.start(path_runner, (830, 830), 'o')

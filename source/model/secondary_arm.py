@@ -79,3 +79,8 @@ class SecondaryArm: #0.47
         self.basePt = pt
         self.otherPt1 = self.getotherPt1()
         self.otherPt2 = self.getotherPt2()
+
+    def get_collision_bounds(self):
+        p = self.otherPt1.toArray()
+        r = (self.otherPt2 - self.otherPt1).toArray()
+        return [[p, r]]
