@@ -20,6 +20,7 @@ class FileVideoStream:
         self.stopped = False
         self.Q = Queue(maxsize=queueSize)
         self.sleep_time = 0.001
+        self.running = False
 
     def start(self):
         self.t = Thread(target=self.update, args=())
@@ -29,8 +30,10 @@ class FileVideoStream:
 
     def stop(self):
         self.stopped = True
+        self.running = False
 
     def update(self):
+        self.running = True
         while True:
             time.sleep(self.sleep_time)
             if self.stopped:

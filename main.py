@@ -52,7 +52,7 @@ def main(data_path=DATA_PATH):
     queue2 = []
     times = []
 
-    while(streamer.more()):
+    while(streamer.running):
         start = time.time()
         ################################################
         ### Video Processing and Meat Identification ###
