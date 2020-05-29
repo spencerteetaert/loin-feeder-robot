@@ -74,7 +74,7 @@ def main(data_path=DATA_PATH):
         frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
         iH, iW, iD = frame.shape
-        box, _ = bounding_box.get_bbox(frame)
+        box, _, _ = bounding_box.get_bbox(frame)
 
         # for i in range(0, len(box)):
         #     cv2.drawContours(frame, [box[i][0]], 0, (255, 255, 255), 3)

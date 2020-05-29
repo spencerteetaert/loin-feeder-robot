@@ -10,10 +10,10 @@ def crop(img):
     ret = img[(iH - crop_size)//2:(iH - crop_size)//2 + crop_size,(iW - crop_size)//2:(iW - crop_size)//2+crop_size]
     return ret
 
-def scale(img):
+def scale(img, width=250):
     iH, iW, _ = img.shape
 
-    final_window_width = 250
+    final_window_width = width
 
     dest_width = final_window_width
     dest_height = round((final_window_width / iW) * iH)
@@ -27,9 +27,9 @@ def get_bbox(img, threshold=global_parameters.BOUNDING_BOX_THESHOLD, lower_mask=
     in the image
     '''
     temp = gen_mask(img, lower_mask=lower_mask, upper_mask=upper_mask)
-    bound_poly = thresh_callback(threshold, temp)
+    bound_poly, contours = thresh_callback(threshold, temp)
 
-    return bound_poly, temp
+    return bound_poly, contours, temp
 
 def gen_mask(img, lower_mask=global_parameters.LOWER_MASK, upper_mask=global_parameters.UPPER_MASK, bitwise_and=False, process=True):
     '''
@@ -100,8 +100,11 @@ def thresh_callback(val, img):
         flag = True
         for j in range(0, len(minRects)):
             # If rect is too small 
-            if (minRects[i][1]['m00'] < global_parameters.MINIMUM_AREA):
-                flag = False
+            # if not cv2.isContourConvex(minRects[i][0]):
+            #     flag = False
+            # if (minRects[i][1]['m00'] < global_parameters.MINIMUM_AREA):
+            #     flag = False
+            pass
             # If rect is inside any other rect
             # elif (cv2.pointPolygonTest(minRects[j][0], (minRects[i][0][0][0], minRects[i][0][0][1]), measureDist=False) == 1):
             #     flag = False
@@ -112,11 +115,12 @@ def thresh_callback(val, img):
             # elif (cv2.pointPolygonTest(minRects[j][0], (minRects[i][0][3][0], minRects[i][0][3][1]), measureDist=False) == 1):
             #     flag = False
             # If any indices are negative 
-            elif (minRects[i][0] <= 0).any():
-                flag = False
+            # elif (minRects[i][0] <= 0).any():
+            #     flag = False
             
         filt += [flag]
 
     ret = [minRects[i] for i in range(0, len(minRects)) if filt[i]==True]
 
-    return ret
+
+    return ret, contours
