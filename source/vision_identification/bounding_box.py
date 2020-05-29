@@ -83,21 +83,40 @@ def thresh_callback(val, img):
     if (len(contours) == 0):
         return 0
 
-    hulls = [cv2.convexHull(contours[i]) for i in range(0, len(contours)) if cv2.contourArea(cv2.convexHull(contours[i])) > global_parameters.MINIMUM_AREA]
+    # hulls = [cv2.convexHull(contours[i]) for i in range(0, len(contours)) if cv2.contourArea(cv2.convexHull(contours[i])) > global_parameters.MINIMUM_AREA]
 
-    if (len(hulls) == 0):
-        return 0
+    # if (len(hulls) == 0):
+        # return 0
+
+    minRects = [None]*len(contours)
+    for i, c in enumerate(contours):
+        temp = np.intp(cv2.boxPoints(cv2.minAreaRect(c)))
+        minRects[i] = [temp, cv2.moments(temp)]
+        # print(minRects[i], "\n\n")
 
     # Removes hulls that are contained within others. This allows for multiple pieces of meat to be detected
     filt = []
-    for i in range(0, len(hulls)):
+    for i in range(0, len(minRects)):
         flag = True
-        for j in range(0, len(hulls)):
-            if (cv2.pointPolygonTest(hulls[j], (hulls[i][0][0][0], hulls[i][0][0][1]), measureDist=False) == 1):
+        for j in range(0, len(minRects)):
+            # If rect is too small 
+            if (minRects[i][1]['m00'] < global_parameters.MINIMUM_AREA):
+                flag = False
+            # If rect is inside any other rect
+            # elif (cv2.pointPolygonTest(minRects[j][0], (minRects[i][0][0][0], minRects[i][0][0][1]), measureDist=False) == 1):
+            #     flag = False
+            # elif (cv2.pointPolygonTest(minRects[j][0], (minRects[i][0][1][0], minRects[i][0][1][1]), measureDist=False) == 1):
+            #     flag = False
+            # elif (cv2.pointPolygonTest(minRects[j][0], (minRects[i][0][2][0], minRects[i][0][2][1]), measureDist=False) == 1):
+            #     flag = False
+            # elif (cv2.pointPolygonTest(minRects[j][0], (minRects[i][0][3][0], minRects[i][0][3][1]), measureDist=False) == 1):
+            #     flag = False
+            # If any indices are negative 
+            elif (minRects[i][0] <= 0).any():
                 flag = False
             
         filt += [flag]
 
-    ret = [hulls[i] for i in range(0, len(hulls)) if filt[i]==True]
+    ret = [minRects[i] for i in range(0, len(minRects)) if filt[i]==True]
 
     return ret

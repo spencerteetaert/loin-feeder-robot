@@ -9,12 +9,11 @@ from .. import global_parameters
 font = cv2.FONT_HERSHEY_SIMPLEX
 
 class Meat():
-    def __init__(self, bbox:np.array, conveyor_speed=global_parameters.CONVEYOR_SPEED * global_parameters.RUNTIME_FACTOR, side="Left", center=(0,0)):
+    def __init__(self, data, conveyor_speed=global_parameters.CONVEYOR_SPEED * global_parameters.RUNTIME_FACTOR, side="Left", center=(0,0)):
         self.conveyor_speed = conveyor_speed
         self.side = side
-        self.bbox = bbox
+        self.bbox = data[0]
         self.center = center
-        self.area = cv2.contourArea(self.bbox)
 
         if (self.bbox == []):
             print("ERR: Meat object created with empty bbox.")
@@ -50,13 +49,13 @@ class Meat():
         self.lines = [self.loin_line, self.shoulder_line, self.ham_line, self.belly_line, self.cut_line]
 
     def gen_significant_lines(self, line):
-        xs = self.bbox[:,0,0]
-        ys = self.bbox[:,0,1]
+        xs = self.bbox[:][0]
+        ys = self.bbox[:][1]
 
-        min_x_index = np.where(xs == min(xs))[0][0]
-        min_y_index = np.where(ys == min(ys))[0][0]
-        max_x_index = np.where(xs == max(xs))[0][0]
-        max_y_index = np.where(ys == max(ys))[0][0]
+        min_x_index = np.where(xs == min(xs))[0]
+        min_y_index = np.where(ys == min(ys))[0]
+        max_x_index = np.where(xs == max(xs))[0]
+        max_y_index = np.where(ys == max(ys))[0]
 
         start_index = 0 
         direction = -1
@@ -155,8 +154,6 @@ class Meat():
         return self.bbox
     def get_side(self):
         return self.side
-    def get_area(self):
-        return self.area
 
     def distance(self, pt1, pt2):
         return math.sqrt((pt2[0][1] - pt1[0][1])**2 + (pt2[0][0] - pt1[0][0])**2)
@@ -172,17 +169,17 @@ class Meat():
             cv2.putText(img, line, (int(self.center[0] + 120), y), font, 0.7, (255, 255, 0))
 
         #Draws identified lines of interest
-        # line_pts = self.get_lines()
+        line_pts = self.get_lines()
 
         #Red - Loin
-        # cv2.line(img, (line_pts[0][0][0],line_pts[0][0][1]), (line_pts[0][1][0],line_pts[0][1][1]), (0, 0, 255), thickness=2)
+        # cv2.line(img, (int(round(line_pts[0][0][0])),int(round(line_pts[0][0][1]))), (int(round(line_pts[0][1][0])),int(round(line_pts[0][1][1]))), (0, 0, 255), thickness=2)
         #Yellow - Shoulder
-        # cv2.line(img, (line_pts[1][0][0],line_pts[1][0][1]), (line_pts[1][1][0],line_pts[1][1][1]), (0, 255, 255), thickness=2)
+        # cv2.line(img, (int(round(line_pts[1][0][0])),int(round(line_pts[1][0][1]))), (int(round(line_pts[1][1][0])),int(round(line_pts[1][1][1]))), (0, 255, 255), thickness=2)
         #Blue - Ham
-        # cv2.line(img, (line_pts[2][0][0],line_pts[2][0][1]), (line_pts[2][1][0],line_pts[2][1][1]), (255, 0, 0), thickness=2)
+        # cv2.line(img, (int(round(line_pts[2][0][0])),int(round(line_pts[2][0][1]))), (int(round(line_pts[2][1][0])),int(round(line_pts[2][1][1]))), (255, 0, 0), thickness=2)
         #Magenta - Belly 
-        # cv2.line(img, (line_pts[3][0][0],line_pts[3][0][1]), (line_pts[3][1][0],line_pts[3][1][1]), (255, 0, 255), thickness=2)
+        # cv2.line(img, (int(round(line_pts[3][0][0])),int(round(line_pts[3][0][1]))), (int(round(line_pts[3][1][0])),int(round(line_pts[3][1][1]))), (255, 0, 255), thickness=2)
         #White - Cut 
-        # cv2.line(img, (line_pts[4][0][0],line_pts[4][0][1]), (line_pts[4][1][0],line_pts[4][1][1]), (100, 205, 205), thickness=2)
+        # cv2.line(img, (int(round(line_pts[4][0][0])),int(round(line_pts[4][0][1]))), (int(round(line_pts[4][1][0])),int(round(line_pts[4][1][1]))), (100, 205, 205), thickness=2)
         # except TypeError as err:
         #     print("Error: {0}".format(err))

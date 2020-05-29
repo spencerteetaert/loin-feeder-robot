@@ -76,24 +76,23 @@ def main(data_path=DATA_PATH):
         iH, iW, iD = frame.shape
         box, _ = bounding_box.get_bbox(frame)
 
+        # for i in range(0, len(box)):
+        #     cv2.drawContours(frame, [box[i][0]], 0, (255, 255, 255), 3)
+
         if (box != 0):
             for i in range(0, len(box)):
                 if delay > 50:
-                    try:
-                        M = cv2.moments(box[i])
-                        cX = int(M["m10"] / M["m00"])
-                        cY = int(M["m01"] / M["m00"])
+                    cX = int(box[i][1]["m10"] / box[i][1]["m00"])
+                    cY = int(box[i][1]["m01"] / box[i][1]["m00"])
 
-                        if iH / 3 - 5 < cY and iH / 3 + 5 > cY:
-                            if flip_flop:
-                                meats += [meat.Meat(box[i], side="Right", center=[cX, cY])]
-                            else:
-                                meats += [meat.Meat(box[i], side="Left", center=[cX, cY])]
-                            flip_flop = not flip_flop
-                            
-                            delay = 0
-                    except:
-                        pass
+                    if iH / 3 - 5 < cY and iH / 3 + 5 > cY:
+                        if flip_flop:
+                            meats += [meat.Meat(box[i], side="Right", center=[cX, cY])]
+                        else:
+                            meats += [meat.Meat(box[i], side="Left", center=[cX, cY])]
+                        flip_flop = not flip_flop
+                        delay = 0
+
         delay += 1
 
         ########################################
