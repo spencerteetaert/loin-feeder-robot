@@ -61,7 +61,7 @@ class Grapher:
         ax1.spines['top'].set_color('white') 
         ax1.spines['right'].set_color('white')
         ax1.spines['left'].set_color('white')
-        ax1.set_ylim(0, 1.2)
+        # ax1.set_ylim(0, 1.2)
 
         # Sets axis for rotational motors
         ax2 = ax1.twinx()
@@ -75,7 +75,7 @@ class Grapher:
         ax2.spines['top'].set_color('white') 
         ax2.spines['right'].set_color('white')
         ax2.spines['left'].set_color('white')
-        ax2.set_ylim(0, 360)
+        # ax2.set_ylim(0, 360)
 
         # Gets limits and shifts data to ensure graphs are lined up at 0
         axes = (ax1, ax2)

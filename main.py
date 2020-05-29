@@ -2,7 +2,6 @@ import time
 
 import numpy as np 
 import cv2
-import matplotlib.pyplot as plt
 
 from source.vision_identification import bounding_box
 from source.vision_identification.video_reader import FileVideoStream
@@ -15,7 +14,7 @@ from source import global_parameters
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 DISPLAY_TOGGLE = True
-PROFILER_TOGGLE = True
+PROFILER_TOGGLE = False
 
 # Model for creating acceleration profiles
 if PROFILER_TOGGLE:
@@ -29,7 +28,7 @@ if DISPLAY_TOGGLE:
 
 streamer = FileVideoStream(DATA_PATH)
 streamer.start()
-time.sleep(1)
+time.sleep(1) 
 
 def on_mouse(event, pX, pY, flags, param):
     if event == cv2.EVENT_LBUTTONUP:

@@ -5,7 +5,7 @@ import cv2
 from .point import Point
 from .. import global_parameters
 
-class SecondaryArm: #0.47
+class SecondaryArm:
     def __init__(self, pt:Point, scale, length1=0.354, length2=0.354, angle=90):
         self.scale = scale
         self.basePt = pt

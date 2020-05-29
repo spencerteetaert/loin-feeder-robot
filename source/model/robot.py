@@ -106,13 +106,13 @@ class Robot:
     ##########################
 
     '''
-    Phase 0: Not moving >> Phase 1 on Function call 
-    Phase 1: Moving to predicted meat location >> Phase 2
-    Phase 2: Grabbing >> Phase 3
-    Phase 3: "Step 0" -> Rotating meat according to pre-set path >> Phase 4
-    Phase 4: "Step 2" -> Extending >> Phase 5
-    Phase 5: Releasing >> Phase 6
-    Phase 6: Moving to "Ready Position" >> Phase 0
+        Phase 0: Not moving >> Phase 1 on Function call 
+        Phase 1: Moving to predicted meat location >> Phase 2
+        Phase 2: Grabbing >> Phase 3
+        Phase 3: "Step 0" -> Rotating meat according to pre-set path >> Phase 4
+        Phase 4: "Step 2" -> Extending >> Phase 5
+        Phase 5: Releasing >> Phase 6
+        Phase 6: Moving to "Ready Position" >> Phase 0
     '''
 
     def moveMeat(self, s1, s2, e1, e2, delay, counter=0, phase_1_delay=True):
@@ -164,10 +164,11 @@ class Robot:
             for j in range(0, len(carriage1)):
                 if self.check_vector_intersect(main_arm[i][0], main_arm[i][1], carriage1[j][0], carriage1[j][1]):
                     return True, "Collision between main arm and carriage1"
+            # Check collision between carriage2 and main arm
             for j in range(0, len(carriage2)):
                 if self.check_vector_intersect(main_arm[i][0], main_arm[i][1], carriage2[j][0], carriage2[j][1]):
                     return True, "Collision between main arm and carriage2"
-        # Check collisions between carriage1
+        # Check collisions between carriages
         for i in range(0, len(carriage1)):
             for j in range(0, len(carriage2)):
                 if self.check_vector_intersect(carriage1[i][0], carriage1[i][1], carriage2[j][0], carriage2[j][1]):
@@ -345,18 +346,21 @@ class Robot:
                 self.follow_pt2.moveTo(global_parameters.PHASE_6_PATH2[self.follow2_index], self.dt2[self.follow2_index - 1])
 
         self.moveTo(self.follow_pt1, self.follow_pt2)
+
         flag, report = self.collision_check()
         if flag:
+            # If a collision occured in this step, turn off recording so that it is not added to the recommended path.
+            # Resets robot to phase 0. Stops current path.
             print("ERROR: Profile resulted in collision and was not sent.")
             print(report)
-            # self.recording = False
+            self.recording = False
+            self.phase = 0
+            return False
+
         if self.recording:
-            # 
-            # else:
             self.data += [self.get_current_state()]
             if self.phase == 0: # This only ever hits immediately after phase 6
                 self.data += [self.get_current_state()]
                 self.data += [self.get_current_state()]
-            # self.data += [1]
 
         return True
