@@ -16,6 +16,7 @@ MINIMUM_AREA = MINIMUM_MIDDLE_SIZE * VIDEO_SCALE**2     # Pixel area for an acce
 LOWER_MASK = np.array([0, 71, 99])      # Default lower mask
 UPPER_MASK = np.array([9, 191, 212])    # Default upper mask
 
+BOUNDING_BOX_THESHOLD = 255
 LOIN_WIDTH = 45                         # How far from loin side to make cut in pixels
 LINE_THRESHOLD = 100                    # Distance between points to be considered a valid line 
 SHORT_END_FACTOR = 0.35                 # Factor for short ends of hog
@@ -80,6 +81,8 @@ PHASE_6_SPEED = PHASE_6_PERCENTAGE * TOTAL_EXECUTION_TIME * FRAME_RATE
 # In meters
 MAIN_TRACK_MIN_LENGTH = 0
 MAIN_TRACK_MAX_LENGTH = 1.236
+
+MAIN_ARM_WIDTH = 0.2
 
 MAIN_ARM_MIN_LENGTH = 0.695
 MAIN_ARM_MAX_LENGTH = 1.089

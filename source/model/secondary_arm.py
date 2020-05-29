@@ -5,7 +5,7 @@ import cv2
 from .point import Point
 from .. import global_parameters
 
-class SecondaryArm: #0.47
+class SecondaryArm:
     def __init__(self, pt:Point, scale, length1=0.354, length2=0.354, angle=90):
         self.scale = scale
         self.basePt = pt
@@ -79,3 +79,8 @@ class SecondaryArm: #0.47
         self.basePt = pt
         self.otherPt1 = self.getotherPt1()
         self.otherPt2 = self.getotherPt2()
+
+    def get_collision_bounds(self):
+        p = self.otherPt1.toArray()
+        r = (self.otherPt2 - self.otherPt1).toArray()
+        return [[p, r]]

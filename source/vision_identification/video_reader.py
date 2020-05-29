@@ -50,5 +50,3 @@ class FileVideoStream:
 
     def more(self):
         return self.Q.qsize() > 0
-    
-    

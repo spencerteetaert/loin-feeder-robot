@@ -2,7 +2,6 @@ import time
 
 import numpy as np 
 import cv2
-import matplotlib.pyplot as plt
 
 from source.vision_identification import bounding_box
 from source.vision_identification.video_reader import FileVideoStream
@@ -10,24 +9,26 @@ from source.vision_identification import meat
 from source.model.robot import Robot
 from source.model.point import Point
 from source.path_planning.path_runner import PathRunner
-from source.path_planning import graphing_tools as Graph
+from source.path_planning import graphing_tools
 from source import global_parameters
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 DISPLAY_TOGGLE = True
+PROFILER_TOGGLE = False
 
 # Model for creating acceleration profiles
-profile_model = Robot(Point(280, 600), global_parameters.VIDEO_SCALE)
-path_runner = PathRunner(profile_model)
+if PROFILER_TOGGLE:
+    profile_model = Robot(Point(280, 600), global_parameters.VIDEO_SCALE)
+    path_runner = PathRunner(profile_model)
 # Model for display
 if DISPLAY_TOGGLE:
     drawing_model = Robot(Point(280, 600), global_parameters.VIDEO_SCALE)
     current_graph = np.zeros([830, 830, 3], dtype=np.uint8)
-    grapher = Graph.Grapher()
+    grapher = graphing_tools.Grapher()
 
 streamer = FileVideoStream(DATA_PATH)
 streamer.start()
-time.sleep(1)
+time.sleep(1) 
 
 def on_mouse(event, pX, pY, flags, param):
     if event == cv2.EVENT_LBUTTONUP:
@@ -49,8 +50,10 @@ def main(data_path=DATA_PATH):
     meats = [0]
     queue1 = []
     queue2 = []
+    times = []
 
     while(streamer.more()):
+        start = time.time()
         ################################################
         ### Video Processing and Meat Identification ###
         ################################################
@@ -107,18 +110,19 @@ def main(data_path=DATA_PATH):
                 queue2 += [[len(meats) - 1, len(meats) - 2]]
                 
         # Profiler model creates motion profiles, it updates as fast as possible in a separate thread
-        if profile_model.phase == 0 and len(queue1) > 0 and not path_runner.running:
-            dist = (global_parameters.PICKUP_POINT - meats[queue1[0][0]].get_center_as_point()).y
+        if PROFILER_TOGGLE:
+            if profile_model.phase == 0 and len(queue1) > 0 and not path_runner.running:
+                dist = (global_parameters.PICKUP_POINT - meats[queue1[0][0]].get_center_as_point()).y
 
-            if dist > 0:
-                sp1 = meats[queue1[0][0]].get_center_as_point().copy() + Point(0, dist)
-                sp2 = meats[queue1[0][1]].get_center_as_point().copy() + Point(0, dist)
-                profile_model.moveMeat(sp1, sp2, ep1, ep2, dist // global_parameters.CONVEYOR_SPEED, phase_1_delay=False)
-                queue1 = queue1[1:]
+                if dist > 0:
+                    sp1 = meats[queue1[0][0]].get_center_as_point().copy() + Point(0, dist)
+                    sp2 = meats[queue1[0][1]].get_center_as_point().copy() + Point(0, dist)
+                    profile_model.moveMeat(sp1, sp2, ep1, ep2, dist // global_parameters.CONVEYOR_SPEED, phase_1_delay=False)
+                    queue1 = queue1[1:]
 
-                # Given the start and end conditions, calculate the profile_model motor profiles
-                path_runner.start()
-        
+                    # Given the start and end conditions, calculate the profile_model motor profiles
+                    path_runner.start()
+            
         # Drawing model is just for drawing purposes, it updates at the frame rate displayed
         if DISPLAY_TOGGLE:
             if drawing_model.phase == 0 and len(queue2) > 0:
@@ -127,19 +131,21 @@ def main(data_path=DATA_PATH):
                 if dist > 0:
                     sp1 = meats[queue2[0][0]].get_center_as_point().copy() + Point(0, dist)
                     sp2 = meats[queue2[0][1]].get_center_as_point().copy() + Point(0, dist)
-                    drawing_model.moveMeat(sp1, sp2, ep1, ep2, dist // global_parameters.CONVEYOR_SPEED)
+                    drawing_model.moveMeat(sp1, sp2, ep1, ep2, dist // (global_parameters.CONVEYOR_SPEED * global_parameters.RUNTIME_FACTOR))
                     queue2 = queue2[1:]
                     flip_flop2 = True
-                    grapher.start(path_runner, (830, 830), 'o')
+                    if PROFILER_TOGGLE:
+                        grapher.start(path_runner, (830, 830), 'i')
                 else:
                     print("ERROR: Conveyor Speed too fast for current settings")
                     queue2 = queue2[1:]
             drawing_model.update()
 
         # Changes display chart
-        if DISPLAY_TOGGLE and flip_flop2 and not path_runner.running and not grapher.running:
-            current_graph = grapher.read()
-            flip_flop2 = False
+        if DISPLAY_TOGGLE and PROFILER_TOGGLE:
+            if flip_flop2 and not path_runner.running and not grapher.running:
+                current_graph = grapher.read()
+                flip_flop2 = False
 
         ###############
         ### Display ###
@@ -151,7 +157,8 @@ def main(data_path=DATA_PATH):
                     meats[i].draw(frame, color=(255, 255, 0))
             drawing_model.draw(frame)
 
-            frame = np.concatenate((frame, current_graph), axis=1)
+            if PROFILER_TOGGLE:
+                frame = np.concatenate((frame, current_graph), axis=1)
             cv2.imshow(win, frame)
 
         ################
@@ -178,14 +185,19 @@ def main(data_path=DATA_PATH):
                     pass
                 current_graph = grapher.read()
             
+        times += [time.time() - start]
         # out.write(frame)
 
         # Artifically slow the program to the desired frame rate
         # cv2.waitKey(max(global_parameters.FRAME_RATE - round((time.time() - force_timer )*1000 + 1), 1))
 
+    print("Average frame time:", np.average(times))
     # out.release()
     streamer.stop()
-    path_runner.stop()
+    if PROFILER_TOGGLE:
+        path_runner.stop()
+    if DISPLAY_TOGGLE:
+        grapher.stop()
     cv2.destroyAllWindows()
 
 main()

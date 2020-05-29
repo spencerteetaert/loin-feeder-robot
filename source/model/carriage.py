@@ -19,6 +19,9 @@ class Carriage:
         self.last_angle = self.relative_angle
         self.delta_angle = 0
 
+        self.hyp_dist = math.sqrt(self.length**2 + self.width**2)/2
+        self.update_points()
+        
     def __repr__(self):
         return "Carriage\n\tAngle " + str(round(self.relative_angle, 1)) + "\n\tdA " + str(round(self.delta_angle, 3)) + "\n" 
 
@@ -30,19 +33,8 @@ class Carriage:
     def getOtherPt(self):
         return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))))
 
-    def draw(self, canvas, color=(255, 255, 255)):
-        points = []
-
-        k = np.array([self.length*math.cos(math.radians(self.angle))/2, -1 * self.length*math.sin(math.radians(self.angle))/2])
-        x = np.array([(k / np.linalg.norm(k))[1] * self.width/2, -1 * self.width * (k / np.linalg.norm(k))[0]/2])  # Find perpendicular normal
-
-        points += [(self.basePt.toArray() + k + x)]
-        points += [(self.basePt.toArray() + k - x)]
-        points += [(self.basePt.toArray() - k - x)]
-        points += [(self.basePt.toArray() - k + x)]
-
-        
-        contour = np.array(points).reshape((-1, 1, 2)).astype(np.int32)
+    def draw(self, canvas, color=(255, 255, 255)):      
+        contour = np.array(self.points).reshape((-1, 1, 2)).astype(np.int32)
         cv2.drawContours(canvas, [contour], 0, color, 2)
 
     def follow(self, pt:Point):
@@ -55,4 +47,24 @@ class Carriage:
     def moveBase(self, pt:Point, secondary_arm_angle):
         self.refresh(secondary_arm_angle)
         self.basePt = pt
+        self.update_points()
+
+    def update_points(self):
+        self.points = []
+
+        k = np.array([self.length*math.cos(math.radians(self.angle))/2, -1 * self.length*math.sin(math.radians(self.angle))/2])
+        x = np.array([(k / np.linalg.norm(k))[1] * self.width/2, -1 * self.width * (k / np.linalg.norm(k))[0]/2])  # Find perpendicular normal
+
+        self.points += [(self.basePt.toArray() + k + x)] # top right
+        self.points += [(self.basePt.toArray() + k - x)] # top left
+        self.points += [(self.basePt.toArray() - k - x)] # bottom left
+        self.points += [(self.basePt.toArray() - k + x)] # bottom right 
         # self.otherPt = self.getOtherPt()
+
+    def get_collision_bounds(self):
+        r1 = np.subtract(self.points[1], self.points[2])
+        r2 = np.subtract(self.points[1], self.points[0]) 
+        r3 = np.subtract(self.points[3], self.points[2])
+        r4 = np.subtract(self.points[3], self.points[0])
+        
+        return [[self.points[1], r3], [self.points[1], r4], [self.points[3], r1], [self.points[3], r2]]

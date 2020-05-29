@@ -16,6 +16,7 @@ def figure_to_array(fig:plt.figure):
     return ret[:,:,1:4]
 
 class Grapher:
+    ''' Class that produces a graph from the data collected by path_runner'''
     def __init__(self):
         self.stopped = False
         self.running = False
@@ -48,6 +49,7 @@ class Grapher:
         
         fig, ax1 = plt.subplots()
                 
+        # Sets axis for linear actuators 
         ax1.set_xlabel('Time (s)')
         ax1.set_ylabel('Linear extension ' + ax1_label)
         ax1.plot(xs, ys[:,0], label="Main Track linear", color='#ff0000') 
@@ -59,8 +61,9 @@ class Grapher:
         ax1.spines['top'].set_color('white') 
         ax1.spines['right'].set_color('white')
         ax1.spines['left'].set_color('white')
-        ax1.set_ylim(0, 1.2)
+        # ax1.set_ylim(0, 1.2)
 
+        # Sets axis for rotational motors
         ax2 = ax1.twinx()
         ax2.set_ylabel('Rotation ' + ax2_label)
         ax2.plot(xs, ys[:,2], label="Main arm rotational", color='#007fff')
@@ -72,16 +75,15 @@ class Grapher:
         ax2.spines['top'].set_color('white') 
         ax2.spines['right'].set_color('white')
         ax2.spines['left'].set_color('white')
-        ax2.set_ylim(0, 360)
+        # ax2.set_ylim(0, 360)
 
+        # Gets limits and shifts data to ensure graphs are lined up at 0
         axes = (ax1, ax2)
         ex = [ax.get_ylim() for ax in axes]
         top = [e[1] / (e[1] - e[0]) for e in ex]
-        # Ensure that plots (intervals) are ordered bottom to top:
         if top[0] > top[1]:
             axes, ex, top = [list(reversed(l)) for l in (axes, ex, top)]
 
-        # Bounds overflow from shift
         tot_span = top[1] - top[0] + 1
 
         temp1 = ex[0][0] + tot_span * (ex[0][1] - ex[0][0])
@@ -89,16 +91,18 @@ class Grapher:
         axes[0].set_ylim(ex[0][0], temp1)
         axes[1].set_ylim(temp2, ex[1][1])
 
+        # Style
         lines, labels = ax1.get_legend_handles_labels()
         lines2, labels2 = ax2.get_legend_handles_labels()
         ax2.legend(lines + lines2, labels + labels2, loc="upper left", facecolor='black')
         plt.title(title)
-
         fig.tight_layout()
-
         fig.set_size_inches(size[0] / 100, size[1] / 100)
         fig.set_facecolor('black')
+
+        # Converts result into an array for display 
         self.fig = figure_to_array(fig)
+        plt.close()
         self.running = False
             
     def read(self):

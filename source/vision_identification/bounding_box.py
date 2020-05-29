@@ -1,20 +1,7 @@
-'''
-Altered from bbox example on opencv documentation site 
-https://docs.opencv.org/3.4/da/d0c/tutorial_bounding_rects_circles.html 
-'''
-import time
-import argparse 
-import random
-import time
-
 import numpy as np
 import cv2
 
 from .. import global_parameters
-
-random.seed(12345)
-
-THRESHOLD = 255
 
 def crop(img):
     '''Crops image to be largest square possible'''
@@ -34,7 +21,7 @@ def scale(img):
     res = cv2.resize(img, dsize=(dest_width, dest_height), interpolation=cv2.INTER_CUBIC)
     return res
 
-def get_bbox(img, threshold=THRESHOLD, lower_mask=global_parameters.LOWER_MASK, upper_mask=global_parameters.UPPER_MASK, source="Image"):
+def get_bbox(img, threshold=global_parameters.BOUNDING_BOX_THESHOLD, lower_mask=global_parameters.LOWER_MASK, upper_mask=global_parameters.UPPER_MASK, source="Image"):
     '''
     Returns bounding polygons for the all identified middles 
     in the image

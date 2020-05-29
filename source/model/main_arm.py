@@ -1,6 +1,7 @@
 import math
 
 import cv2
+import numpy as np
 
 from .point import Point
 from .. import global_parameters
@@ -69,3 +70,10 @@ class MainArm:
         self.refresh()
         self.basePt = pt
         self.otherPt = self.getOtherPt()
+
+    def get_collision_bounds(self):
+        p = np.add(self.basePt.toArray(), [global_parameters.MAIN_ARM_WIDTH, global_parameters.MAIN_ARM_WIDTH])
+        r1 = np.array([0, -1000])
+        r2 = np.array([-1000, 0])
+
+        return [[p, r1], [p, r2]]

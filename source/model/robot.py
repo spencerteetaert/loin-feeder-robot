@@ -106,13 +106,13 @@ class Robot:
     ##########################
 
     '''
-    Phase 0: Not moving >> Phase 1 on Function call 
-    Phase 1: Moving to predicted meat location >> Phase 2
-    Phase 2: Grabbing >> Phase 3
-    Phase 3: "Step 0" -> Rotating meat according to pre-set path >> Phase 4
-    Phase 4: "Step 2" -> Extending >> Phase 5
-    Phase 5: Releasing >> Phase 6
-    Phase 6: Moving to "Ready Position" >> Phase 0
+        Phase 0: Not moving >> Phase 1 on Function call 
+        Phase 1: Moving to predicted meat location >> Phase 2
+        Phase 2: Grabbing >> Phase 3
+        Phase 3: "Step 0" -> Rotating meat according to pre-set path >> Phase 4
+        Phase 4: "Step 2" -> Extending >> Phase 5
+        Phase 5: Releasing >> Phase 6
+        Phase 6: Moving to "Ready Position" >> Phase 0
     '''
 
     def moveMeat(self, s1, s2, e1, e2, delay, counter=0, phase_1_delay=True):
@@ -129,6 +129,67 @@ class Robot:
         self.delay = delay
         self.counter = counter
         self.PHASE_1_DELAY = phase_1_delay
+
+    def collision_check(self):
+        ''' Checks all significant points and boundaries to see if a collision has occurred in a given state 
+        
+        How it works:
+        - regions will be defined as no entry zones for specific heights
+        - all relevant points will be run on a polygon inclusion algo to check if they fall within the regions 
+        - any single collision at any height will return True 
+        
+        Points/Vects on robot to be considered (9):
+        - four vectors for each carriage 
+        - one vector for secondary arm 
+
+        Points/Vects for no travel zones:
+        - Carriages with themselves 
+        - two defining top left corner (above and past the main arm) 
+        - any additional environmental constraints 
+
+        '''
+
+        # Gather all relevant vectors 
+        main_arm = self.main_arm.get_collision_bounds()
+        secondary_arm = self.secondary_arm.get_collision_bounds()
+        carriage1 = self.carriage1.get_collision_bounds()
+        carriage2 = self.carriage2.get_collision_bounds()
+
+        for i in range(0, len(main_arm)):
+            # Check collision between secondary arm and main arm 
+            for j in range(0, len(secondary_arm)):
+                if self.check_vector_intersect(main_arm[i][0], main_arm[i][1], secondary_arm[j][0], secondary_arm[j][1]):
+                    return True, "Collision between main arm and secondary arm"
+            # Check collision between carriage1 and main arm
+            for j in range(0, len(carriage1)):
+                if self.check_vector_intersect(main_arm[i][0], main_arm[i][1], carriage1[j][0], carriage1[j][1]):
+                    return True, "Collision between main arm and carriage1"
+            # Check collision between carriage2 and main arm
+            for j in range(0, len(carriage2)):
+                if self.check_vector_intersect(main_arm[i][0], main_arm[i][1], carriage2[j][0], carriage2[j][1]):
+                    return True, "Collision between main arm and carriage2"
+        # Check collisions between carriages
+        for i in range(0, len(carriage1)):
+            for j in range(0, len(carriage2)):
+                if self.check_vector_intersect(carriage1[i][0], carriage1[i][1], carriage2[j][0], carriage2[j][1]):
+                    return True, "Collision between carriage1 and carriage2"
+            
+        return False, ""
+
+    def check_vector_intersect(self, p, r, q, s):
+        temp1 = np.subtract(q, p)
+        temp2 = np.cross(r, s)
+
+        if temp2 == 0:
+            return False
+
+        u = np.cross(temp1, r) / temp2
+        t = np.cross(temp1, s) / temp2
+
+        if u <= 0 or u >= 1 or t <= 0 or t >= 1:
+            return False
+
+        return True
 
     def moveTo(self, pt1, pt2):
         # First moves all the components to the desired points
@@ -181,6 +242,7 @@ class Robot:
             self.delay -= 1 # Delay here tracks time until meat is at start points 
             if self.switched:
                 if self.recording:
+                    self.data += [self.get_current_state()]
                     self.data += [self.get_current_state()]
                 # self.counter = 0
                 self.switched = False
@@ -285,8 +347,20 @@ class Robot:
 
         self.moveTo(self.follow_pt1, self.follow_pt2)
 
+        flag, report = self.collision_check()
+        if flag:
+            # If a collision occured in this step, turn off recording so that it is not added to the recommended path.
+            # Resets robot to phase 0. Stops current path.
+            print("ERROR: Profile resulted in collision and was not sent.")
+            print(report)
+            self.recording = False
+            self.phase = 0
+            return False
+
         if self.recording:
             self.data += [self.get_current_state()]
-            # self.data += [1]
+            if self.phase == 0: # This only ever hits immediately after phase 6
+                self.data += [self.get_current_state()]
+                self.data += [self.get_current_state()]
 
         return True
