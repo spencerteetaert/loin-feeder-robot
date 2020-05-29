@@ -60,11 +60,11 @@ def main(input_path=DATA_PATH):
             box, contours, _ = bounding_box.get_bbox(og, source=src, lower_mask=LOWER_MASK, upper_mask=UPPER_MASK)
             temp = og.copy()
 
-            if box != 0:
+            if contours != 0:
                 for i in range(0, len(box)):
                     cv2.drawContours(temp, [box[i][0]], 0, (255, 255, 255), 3)   
-            for i in range(0, len(contours)):
-                cv2.drawContours(temp, contours, i, (255, 255, 0), 2)
+                for i in range(0, len(contours)):
+                    cv2.drawContours(temp, contours, i, ((i * 17)%255, (i * 57)%255, (i * 3)%255), 2)
                 
             cv2.imshow(src, temp)
 

@@ -16,7 +16,7 @@ MINIMUM_AREA = MINIMUM_MIDDLE_SIZE * VIDEO_SCALE**2     # Pixel area for an acce
 LOWER_MASK = np.array([0, 71, 99])      # Default lower mask
 UPPER_MASK = np.array([9, 191, 212])    # Default upper mask
 
-BOUNDING_BOX_THESHOLD = 255
+BOUNDING_BOX_THESHOLD = 10
 LOIN_WIDTH = 45                         # How far from loin side to make cut in pixels
 LINE_THRESHOLD = 100                    # Distance between points to be considered a valid line 
 SHORT_END_FACTOR = 0.35                 # Factor for short ends of hog
