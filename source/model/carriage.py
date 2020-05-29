@@ -5,6 +5,7 @@ import numpy as np
 
 from .point import Point
 from .. import global_parameters
+from .. import vector_tools
 
 class Carriage:
     def __init__(self, pt:Point, scale, angle=0):
@@ -31,7 +32,7 @@ class Carriage:
             self.relative_angle = (self.angle - secondary_arm_angle + 360 + 180) % 360
 
     def getOtherPt(self):
-        return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))))
+        return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))/2), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))/2))
 
     def draw(self, canvas, color=(255, 255, 255)):      
         contour = np.array(self.points).reshape((-1, 1, 2)).astype(np.int32)
@@ -53,13 +54,14 @@ class Carriage:
         self.points = []
 
         k = np.array([self.length*math.cos(math.radians(self.angle))/2, -1 * self.length*math.sin(math.radians(self.angle))/2])
-        x = np.array([(k / np.linalg.norm(k))[1] * self.width/2, -1 * self.width * (k / np.linalg.norm(k))[0]/2])  # Find perpendicular normal
+        x = vector_tools.get_normal_unit([0, 0], k)
+        x *= self.width/2
 
         self.points += [(self.basePt.toArray() + k + x)] # top right
         self.points += [(self.basePt.toArray() + k - x)] # top left
         self.points += [(self.basePt.toArray() - k - x)] # bottom left
         self.points += [(self.basePt.toArray() - k + x)] # bottom right 
-        # self.otherPt = self.getOtherPt()
+        self.otherPt = self.getOtherPt()
 
     def get_collision_bounds(self):
         r1 = np.subtract(self.points[1], self.points[2])

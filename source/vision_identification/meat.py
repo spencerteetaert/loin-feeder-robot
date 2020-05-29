@@ -5,6 +5,7 @@ import cv2
 
 from ..model.point import Point 
 from .. import global_parameters
+from .. import vector_tools
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 
@@ -101,10 +102,7 @@ class Meat():
                 # self.belly_line = [self.bbox[long_line_indeces[1][0]], self.bbox[long_line_indeces[1][1]]]
                 self.loin_line = [self.bbox[long_line_indeces[0][0]], self.bbox[long_line_indeces[0][1]]]
 # 
-
-        # Cut line
-        k = np.subtract(self.loin_line[0], self.loin_line[1])
-        x = np.array([(k / np.linalg.norm(k))[1], -1*(k / np.linalg.norm(k))[0]])  # Find perpendicular normal
+        x = vector_tools.get_normal_unit(self.loin_line[0], self.loin_line[1])
         
         if self.side == "Left":
             x *= -1
@@ -127,9 +125,6 @@ class Meat():
         return self.bbox
     def get_side(self):
         return self.side
-
-    def distance(self, pt1, pt2):
-        return math.sqrt((pt2[0][1] - pt1[0][1])**2 + (pt2[0][0] - pt1[0][0])**2)
 
     def draw(self, img, color=(0, 255, 0)):
         # try:
