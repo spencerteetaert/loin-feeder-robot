@@ -107,7 +107,7 @@ class Meat():
         if self.side == "Left":
             x *= -1
 
-        dir_vect = x * global_parameters.LOIN_WIDTH
+        dir_vect = x * global_parameters.LOIN_WIDTH * global_parameters.VIDEO_SCALE
         self.cut_line = self.loin_line + dir_vect
 
         # Return 

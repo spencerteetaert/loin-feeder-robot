@@ -9,6 +9,7 @@ from source.vision_identification import meat
 from source.model.robot import Robot
 from source.model.point import Point
 from source.path_planning.path_runner import PathRunner
+from source.path_planning.frame_handler import FrameHandler
 from source.path_planning import graphing_tools
 from source import global_parameters
 
@@ -25,6 +26,8 @@ if DISPLAY_TOGGLE:
     drawing_model = Robot(Point(280, 600), global_parameters.VIDEO_SCALE)
     current_graph = np.zeros([830, 830, 3], dtype=np.uint8)
     grapher = graphing_tools.Grapher()
+
+handler = FrameHandler()
 
 streamer = FileVideoStream(DATA_PATH)
 streamer.start()
@@ -69,8 +72,8 @@ def main(data_path=DATA_PATH):
         
         # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
 
-        frame = streamer.read()
-        frame = bounding_box.scale(frame)
+        temp = streamer.read()
+        frame = bounding_box.scale(temp)
         frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
         iH, iW, iD = frame.shape
@@ -92,6 +95,8 @@ def main(data_path=DATA_PATH):
                             meats += [meat.Meat(box[i], side="Left", center=[cX, cY])]
                         flip_flop = not flip_flop
                         delay = 0
+                        if len(meats) > 2:
+                            handler.process_frame(temp)
 
         delay += 1
 
@@ -188,7 +193,7 @@ def main(data_path=DATA_PATH):
         # out.write(frame)
 
         # Artifically slow the program to the desired frame rate
-        # cv2.waitKey(max(global_parameters.FRAME_RATE - round((time.time() - force_timer )*1000 + 1), 1))
+        cv2.waitKey(max(global_parameters.FRAME_RATE - round((time.time() - force_timer )*1000 + 1), 1))
 
     print("Average frame time:", np.average(times))
     # out.release()
