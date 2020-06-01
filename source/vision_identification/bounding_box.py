@@ -87,9 +87,8 @@ def thresh_callback(mask):
     filt = []
     for i in range(0, len(minRects)):
         flag = True
-        for j in range(0, len(minRects)):
-            if (minRects[i][1]['m00'] < global_parameters.MINIMUM_AREA):
-                flag = False
+        if (minRects[i][1]['m00'] < global_parameters.MINIMUM_AREA):
+            flag = False
             
         filt += [flag]
 

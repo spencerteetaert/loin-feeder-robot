@@ -101,7 +101,7 @@ class Meat():
             else:
                 # self.belly_line = [self.bbox[long_line_indeces[1][0]], self.bbox[long_line_indeces[1][1]]]
                 self.loin_line = [self.bbox[long_line_indeces[0][0]], self.bbox[long_line_indeces[0][1]]]
-# 
+
         x = vector_tools.get_normal_unit(self.loin_line[0], self.loin_line[1])
         
         if self.side == "Left":
