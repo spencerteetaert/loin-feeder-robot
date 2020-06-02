@@ -1,8 +1,9 @@
 import socket
 import select
 
+from .. import global_parameters
+
 HEADER_LENGTH = 10
-DATA_CHUNK_SIZE = 10
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Allows for disconnection from port
@@ -11,9 +12,12 @@ server_socket.bind((socket.gethostname(), 2000))
 server_socket.listen() 
 
 # Wait until PLC connection is established 
-print("Calling server_socket.accept")
+print("Connecting to PLC...")
 PLC_socket, PLC_address = server_socket.accept()
 print("Connection established with PLC.")
+print("Connecting to camera...")
+camera_socket, camera_address = server_socket.accept()
+print("Connection established with camera.")
 
 def package_data(vel_data, start_time):
     # vel_data is a list of velocity values for each actuator 
@@ -21,13 +25,13 @@ def package_data(vel_data, start_time):
     full_data = ""
     for i in range(0, len(vel_data)):
         for j in range(0, len(vel_data[i])):
-            # print(f"{str(round(vel_data[i][j], 5)):<{DATA_CHUNK_SIZE}}")
-            full_data += f"{str(round(vel_data[i][j], 5)):<{DATA_CHUNK_SIZE}}"
+            # print(f"{str(round(vel_data[i][j], 5)):<{global_parameters.DATA_CHUNK_SIZE}}")
+            full_data += f"{str(round(vel_data[i][j], 5)):<{global_parameters.DATA_CHUNK_SIZE}}"
 
     encoded_data = full_data.encode('utf-8')
 
-    # for i in range(0, len(t), DATA_CHUNK_SIZE):
-    #     print("T",i,t[i:i+DATA_CHUNK_SIZE])
+    # for i in range(0, len(t), global_parameters.DATA_CHUNK_SIZE):
+    #     print("T",i,t[i:i+global_parameters.DATA_CHUNK_SIZE])
 
     return encoded_data
 

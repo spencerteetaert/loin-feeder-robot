@@ -1,16 +1,26 @@
 import time
+import socket
+import select
+import errno # Error codes
+import sys
 
 import numpy as np 
 import cv2
 
-from ..vision_identification import bounding_box
-from ..vision_identification.video_reader import FileVideoStream
-from ..vision_identification import meat
-from ..model.robot import Robot
-from ..model.point import Point
-from ..path_planning.path_runner import PathRunner
-from ..path_planning import graphing_tools
-from .. import global_parameters
+from context import source
+from source.vision_identification import bounding_box
+from source.vision_identification.video_reader import FileVideoStream
+from source.vision_identification import meat
+from source.model.robot import Robot
+from source.model.point import Point
+from source.path_planning.path_runner import PathRunner
+from source.path_planning import graphing_tools
+from source import global_parameters
+
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client_socket.connect((socket.gethostname(), 2000))
+
+client_socket.setblocking(False) # makes receive non blocking 
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 DISPLAY_TOGGLE = True

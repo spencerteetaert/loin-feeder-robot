@@ -8,7 +8,7 @@ from source.vision_identification import bounding_box
 from source.vision_identification import meat
 from source.model.robot import Robot
 from source.model.point import Point
-from source.data_send_receive import data_send
+# from source.data_send_receive import data_io
 from source import global_parameters
 
 class FrameHandler:
@@ -55,7 +55,8 @@ class FrameHandler:
                     if len(self.meats) > 1:
                         self.find_path()
                         self.gen_profiles()
-                        data_send.send_data(self.vel_data, 1)
+                        self.package_data()
+                        # data_io.send_data(self.vel_data, 1)
 
                     break # Ensures only one piece is identified 
 
@@ -109,3 +110,18 @@ class FrameHandler:
 
     def get_results(self):
         return self.xs, self.pos_data, self.vel_data, self.acc_data
+
+    def package_data(self):
+        # vel_data is a list of velocity values for each actuator 
+        full_data = ""
+        for i in range(0, len(self.vel_data)):
+            for j in range(0, len(self.vel_data[i])):
+                # print(f"{str(round(vel_data[i][j], 5)):<{DATA_CHUNK_SIZE}}")
+                full_data += f"{str(round(self.vel_data[i][j], 5)):<{global_parameters.DATA_CHUNK_SIZE}}"
+
+        encoded_data = full_data.encode('utf-8')
+
+        # for i in range(0, len(t), DATA_CHUNK_SIZE):
+        #     print("T",i,t[i:i+DATA_CHUNK_SIZE])
+
+        return encoded_data
