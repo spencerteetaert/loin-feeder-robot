@@ -53,7 +53,7 @@ def main(data_path=DATA_PATH):
                             print("Meat detected")
                             print(meats[-1])
                             
-                            data = "Side:" + meats[-1].get_side() + "\n" + str(delay) + "\nArea:" + str(meats[-1].get_area())
+                            data = "Side:" + meats[-1].get_side() + "\n" + str(delay))
                             
                             delay = 0
                     except:

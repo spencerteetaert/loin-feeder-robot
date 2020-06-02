@@ -1,4 +1,5 @@
-from threading import Thread
+from threading import Thread as worker
+# from processing import process as worker
 from threading import Lock
 import sys
 from queue import Queue
@@ -21,7 +22,7 @@ class PathRunner:
         self.constants = []
 
     def start(self):
-        self.t = Thread(target=self.run, args=([]))
+        self.t = worker(target=self.run, args=([]))
         self.t.daemon = True
         self.t.start()
         return self
@@ -68,7 +69,7 @@ class PathRunner:
             
     def read(self):
         if not self.running:
-            return self.xs, self.raw_pos_data, self.int_pos_data
+            return self.xs, self.raw_acc_data, self.int_pos_data
         else:
             with Lock():
                 print("ERROR: Request for data made before results computed")

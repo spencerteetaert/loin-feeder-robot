@@ -16,8 +16,8 @@ MINIMUM_AREA = MINIMUM_MIDDLE_SIZE * VIDEO_SCALE**2     # Pixel area for an acce
 LOWER_MASK = np.array([0, 71, 99])      # Default lower mask
 UPPER_MASK = np.array([9, 191, 212])    # Default upper mask
 
-BOUNDING_BOX_THESHOLD = 255
-LOIN_WIDTH = 45                         # How far from loin side to make cut in pixels
+BOUNDING_BOX_THESHOLD = 10
+LOIN_WIDTH = 0.021                      # How far from loin side to make cut in pixels
 LINE_THRESHOLD = 100                    # Distance between points to be considered a valid line 
 SHORT_END_FACTOR = 0.35                 # Factor for short ends of hog
 CHANGING_START_INDEX = False            # Toggles whether to iterated start indeces 
@@ -35,6 +35,8 @@ SAFE_ENVIRONMENT = [[[440, 190], [440, 730]], [[100, 735], [800, 735]], [[440, 6
 READY_POS_1 = Point(439, 504, angle=0)
 READY_POS_2 = Point(439, 654, angle=0)
 PICKUP_POINT = Point(440, 504)
+END_POINT_1 = Point(625, 735, angle=90)
+END_POINT_2 = Point(250, 735, angle=90)
 
 # Phase Parameters 
 '''

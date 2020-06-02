@@ -5,27 +5,21 @@ import cv2
 
 from ..model.point import Point 
 from .. import global_parameters
+from .. import vector_tools
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 
 class Meat():
-    def __init__(self, bbox:np.array, conveyor_speed=global_parameters.CONVEYOR_SPEED * global_parameters.RUNTIME_FACTOR, side="Left", center=(0,0)):
+    def __init__(self, data, conveyor_speed=global_parameters.CONVEYOR_SPEED * global_parameters.RUNTIME_FACTOR, side="Left", center=(0,0)):
         self.conveyor_speed = conveyor_speed
         self.side = side
-        self.bbox = bbox
+        self.bbox = data[0]
         self.center = center
-        self.area = cv2.contourArea(self.bbox)
 
         if (self.bbox == []):
             print("ERR: Meat object created with empty bbox.")
         else:
-            self.loin_line = self.gen_significant_lines("loin")
-            self.shoulder_line = self.gen_significant_lines("shoulder")
-            self.ham_line = self.gen_significant_lines("ham")
-            self.belly_line = self.gen_significant_lines("belly")
-            self.cut_line = self.gen_significant_lines("cut")
-
-            self.lines = [self.loin_line, self.shoulder_line, self.ham_line, self.belly_line, self.cut_line]
+            self.gen_significant_lines()
 
     def __repr__(self):
         t1 = self.side + " piece\n"
@@ -41,107 +35,83 @@ class Meat():
         # print(step_vec)
         self.bbox = self.bbox + step_vec
         self.loin_line = self.loin_line + step_vec
-        self.shoulder_line = self.shoulder_line + step_vec
-        self.ham_line = self.ham_line + step_vec
-        self.belly_line = self.belly_line + step_vec
+        # self.shoulder_line = self.shoulder_line + step_vec
+        # self.ham_line = self.ham_line + step_vec
+        # self.belly_line = self.belly_line + step_vec
         self.cut_line = self.cut_line + step_vec
         self.center = self.center + step_vec
 
-        self.lines = [self.loin_line, self.shoulder_line, self.ham_line, self.belly_line, self.cut_line]
+        # self.lines = [self.loin_line, self.shoulder_line, self.ham_line, self.belly_line, self.cut_line]
 
-    def gen_significant_lines(self, line):
-        xs = self.bbox[:,0,0]
-        ys = self.bbox[:,0,1]
+    def gen_significant_lines(self):
 
-        min_x_index = np.where(xs == min(xs))[0][0]
-        min_y_index = np.where(ys == min(ys))[0][0]
-        max_x_index = np.where(xs == max(xs))[0][0]
-        max_y_index = np.where(ys == max(ys))[0][0]
+        # One will be short, one medium, one long
+        dist1 = (self.bbox[1] - self.bbox[0])[0]**2 + (self.bbox[1] - self.bbox[0])[1]**2
+        dist2 = (self.bbox[2] - self.bbox[0])[0]**2 + (self.bbox[2] - self.bbox[0])[1]**2
+        dist3 = (self.bbox[3] - self.bbox[0])[0]**2 + (self.bbox[3] - self.bbox[0])[1]**2
+        maxD = max(dist1, dist2, dist3)
+        minD = min(dist1, dist2, dist3)
 
-        start_index = 0 
-        direction = -1
-
-        # print(min(xs))
-
-        # print("min_x_index",min_x_index)
-        # print("min_y_index",min_y_index)
-        # print("max_x_index",max_x_index)
-        # print("max_y_index",max_y_index)
-        # print("xs", xs)
-        # print("ys", ys)
-
-        thresh_factor = 1
-        if line == "loin": # Red
-            if self.side == "Left":
-                start_index = max_y_index
-                if xs[start_index] > self.center[0]:
-                    direction = 1
+        if maxD == dist1:
+            if minD == dist2:
+                long_line_indeces = [[1, 2], [0, 3]]
+                # short_line_indeces = [[0, 2], [1, 3]]
             else:
-                start_index = min_y_index
-                if xs[start_index] < self.center[0]:
-                    direction = 1
-        elif line == "shoulder": # Yellow
-            start_index = min_x_index
-            thresh_factor = global_parameters.SHORT_END_FACTOR
-            if ys[start_index] > self.center[1]:
-                direction = 1
-        elif line == "ham": # Blue
-            start_index = max_x_index
-            thresh_factor = global_parameters.SHORT_END_FACTOR
-            if ys[start_index] < self.center[1]:
-                direction = 1
-        elif line == "belly": # Magenta 
-            if self.side == "Left":
-                start_index = min_y_index
-                if xs[start_index] < self.center[0]:
-                    direction = 1
+                long_line_indeces = [[1, 3], [0, 2]]
+                # short_line_indeces = [[0, 3], [1, 2]]
+        elif maxD == dist2:
+            if minD == dist1:
+                long_line_indeces = [[1, 2], [0, 3]]
+                # short_line_indeces = [[0, 1], [2, 3]]
             else:
-                start_index = max_y_index
-                if xs[start_index] > self.center[0]:
-                    direction = 1
-        elif line == "cut":
-            k = np.subtract(self.belly_line[0], self.belly_line[1])
-            x = np.array([(k / np.linalg.norm(k))[1], -1*(k / np.linalg.norm(k))[0]])  # Find perpendicular normal
-            
+                long_line_indeces = [[2, 3], [0, 1]]
+                # short_line_indeces = [[0, 3], [1, 2]]
+        else:
+            if minD == dist1:
+                long_line_indeces = [[1, 3], [0, 2]]
+                # short_line_indeces = [[0, 1], [2, 3]]
+            else:
+                long_line_indeces = [[0, 1], [2, 3]]
+                # short_line_indeces = [[0, 2], [1, 3]]
+
+        # short_avg_x_0 = (self.bbox[short_line_indeces[0][0]][0] + self.bbox[short_line_indeces[0][1]][0])/2
+        # short_avg_x_1 = (self.bbox[short_line_indeces[1][0]][0] + self.bbox[short_line_indeces[1][1]][0])/2
+
+        # if short_avg_x_0 > short_avg_x_1:
+        #     self.ham_line = [self.bbox[short_line_indeces[0][0]], self.bbox[short_line_indeces[0][1]]]
+        #     self.shoulder_line = [self.bbox[short_line_indeces[1][0]], self.bbox[short_line_indeces[1][1]]]
+        # else:
+        #     self.shoulder_line = [self.bbox[short_line_indeces[0][0]], self.bbox[short_line_indeces[0][1]]]
+        #     self.ham_line = [self.bbox[short_line_indeces[1][0]], self.bbox[short_line_indeces[1][1]]]
+
+        long_avg_y_0 = (self.bbox[long_line_indeces[0][0]][1] + self.bbox[long_line_indeces[0][1]][1])/2
+        long_avg_y_1 = (self.bbox[long_line_indeces[1][0]][1] + self.bbox[long_line_indeces[1][1]][1])/2
+    
+        if long_avg_y_0 > long_avg_y_1:
             if self.side == "Left":
-                x *= -1
-
-            dir_vect = x * global_parameters.LOIN_WIDTH
-            ret = np.around(self.loin_line + dir_vect).astype(int)
-
-            return ret
+                # self.belly_line = [self.bbox[long_line_indeces[1][0]], self.bbox[long_line_indeces[1][1]]]
+                self.loin_line = [self.bbox[long_line_indeces[0][0]], self.bbox[long_line_indeces[0][1]]]
+            else:
+                # self.belly_line = [self.bbox[long_line_indeces[0][0]], self.bbox[long_line_indeces[0][1]]]
+                self.loin_line = [self.bbox[long_line_indeces[1][0]], self.bbox[long_line_indeces[1][1]]]
         else:
-            print("ERR: Meat line generation failed. No line specified.")
+            if self.side == "Left":
+                # self.belly_line = [self.bbox[long_line_indeces[0][0]], self.bbox[long_line_indeces[0][1]]]
+                self.loin_line = [self.bbox[long_line_indeces[1][0]], self.bbox[long_line_indeces[1][1]]]
+            else:
+                # self.belly_line = [self.bbox[long_line_indeces[1][0]], self.bbox[long_line_indeces[1][1]]]
+                self.loin_line = [self.bbox[long_line_indeces[0][0]], self.bbox[long_line_indeces[0][1]]]
 
-        rotated_index = (start_index + len(self.bbox) + direction) % len(self.bbox)
-        temp = start_index
-        threshold = global_parameters.LINE_THRESHOLD * thresh_factor
+        x = vector_tools.get_normal_unit(self.loin_line[0], self.loin_line[1])
+        
+        if self.side == "Left":
+            x *= -1
 
-        while(self.distance(self.bbox[start_index], self.bbox[rotated_index]) < threshold):
-            if global_parameters.CHANGING_START_INDEX:
-                start_index = rotated_index
-            rotated_index = (rotated_index + len(self.bbox) + direction) % len(self.bbox)
+        dir_vect = x * global_parameters.LOIN_WIDTH * global_parameters.VIDEO_SCALE
+        self.cut_line = self.loin_line + dir_vect
 
-            if temp == start_index:
-                threshold -= 5
-
-        ret = self.find_line_from_points(self.bbox[start_index], self.bbox[rotated_index])
-
-        return ret
-
-    def find_line_from_points(self, pt1, pt2):
-        # print("P1: ", pt1, "P2:",pt2)
-        dy = pt2[0][1] - pt1[0][1]
-        dx = pt2[0][0] - pt1[0][0]
-
-        ret_pt1 = [pt2[0][0] + dx * 100, pt2[0][1] + dy * 100]
-        ret_pt2 = [pt2[0][0] - dx * 100, pt2[0][1] - dy * 100]
-
-        # Ensure all point sets go left to right
-        if ret_pt1[0] < ret_pt2[0]:
-            return [ret_pt1, ret_pt2]
-        else:
-            return [ret_pt2, ret_pt1]
+        # Return 
+        # self.lines = [self.loin_line, self.shoulder_line, self.ham_line, self.belly_line, self.cut_line]
 
     def get_center_as_point(self):
         dy = self.loin_line[1][1] - self.loin_line[0][1]
@@ -155,11 +125,6 @@ class Meat():
         return self.bbox
     def get_side(self):
         return self.side
-    def get_area(self):
-        return self.area
-
-    def distance(self, pt1, pt2):
-        return math.sqrt((pt2[0][1] - pt1[0][1])**2 + (pt2[0][0] - pt1[0][0])**2)
 
     def draw(self, img, color=(0, 255, 0)):
         # try:
@@ -175,14 +140,14 @@ class Meat():
         # line_pts = self.get_lines()
 
         #Red - Loin
-        # cv2.line(img, (line_pts[0][0][0],line_pts[0][0][1]), (line_pts[0][1][0],line_pts[0][1][1]), (0, 0, 255), thickness=2)
+        # cv2.line(img, (int(round(line_pts[0][0][0])),int(round(line_pts[0][0][1]))), (int(round(line_pts[0][1][0])),int(round(line_pts[0][1][1]))), (0, 0, 255), thickness=2)
         #Yellow - Shoulder
-        # cv2.line(img, (line_pts[1][0][0],line_pts[1][0][1]), (line_pts[1][1][0],line_pts[1][1][1]), (0, 255, 255), thickness=2)
+        # cv2.line(img, (int(round(line_pts[1][0][0])),int(round(line_pts[1][0][1]))), (int(round(line_pts[1][1][0])),int(round(line_pts[1][1][1]))), (0, 255, 255), thickness=2)
         #Blue - Ham
-        # cv2.line(img, (line_pts[2][0][0],line_pts[2][0][1]), (line_pts[2][1][0],line_pts[2][1][1]), (255, 0, 0), thickness=2)
+        # cv2.line(img, (int(round(line_pts[2][0][0])),int(round(line_pts[2][0][1]))), (int(round(line_pts[2][1][0])),int(round(line_pts[2][1][1]))), (255, 0, 0), thickness=2)
         #Magenta - Belly 
-        # cv2.line(img, (line_pts[3][0][0],line_pts[3][0][1]), (line_pts[3][1][0],line_pts[3][1][1]), (255, 0, 255), thickness=2)
-        #White - Cut 
-        # cv2.line(img, (line_pts[4][0][0],line_pts[4][0][1]), (line_pts[4][1][0],line_pts[4][1][1]), (100, 205, 205), thickness=2)
+        # cv2.line(img, (int(round(line_pts[3][0][0])),int(round(line_pts[3][0][1]))), (int(round(line_pts[3][1][0])),int(round(line_pts[3][1][1]))), (255, 0, 255), thickness=2)
+        # White - Cut 
+        # cv2.line(img, (int(round(line_pts[4][0][0])),int(round(line_pts[4][0][1]))), (int(round(line_pts[4][1][0])),int(round(line_pts[4][1][1]))), (100, 205, 205), thickness=2)
         # except TypeError as err:
         #     print("Error: {0}".format(err))

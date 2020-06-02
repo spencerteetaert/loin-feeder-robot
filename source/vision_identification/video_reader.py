@@ -1,4 +1,5 @@
-from threading import Thread
+from threading import Thread as worker
+# from processing import process as worker
 import sys
 from queue import Queue
 import time
@@ -20,17 +21,20 @@ class FileVideoStream:
         self.stopped = False
         self.Q = Queue(maxsize=queueSize)
         self.sleep_time = 0.001
+        self.running = False
 
     def start(self):
-        self.t = Thread(target=self.update, args=())
+        self.t = worker(target=self.update, args=())
         self.t.daemon = True
         self.t.start()
         return self
 
     def stop(self):
         self.stopped = True
+        self.running = False
 
     def update(self):
+        self.running = True
         while True:
             time.sleep(self.sleep_time)
             if self.stopped:

@@ -25,7 +25,7 @@ def main(input_path=DATA_PATH):
         # temp = input_path + str(i) + ".png"
         temp = input_path + str(i) + ".png"
         # try: 
-        og = bbox.preprocess(cv2.imread(temp))
+        og = bounding_box.scale(cv2.imread(temp), width=500)
         og.shape
         # except:
         #     continue
@@ -57,7 +57,16 @@ def main(input_path=DATA_PATH):
             LOWER_MASK = np.array([hlow, slow, vlow])
             UPPER_MASK = np.array([hhigh, shigh, vhigh])
 
-            bbox.get_bbox(og, draw=True, source=src, lower_mask=LOWER_MASK, upper_mask=UPPER_MASK)
+            box, contours, _ = bounding_box.get_bbox(og, source=src, lower_mask=LOWER_MASK, upper_mask=UPPER_MASK)
+            temp = og.copy()
+
+            if contours != 0:
+                for i in range(0, len(box)):
+                    cv2.drawContours(temp, [box[i][0]], 0, (255, 255, 255), 3)   
+                for i in range(0, len(contours)):
+                    cv2.drawContours(temp, contours, i, ((i * 17)%255, (i * 57)%255, (i * 3)%255), 2)
+                
+            cv2.imshow(src, temp)
 
         cv2.destroyAllWindows()
 

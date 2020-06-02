@@ -1,4 +1,5 @@
-from threading import Thread
+from threading import Thread as worker
+# from processing import process as worker
 from threading import Lock
 
 import numpy as np
@@ -22,7 +23,7 @@ class Grapher:
         self.running = False
 
     def start(self, path_runner, size, switch):
-        self.t = Thread(target=self.run, args=([path_runner, size, switch]))
+        self.t = worker(target=self.run, args=([path_runner, size, switch]))
         self.t.daemon = True
         self.t.start()
         return self
