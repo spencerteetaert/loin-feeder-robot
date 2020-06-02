@@ -10,7 +10,6 @@ from source.model.robot import Robot
 from source.model.point import Point
 from source import global_parameters
 
-canvas = np.zeros([1000, 1000, 3])
 class FrameHandler:
     def __init__(self):
         self.flip_flop = True # False = Left, True = Right 
@@ -56,15 +55,6 @@ class FrameHandler:
                         self.find_path()
                         self.gen_profiles()
                         self.send_data()
-                        # self.model.draw(self.frame)
-                        # self.start_point_1.draw(self.frame, color=(0, 255, 0))
-                        # self.start_point_2.draw(self.frame, color=(0, 255, 0))
-                        # self.end_point_1.draw(self.frame, color=(0, 0, 255))
-                        # self.end_point_2.draw(self.frame, color=(0, 0, 255))
-
-                        # cv2.imshow("Temp", self.frame)
-                        # cv2.waitKey(0)
-                        # cv2.destroyWindow("Temp")
 
                     break # Ensures only one piece is identified 
 

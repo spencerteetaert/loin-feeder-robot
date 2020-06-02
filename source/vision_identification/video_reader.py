@@ -1,4 +1,5 @@
-from threading import Thread
+from threading import Thread as worker
+# from processing import process as worker
 import sys
 from queue import Queue
 import time
@@ -23,7 +24,7 @@ class FileVideoStream:
         self.running = False
 
     def start(self):
-        self.t = Thread(target=self.update, args=())
+        self.t = worker(target=self.update, args=())
         self.t.daemon = True
         self.t.start()
         return self
