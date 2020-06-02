@@ -14,7 +14,7 @@ from source.path_planning import graphing_tools
 from source import global_parameters
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
-DISPLAY_TOGGLE = True
+DISPLAY_TOGGLE = False
 PROFILER_TOGGLE = True
 
 # Model for creating acceleration profiles

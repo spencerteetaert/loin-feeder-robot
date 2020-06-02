@@ -8,6 +8,7 @@ from source.vision_identification import bounding_box
 from source.vision_identification import meat
 from source.model.robot import Robot
 from source.model.point import Point
+from source.data_send_receive import data_send
 from source import global_parameters
 
 class FrameHandler:
@@ -26,7 +27,7 @@ class FrameHandler:
         self.start = 0
         self.model = Robot(Point(280, 600), global_parameters.VIDEO_SCALE)
     def __repr__(self):
-        pass
+        return "FrameHandler Object\n\tModel:" + self.model.__repr__()
 
     def process_frame(self, frame):
         print("Processing Frame")
@@ -54,7 +55,7 @@ class FrameHandler:
                     if len(self.meats) > 1:
                         self.find_path()
                         self.gen_profiles()
-                        self.send_data()
+                        data_send.send_data(self.vel_data, 1)
 
                     break # Ensures only one piece is identified 
 
@@ -108,7 +109,3 @@ class FrameHandler:
 
     def get_results(self):
         return self.xs, self.pos_data, self.vel_data, self.acc_data
-    
-    def send_data(self):
-        # This function will convert profiles to required form for PLC and send them out the given port 
-        pass

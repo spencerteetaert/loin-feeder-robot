@@ -65,6 +65,8 @@ class PathRunner:
             self.int_vel_data = np.asarray([integrate.simps(self.raw_acc_data[0:i+1], axis=0).tolist() for i in range(0, len(self.raw_acc_data))])
             self.int_pos_data = np.add(np.asarray([integrate.simps(self.int_vel_data[0:i+1], axis=0).tolist() for i in range(0, len(self.int_vel_data))]), self.constants)
 
+        with Lock():
+            print(time.time() - start)
         self.running = False      
             
     def read(self):
