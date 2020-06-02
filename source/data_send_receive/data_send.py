@@ -12,16 +12,17 @@ server_socket.listen()
 
 # Wait until PLC connection is established 
 print("Calling server_socket.accept")
-# PLC_socket, PLC_address = server_socket.accept()
+PLC_socket, PLC_address = server_socket.accept()
 print("Connection established with PLC.")
 
 def package_data(vel_data, start_time):
     # vel_data is a list of velocity values for each actuator 
-
+    print("OG_DATA:", vel_data)
     full_data = ""
     for i in range(0, len(vel_data)):
-        print(f"{str(round(vel_data[i], 5)):<{DATA_CHUNK_SIZE}}")
-        full_data += f"{str(round(vel_data[i], 5)):<{DATA_CHUNK_SIZE}}"
+        for j in range(0, len(vel_data[i])):
+            # print(f"{str(round(vel_data[i][j], 5)):<{DATA_CHUNK_SIZE}}")
+            full_data += f"{str(round(vel_data[i][j], 5)):<{DATA_CHUNK_SIZE}}"
 
     encoded_data = full_data.encode('utf-8')
 

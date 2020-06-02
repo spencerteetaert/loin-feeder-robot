@@ -30,7 +30,7 @@ class FrameHandler:
         return "FrameHandler Object\n\tModel:" + self.model.__repr__()
 
     def process_frame(self, frame):
-        print("Processing Frame")
+        # print("Processing Frame")
         start = time.time()
         if len(self.meats) == 0:
             self.start = start
@@ -59,7 +59,7 @@ class FrameHandler:
 
                     break # Ensures only one piece is identified 
 
-        print("Total processing time:", time.time() - start) 
+        # print("Total processing time:", time.time() - start) 
 
     def find_path(self):
         self.dt = time.time() - self.start

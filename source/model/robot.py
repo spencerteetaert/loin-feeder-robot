@@ -355,6 +355,7 @@ class Robot:
             print(report)
             self.recording = False
             self.phase = 0
+            self.data = []
             return False
 
         if self.recording:
