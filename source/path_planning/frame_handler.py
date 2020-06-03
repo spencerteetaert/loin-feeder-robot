@@ -13,7 +13,7 @@ from source import global_parameters
 
 class FrameHandler:
     def __init__(self):
-        self.flip_flop = True # False = Left, True = Right 
+        self.flip_flop = False # False = Left, True = Right 
         self.meats = []
         self.acc_data = []
         self.vel_data = []
@@ -25,7 +25,7 @@ class FrameHandler:
 
         self.dt = None
         self.start = 0
-        self.model = Robot(Point(280, 600), global_parameters.VIDEO_SCALE)
+        self.model = Robot(global_parameters.ROBOT_BASE_POINT, global_parameters.VIDEO_SCALE)
     def __repr__(self):
         return "FrameHandler Object\n\tModel:" + self.model.__repr__()
 

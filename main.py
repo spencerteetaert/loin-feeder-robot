@@ -36,6 +36,7 @@ with PLC() as plc:
             val = 0
         else:
             count_flag = False
+            temp = time.time()
 
         if val != 0: # If image is available
             if frame_handler.process_frame(frame, read_time, draw=True):
@@ -46,6 +47,8 @@ with PLC() as plc:
                     flag = True
                 if flag:
                     instruction_handler.add(0, 0) # Ending flag 
+
+            print("TIMMEEE", time.time() - temp)
         else:
             frame = bounding_box.scale(frame)
             frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
@@ -59,6 +62,7 @@ with PLC() as plc:
         elif k == ord('c'):
             count_flag = True
 
+        # print("t:", time.time() - read_time)
 
         ### Read and process PLC data ### 
 

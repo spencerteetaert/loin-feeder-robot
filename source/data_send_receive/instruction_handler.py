@@ -3,6 +3,8 @@ from threading import Thread
 from threading import Lock
 from queue import Queue
 import time
+import numpy as np
+np.set_printoptions(suppress=True, precision=2)
 
 from .. import global_parameters
 
@@ -44,6 +46,9 @@ class InstructionHandler:
                     counter += 1
                     if not self.instruction_Q.empty():
                         instruction = self.instruction_Q.get()
+                        to_send = np.around(instruction, 2)
+
+                        print("Sent to PLC:", to_send)
 
                         ### PLC write instruction ###
                         # plc.Write("<tag0>", value=instruction[0])

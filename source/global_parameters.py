@@ -87,6 +87,8 @@ PHASE_6_SPEED = PHASE_6_PERCENTAGE * TOTAL_EXECUTION_TIME * FRAME_RATE
 ### Physical Parameters ###
 ###########################
 
+ROBOT_BASE_POINT = Point(280, 600)
+
 # In meters
 MAIN_TRACK_MIN_LENGTH = 0
 MAIN_TRACK_MAX_LENGTH = 1.236

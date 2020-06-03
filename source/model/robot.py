@@ -367,4 +367,9 @@ class Robot:
                 self.data += [self.get_current_state()]
                 self.data += [self.get_current_state()]
 
+        # frame = np.zeros([1200, 1200, 3])
+        # self.draw(frame)
+        # cv2.imshow("Temp", frame)
+        # cv2.waitKey(1)
+
         return True
