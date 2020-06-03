@@ -6,6 +6,7 @@ import numpy as np
 from source import global_parameters
 from source.path_planning.frame_handler import FrameHandler
 from source.data_send_receive.instruction_handler import InstructionHandler
+from source.vision_identification import bounding_box
 
 frame_handler = FrameHandler()
 instruction_handler = InstructionHandler()
@@ -16,7 +17,8 @@ instruction_handler.start()
 
 with PLC() as plc:
     plc.IPAddress = global_parameters.PLC_IP
-    
+    count_flag = False
+
     while True:
         ''' 
             Read camera image if available 
@@ -27,27 +29,37 @@ with PLC() as plc:
         '''
 
         ### Read and Process Image ### 
-        t = time.time()
+        read_time = time.time()
         (val, frame) = video_capture.read() 
-        # print("1")
+
+        if not count_flag:
+            val = 0
+        else:
+            count_flag = False
 
         if val != 0: # If image is available
-            if frame_handler.process_frame(frame, t, draw=True):
+            if frame_handler.process_frame(frame, read_time, draw=True):
                 time_stamps, profiles = frame_handler.get_results()
-
-                temp = time.time()
+                flag = False
                 for i in range(0, len(profiles)):
                     instruction_handler.add(time_stamps[i], profiles[i])
-                instruction_handler.add(0, 0)
-                print("TEST", time.time() - temp)
+                    flag = True
+                if flag:
+                    instruction_handler.add(0, 0) # Ending flag 
+        else:
+            frame = bounding_box.scale(frame)
+            frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
-            # cv2.imshow("Temp", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):    
-                break
+        global_parameters.PICKUP_POINT.draw(frame)
+        cv2.imshow("Temp", frame)
 
-        time.sleep(6)
+        k = cv2.waitKey(1) & 0xFF
+        if k == ord('q'):    
+            break
+        elif k == ord('c'):
+            count_flag = True
 
-        # print(time.time() - t)
+
         ### Read and process PLC data ### 
 
         # val1 = plc.Read("<tag1>")
@@ -57,6 +69,4 @@ with PLC() as plc:
         # Do something with read vals
         # val.TagName, val.Value, val.Status
         
-    print("Average time", np.average(times))
     instruction_handler.stop()
-        # break

@@ -17,6 +17,7 @@ class InstructionHandler:
         pass
 
     def start(self):
+        self.stopped = False
         self.t = Thread(target=self.run, args=([]))
         self.t.daemon = True
         self.t.start()
@@ -30,17 +31,17 @@ class InstructionHandler:
         with PLC() as plc:
             plc.IPAddress = global_parameters.PLC_IP
             current_time = self.time_Q.get()
-            temp = time.time()
             counter = 0
 
             while True:
                 if self.stopped:
                     return 
 
-                if current_time < time.time():
-                    print(counter)
+                if current_time < time.time() and current_time > 0:
+                    if counter == 0:
+                        s = time.time()
+                        print("Robot command started at:", s)
                     counter += 1
-                    # print(self.instruction_Q.empty())
                     if not self.instruction_Q.empty():
                         instruction = self.instruction_Q.get()
 
@@ -53,12 +54,12 @@ class InstructionHandler:
 
                         current_time = self.time_Q.get()
 
-                if current_time == 0:
-                    print("EXECUTION TIME:", time.time() - temp)
-                    self.time_Q.get()
-                    self.instruction_Q.get()
-                    temp = time.time()
+                elif current_time == 0 and counter != 0:
                     counter = 0
+                    print("Execution time:", time.time() - s)
+                    current_time = self.time_Q.get() # get is a locking function so it stays here until the next instruction comes in
+                    # self.instruction_Q.get()
+                    
 
     def add(self, time, instruction):
         self.time_Q.put(time)
