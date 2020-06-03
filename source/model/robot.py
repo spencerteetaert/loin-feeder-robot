@@ -34,6 +34,7 @@ class Robot:
         self.switched = False
         self.delay = 0
         self.counter = 0
+        self.phase_1_counter = 0
 
         self.data = []
         self.recording = False
@@ -240,6 +241,7 @@ class Robot:
         # Phase 1: Moving to predicted meat location
         if self.phase == 1:
             self.delay -= 1 # Delay here tracks time until meat is at start points 
+            self.phase_1_counter += 1
             if self.switched:
                 if self.recording:
                     self.data += [self.get_current_state()]
@@ -248,6 +250,7 @@ class Robot:
                 self.switched = False
                 self.follow_pt1.moveTo(self.s1, global_parameters.PHASE_1_SPEED)
                 self.follow_pt2.moveTo(self.s2, global_parameters.PHASE_1_SPEED)
+                self.phase_1_counter = 0
             if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 and self.delay < 1 and self.PHASE_1_DELAY: # End of step condition 
                 self.switched = True 
                 self.phase = 2
@@ -355,6 +358,7 @@ class Robot:
             print(report)
             self.recording = False
             self.phase = 0
+            self.data = []
             return False
 
         if self.recording:
@@ -362,5 +366,10 @@ class Robot:
             if self.phase == 0: # This only ever hits immediately after phase 6
                 self.data += [self.get_current_state()]
                 self.data += [self.get_current_state()]
+
+        # frame = np.zeros([1200, 1200, 3])
+        # self.draw(frame)
+        # cv2.imshow("Temp", frame)
+        # cv2.waitKey(1)
 
         return True

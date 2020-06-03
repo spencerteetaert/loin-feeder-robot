@@ -2,6 +2,13 @@ import numpy as np
 
 from .model.point import Point
 
+################################
+### Communication Parameters ###
+################################
+
+PLC_IP = "10.86.4.24"
+CAMERA_IP = "10.86.4.24"
+
 #########################
 ### Vision Parameters ###
 #########################
@@ -79,6 +86,8 @@ PHASE_6_SPEED = PHASE_6_PERCENTAGE * TOTAL_EXECUTION_TIME * FRAME_RATE
 ###########################
 ### Physical Parameters ###
 ###########################
+
+ROBOT_BASE_POINT = Point(280, 600)
 
 # In meters
 MAIN_TRACK_MIN_LENGTH = 0
