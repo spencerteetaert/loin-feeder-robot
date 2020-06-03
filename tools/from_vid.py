@@ -27,14 +27,15 @@ def main(data_path=DATA_PATH):
         # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
 
         try:
-            frame = bbox.preprocess(frame)
+            frame = bounding_box.scale(frame)
+            frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
         except:
             print("End of video")
             break
 
         iH, iW, _ = frame.shape
 
-        box, mask, _ = bbox.get_bbox(frame)
+        box, mask, _ = bounding_box.get_bbox(frame)
 
         if (box != 0):
             for i in range(0, len(box)):
@@ -53,7 +54,7 @@ def main(data_path=DATA_PATH):
                             print("Meat detected")
                             print(meats[-1])
                             
-                            data = "Side:" + meats[-1].get_side() + "\n" + str(delay))
+                            data = "Side:" + meats[-1].get_side() + "\n" + str(delay)
                             
                             delay = 0
                     except:
@@ -61,13 +62,13 @@ def main(data_path=DATA_PATH):
 
         try:   
             if switch==1:
-                res = bbox.draw_results(frame, [meats[-1].get_bbox()], "Test", meat=meats[-1], extra_data=data)
+                res = bounding_box.draw_results(frame, [meats[-1].get_bbox()], "Test", meat=meats[-1], extra_data=data)
             elif switch==2:
-                filtered = bbox.gen_mask(frame, bitwise_and=True, process=False)
-                bbox.draw_results(filtered, [meats[-1].get_bbox()], "Test", meat=meats[-1], extra_data=data)
+                filtered = bounding_box.gen_mask(frame, bitwise_and=True, process=False)
+                bounding_box.draw_results(filtered, [meats[-1].get_bbox()], "Test", meat=meats[-1], extra_data=data)
             elif switch==3:
                 filtered = bbox.gen_mask(frame, bitwise_and=False, process=True)
-                bbox.draw_results(filtered, [meats[-1].get_bbox()], "Test", meat=meats[-1], extra_data=data)
+                bounding_box.draw_results(filtered, [meats[-1].get_bbox()], "Test", meat=meats[-1], extra_data=data)
             # res = bbox.draw_results(mask, box, "Test", meat=meats[-1])
         except:
             res = frame

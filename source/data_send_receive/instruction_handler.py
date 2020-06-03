@@ -8,6 +8,13 @@ np.set_printoptions(suppress=True, precision=2)
 
 from .. import global_parameters
 
+"""
+    This class is meant to ensure that the timing of instructions
+    sent to the PLC are as they should be. It sends instructions
+    to the PLC at a given absolute time to ensure that the machine
+    output is not affected by a slow computer. 
+"""
+
 class InstructionHandler:
     def __init__(self, queueSize=1048):
         self.stopped = False
@@ -56,6 +63,9 @@ class InstructionHandler:
                         # plc.Write("<tag2>", value=instruction[2])
                         # plc.Write("<tag3>", value=instruction[3])
                         # plc.Write("<tag4>", value=instruction[4])
+                        # plc.Write("<tag5>", value=instruction[5])
+                        # plc.Write("<tag6>", value=instruction[6])
+                        # plc.Write("<tag7>", value=instruction[7])
 
                         current_time = self.time_Q.get()
 
@@ -65,7 +75,10 @@ class InstructionHandler:
                     current_time = self.time_Q.get() # get is a locking function so it stays here until the next instruction comes in
                     # self.instruction_Q.get()
                     
-
     def add(self, time, instruction):
+        ''' Adds a time stamp and instruction profile to the queue. 
+        Time stamp is as time.time() reads (in s) and instruction is a
+        list of velocity values to be sent to the actuators at the given 
+        time '''
         self.time_Q.put(time)
         self.instruction_Q.put(instruction)
