@@ -29,13 +29,15 @@ class FrameHandler:
     def __repr__(self):
         return "FrameHandler Object\n\tModel:" + self.model.__repr__()
 
-    def process_frame(self, frame):
-        # print("Processing Frame")
+    def process_frame(self, frame, start_time, draw=False):
         start = time.time()
         if len(self.meats) == 0:
             self.start = start
         self.frame = bounding_box.scale(frame)
         self.frame = cv2.copyMakeBorder(self.frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
+
+        if draw:
+            cv2.imshow("Temp", self.frame)
 
         iH, _, _ = self.frame.shape
         data, _, _ = bounding_box.get_bbox(self.frame)
@@ -53,16 +55,16 @@ class FrameHandler:
                     self.flip_flop = not self.flip_flop
 
                     if len(self.meats) > 1:
-                        self.find_path()
-                        self.gen_profiles()
-                        self.package_data()
-                        # data_io.send_data(self.vel_data, 1)
+                        self.find_path(start_time)
+                        if not self.gen_profiles(): # If path creation failed (collision, etc)
+                            # self.xs = []
+                            return False
 
                     break # Ensures only one piece is identified 
+        
+        return True
 
-        # print("Total processing time:", time.time() - start) 
-
-    def find_path(self):
+    def find_path(self, start_time):
         self.dt = time.time() - self.start
         # Profiler model creates motion profiles, it updates as fast as possible in a separate thread
         if self.model.phase == 0:
@@ -75,25 +77,25 @@ class FrameHandler:
                 self.model.moveMeat(self.start_point_1, self.start_point_2, self.end_point_1, self.end_point_2, dist / global_parameters.CONVEYOR_SPEED, phase_1_delay=False)
                 
                 # Given the start and end conditions, calculate the model motor profiles
-                self.run_model()       
+                self.run_model(start_time)       
 
-    def run_model(self):
+    def run_model(self, start_time):
         self.model.clear_history()
         self.model.recording = True
         self.constants = self.model.get_current_state()
 
         counter = 0
         self.xs = []
-        self.xs += [counter / global_parameters.FRAME_RATE]
+        self.xs += [start_time + counter / global_parameters.FRAME_RATE]
         counter += 1
-        self.xs += [counter / global_parameters.FRAME_RATE]
+        self.xs += [start_time + counter / global_parameters.FRAME_RATE]
         counter += 1
         while self.model.update():
-            self.xs += [counter / global_parameters.FRAME_RATE]
+            self.xs += [start_time + counter / global_parameters.FRAME_RATE]
             counter += 1
-        self.xs += [counter / global_parameters.FRAME_RATE]
+        self.xs += [start_time + counter / global_parameters.FRAME_RATE]
         counter += 1
-        self.xs += [counter / global_parameters.FRAME_RATE]
+        self.xs += [start_time + counter / global_parameters.FRAME_RATE]
         counter += 1
 
         self.model.recording = False
@@ -101,27 +103,29 @@ class FrameHandler:
     def gen_profiles(self):
         # Discrete data as derived from the model
         raw_pos_data = np.asarray(self.model.get_data())
+        if len(raw_pos_data) == 0:
+            return False
         raw_vel_data = np.gradient(raw_pos_data, axis=0)
 
         # Integrated data. Closer representation of how robot will move 
         self.acc_data = np.gradient(raw_vel_data, axis=0)
         self.vel_data = np.asarray([integrate.simps(self.acc_data[0:i+1], axis=0).tolist() for i in range(0, len(self.acc_data))])
-        self.pos_data = np.add(np.asarray([integrate.simps(self.vel_data[0:i+1], axis=0).tolist() for i in range(0, len(self.vel_data))]), self.constants)
+        # self.pos_data = np.add(np.asarray([integrate.simps(self.vel_data[0:i+1], axis=0).tolist() for i in range(0, len(self.vel_data))]), self.constants)
 
     def get_results(self):
-        return self.xs, self.pos_data, self.vel_data, self.acc_data
+        return self.xs, self.vel_data
 
-    def package_data(self):
-        # vel_data is a list of velocity values for each actuator 
-        full_data = ""
-        for i in range(0, len(self.vel_data)):
-            for j in range(0, len(self.vel_data[i])):
-                # print(f"{str(round(vel_data[i][j], 5)):<{DATA_CHUNK_SIZE}}")
-                full_data += f"{str(round(self.vel_data[i][j], 5)):<{global_parameters.DATA_CHUNK_SIZE}}"
+    # def package_data(self):
+    #     # vel_data is a list of velocity values for each actuator 
+    #     full_data = ""
+    #     for i in range(0, len(self.vel_data)):
+    #         for j in range(0, len(self.vel_data[i])):
+    #             # print(f"{str(round(vel_data[i][j], 5)):<{DATA_CHUNK_SIZE}}")
+    #             full_data += f"{str(round(self.vel_data[i][j], 5)):<{global_parameters.DATA_CHUNK_SIZE}}"
 
-        encoded_data = full_data.encode('utf-8')
+    #     encoded_data = full_data.encode('utf-8')
 
-        # for i in range(0, len(t), DATA_CHUNK_SIZE):
-        #     print("T",i,t[i:i+DATA_CHUNK_SIZE])
+    #     # for i in range(0, len(t), DATA_CHUNK_SIZE):
+    #     #     print("T",i,t[i:i+DATA_CHUNK_SIZE])
 
-        return encoded_data
+    #     return encoded_data

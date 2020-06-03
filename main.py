@@ -1,76 +1,62 @@
-import socket
-import select
-
 import cv2
+from pylogix import PLC
+import time
+import numpy as np
 
 from source import global_parameters
 from source.path_planning.frame_handler import FrameHandler
+from source.data_send_receive.instruction_handler import InstructionHandler
+
 frame_handler = FrameHandler()
+instruction_handler = InstructionHandler()
+video_capture = cv2.VideoCapture(r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4")
+times = []
 
-HEADER_LENGTH = 10
+instruction_handler.start()
 
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # Allows for disconnection from port
-
-server_socket.bind((socket.gethostname(), 2000)) 
-server_socket.listen() 
-
-# Wait until PLC and camera connections are established 
-print("Connecting to PLC...")
-while True:
-    PLC_socket, PLC_address = server_socket.accept()
-    if PLC_address[0] == global_parameters.PLC_IP:
-        break
-print(f"Connection established with PLC at {PLC_address}")
-print("Connecting to camera...")
-while True:
-    camera_socket, camera_address = server_socket.accept()
-    if camera_address[0] == global_parameters.CAMERA_IP:
-        break
-print(f"Connection established with camera at {camera_address}")
-
-def send_data(vel_data, start_time):
-    to_send = package_data(vel_data, start_time)
-    PLC_socket.send(to_send)
-
-sockets_list = [PLC_socket, camera_socket]
-
-# clients = {}
-
-# def receive_data(client_socket:socket.socket):
-#     try:
-#         message_header = client_socket.recv(HEADER_LENGTH)
-
-#         if not len(message_header):
-#             return False
-
-#         message_length = int(message_header.decode("utf-8").strip())
-#         return {"header":message_header, "data":client_socket.recv(message_length)}
-#     except:
-#         return False
-
-while True:
-    read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list)
+with PLC() as plc:
+    plc.IPAddress = global_parameters.PLC_IP
     
-    # Camera Action 
-    message = receive_data(notified_socket[1])
-    if message is False:
-        print(f"FATAL ERROR: Lost connection from {notified_socket}")
-        break 
-    else:
-        user = clients[notified_socket]
-        print(f"Received message from {user['data'].decode('utf-8')}: {message['data'].decode('utf-8')}")
+    while True:
+        ''' 
+            Read camera image if available 
+            Process image and store a sequential instruction set 
+            Send the next instruction as required 
+            Read feedbaack data from PLC
+            Parse for errors
+        '''
 
-        for client_socket in clients:
-            if client_socket != notified_socket:
-                client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
+        ### Read and Process Image ### 
+        t = time.time()
+        (val, frame) = video_capture.read() 
+        # print("1")
 
-    for notified_socket in exception_sockets:
-        sockets_list.remove(notified_socket)
-        del clients[notified_socket]
+        if val != 0: # If image is available
+            if frame_handler.process_frame(frame, t, draw=True):
+                time_stamps, profiles = frame_handler.get_results()
 
+                temp = time.time()
+                for i in range(0, len(profiles)):
+                    instruction_handler.add(time_stamps[i], profiles[i])
+                instruction_handler.add(0, 0)
+                print("TEST", time.time() - temp)
 
-while True:
-    clientsocket, address = server_socket.accept()
-    print(f"Connection from {address} has been established")
-    clientsocket.send(bytes(to_send, "utf-8"))
+            # cv2.imshow("Temp", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):    
+                break
+
+        time.sleep(6)
+
+        # print(time.time() - t)
+        ### Read and process PLC data ### 
+
+        # val1 = plc.Read("<tag1>")
+        # val2 = plc.Read("<tag2>")
+        # val3 = plc.Read("<tag3>")
+
+        # Do something with read vals
+        # val.TagName, val.Value, val.Status
+        
+    print("Average time", np.average(times))
+    instruction_handler.stop()
+        # break

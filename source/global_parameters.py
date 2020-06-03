@@ -6,7 +6,6 @@ from .model.point import Point
 ### Communication Parameters ###
 ################################
 
-DATA_CHUNK_SIZE = 10
 PLC_IP = "10.86.4.24"
 CAMERA_IP = "10.86.4.24"
 
