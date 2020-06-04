@@ -4,15 +4,15 @@ import cv2
 import numpy as np
 
 from .point import Point
-from .. import global_parameters
+from ..global_parameters import global_parameters
 from .. import vector_tools
 
 class Carriage:
     def __init__(self, pt:Point, scale, angle=0):
         self.scale = scale
         self.basePt = pt
-        self.width = global_parameters.CARRIAGE_WIDTH * scale
-        self.length = global_parameters.CARRIAGE_LENGTH * scale
+        self.width = global_parameters['CARRIAGE_WIDTH'] * scale
+        self.length = global_parameters['CARRIAGE_LENGTH'] * scale
         self.angle = angle 
         self.relative_angle = 90
         self.otherPt = self.getOtherPt()

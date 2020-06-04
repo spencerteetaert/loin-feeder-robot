@@ -3,7 +3,7 @@ import math
 import cv2
 
 from .point import Point
-from .. import global_parameters
+from ..global_parameters import global_parameters
 
 class MainTrack:
     def __init__(self, pt:Point, scale, length=0.1):
@@ -12,8 +12,8 @@ class MainTrack:
         self.length = length * scale
         self.last_pos = self.length/self.scale
         self.delta_pos = 0
-        self.min_length = global_parameters.MAIN_TRACK_MIN_LENGTH * scale
-        self.max_length = global_parameters.MAIN_TRACK_MAX_LENGTH * scale
+        self.min_length = global_parameters['MAIN_TRACK_MIN_LENGTH'] * scale
+        self.max_length = global_parameters['MAIN_TRACK_MAX_LENGTH'] * scale
         self.otherPt = self.getOtherPt()
 
     def __repr__(self):

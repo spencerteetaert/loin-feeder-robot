@@ -4,6 +4,25 @@ import math
 import cv2
 import numpy as np
 
+'''
+    Iterates through images. User clicks on the image to lay a point. 
+    When 'n' is pressed, the points are connected and the min/max HSV
+    values found within the enclosed space is returned. 
+
+    Images files should be of the form "DATA_PATH<index value>.FILE_TYPE"
+
+    Controls: 
+    - press 'q' to quit
+    - press 'n' to go to the next image
+    - press 'd' to delete the last placed point 
+'''
+
+DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\test"
+FILE_TYPE = ".png"
+START_INDEX = 0
+END_INDEX = 9
+
+flag = False
 class Point(object):
     def __init__(self, x=0,y=0):
         self.x = x
@@ -21,7 +40,7 @@ def mouse_event(event, pX, pY, flags, param):
         points += [[pX, pY]]
 
 def display():
-    global img, i, points
+    global img, i, points, flag
 
     cv2.imshow("Image", img)
     cv2.setMouseCallback("Image", mouse_event)
@@ -31,6 +50,10 @@ def display():
         if k == ord('n'):
             cv2.destroyWindow("Image")
             break
+        elif k == ord('q'):
+            cv2.destroyWindow("Image")
+            flag = True
+            break
         elif k == ord('d'):
             points = points[:-1]
 
@@ -38,8 +61,8 @@ hB = [180, 0]
 sB = [255, 0]
 vB = [255, 0]
 
-for i in range(0, 10):
-    img = cv2.imread(r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\test"+str(i)+".png")
+for i in range(START_INDEX, END_INDEX+1):
+    img = cv2.imread(DATA_PATH+str(i)+FILE_TYPE)
     # temp = cv2.cvtColor(img, cv2.COLOR_YUV2BGR_NV21)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
@@ -57,6 +80,9 @@ for i in range(0, 10):
     t.start()
     #Pauses here until thread is completed
     t.join()
+
+    if flag:
+        break
 
     if len(points) > 2:
         contour = np.array(points).reshape((-1, 1, 2)).astype(np.int32)

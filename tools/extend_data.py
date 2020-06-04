@@ -7,6 +7,16 @@ import skimage.measure as skim
 import numpy as np
 import cv2
 
+'''
+    This function extends a data set for training purposes. 
+    It applies a random assortment of distortions to each image
+    including: 
+    - Resizing 
+    - Noise 
+    - Skew 
+    - Quality reduction  
+'''
+
 #Distortion parameter limits 
 MIN_WIDTH = 0.5
 MIN_HEIGHT = 0.5
@@ -29,14 +39,7 @@ dt_string = now.strftime("%d.%m.%Y %H-%M-%S")
 OUTPUT_PATH = "C:\\Users\\User\\Documents\\Hylife 2020\\Loin Feeder\\Data\\Output Data "+dt_string
 
 def main(input_path=DATA_PATH, output_path=OUTPUT_PATH, resize_freq=RESIZE_FREQ, noise_freq=NOISE_FREQ, skew_freq=SKEW_FREQ, colour_distort_freq=COLOUR_DISTORT_FREQ):
-    '''This function extends a data set for training purposes. 
-    It applies a random assortment of distortions to each image
-    including: 
-    - Resizing 
-    - Noise 
-    - Skew 
-    - Quality reduction  
-    '''
+    
     in_data = glob.glob(input_path)
     counter = 0
 

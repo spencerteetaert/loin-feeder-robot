@@ -5,9 +5,9 @@ import time
 
 from pylogix import PLC
 import numpy as np
-np.set_printoptions(suppress=True, precision=2)
+np.set_printoptions(suppress=True, precision=3)
 
-from .. import global_parameters
+from ..global_parameters import global_parameters
 
 """
     This class is meant to ensure that the timing of instructions
@@ -39,7 +39,7 @@ class InstructionHandler:
     def run(self):
         self.running = True
         with PLC() as plc:
-            plc.IPAddress = global_parameters.PLC_IP
+            plc.IPAddress = global_parameters['PLC_IP']
             current_time = self.time_Q.get()
             counter = 0
 
@@ -56,9 +56,8 @@ class InstructionHandler:
                         instruction = self.instruction_Q.get()
                         to_send = np.around(instruction, 2)
 
-                        print(instruction)
-
                         ### PLC write instruction ###
+                        print(instruction)
                         # plc.Write("<tag0>", value=instruction[0])
                         # plc.Write("<tag1>", value=instruction[1])
                         # plc.Write("<tag2>", value=instruction[2])
@@ -67,6 +66,7 @@ class InstructionHandler:
                         # plc.Write("<tag5>", value=instruction[5])
                         # plc.Write("<tag6>", value=instruction[6])
                         # plc.Write("<tag7>", value=instruction[7])
+                        #############################
 
                         current_time = self.time_Q.get()
                     else:

@@ -1,11 +1,11 @@
 import numpy as np
 
 from ..model.point import Point
-from .. import global_parameters
+from ..global_parameters import global_parameters
 
 class PathFinder:
     def __init__(self):
-        self.environment = global_parameters.SAFE_ENVIRONMENT
+        self.environment = global_parameters['SAFE_ENVIRONMENT']
 
     def __call__(self, start_point, end_point, speed):
         # Convert to arrays to make use of numpy functionality 
@@ -50,7 +50,7 @@ class PathFinder:
 
             # Break point to avoid infinite looping if path isn't found 
             fail_safe += 1
-            if (fail_safe > global_parameters.RUNTIME_LIMIT):
+            if (fail_safe > global_parameters['RUNTIME_LIMIT']):
                 print("ERROR: Path not found.")
                 break            
 

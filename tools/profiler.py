@@ -1,3 +1,7 @@
+'''
+    Runs a profiler on the main file to identify slow functions and runtime. 
+'''
+
 import cProfile
 pr = cProfile.Profile()
 

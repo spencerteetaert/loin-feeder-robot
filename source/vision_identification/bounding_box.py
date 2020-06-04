@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 from skimage import feature 
 
-from .. import global_parameters
+from ..global_parameters import global_parameters
 
 def crop(img):
     '''Crops image to be largest square possible'''
@@ -22,7 +22,7 @@ def scale(img, width=250):
     res = cv2.resize(img, dsize=(dest_width, dest_height), interpolation=cv2.INTER_CUBIC)
     return res
 
-def get_bbox(img, lower_mask=global_parameters.LOWER_MASK, upper_mask=global_parameters.UPPER_MASK, source="Image"):
+def get_bbox(img, lower_mask=global_parameters['LOWER_MASK'], upper_mask=global_parameters['UPPER_MASK'], source="Image"):
     '''
     Returns bounding polygons for the all identified middles 
     in the image
@@ -32,7 +32,7 @@ def get_bbox(img, lower_mask=global_parameters.LOWER_MASK, upper_mask=global_par
 
     return bound_poly, contours, temp
 
-def gen_mask(img, lower_mask=global_parameters.LOWER_MASK, upper_mask=global_parameters.UPPER_MASK, bitwise_and=False, process=True):
+def gen_mask(img, lower_mask=global_parameters['LOWER_MASK'], upper_mask=global_parameters['UPPER_MASK'], bitwise_and=False, process=True):
     '''
     Masks input img based off HSV colour ranges provided 
     '''
@@ -87,7 +87,7 @@ def thresh_callback(mask):
     filt = []
     for i in range(0, len(minRects)):
         flag = True
-        if (minRects[i][1]['m00'] < global_parameters.MINIMUM_AREA):
+        if (minRects[i][1]['m00'] < global_parameters['MINIMUM_AREA']):
             flag = False
             
         filt += [flag]

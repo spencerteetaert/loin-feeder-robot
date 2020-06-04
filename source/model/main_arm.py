@@ -4,15 +4,15 @@ import cv2
 import numpy as np
 
 from .point import Point
-from .. import global_parameters
+from ..global_parameters import global_parameters
 
 class MainArm:
     def __init__(self, pt:Point, scale, length=0.75, angle=180):
         self.scale = scale
         self.basePt = pt
         self.length = length * scale
-        self.min_length = global_parameters.MAIN_ARM_MIN_LENGTH * scale
-        self.max_length = global_parameters.MAIN_ARM_MAX_LENGTH * scale
+        self.min_length = global_parameters['MAIN_ARM_MIN_LENGTH'] * scale
+        self.max_length = global_parameters['MAIN_ARM_MAX_LENGTH'] * scale
         self.angle = angle 
         self.otherPt = self.getOtherPt()
         self.refresh()
@@ -56,10 +56,10 @@ class MainArm:
         # Rotational bounds 
         self.refresh()
         rel_angle = (secondary_arm_angle - self.angle + 360) % 360 
-        if rel_angle < global_parameters.MAIN_ARM_MIN_ANGLE:
-            self.basePt.rotate(global_parameters.MAIN_ARM_MIN_ANGLE - rel_angle, self.otherPt)
-        elif rel_angle > global_parameters.MAIN_ARM_MAX_ANGLE:
-            self.basePt.rotate(global_parameters.MAIN_ARM_MAX_ANGLE - rel_angle, self.otherPt)
+        if rel_angle < global_parameters['MAIN_ARM_MIN_ANGLE']:
+            self.basePt.rotate(global_parameters['MAIN_ARM_MIN_ANGLE'] - rel_angle, self.otherPt)
+        elif rel_angle > global_parameters['MAIN_ARM_MAX_ANGLE']:
+            self.basePt.rotate(global_parameters['MAIN_ARM_MAX_ANGLE'] - rel_angle, self.otherPt)
 
         self.delta_pos = self.length/self.scale - self.last_pos
         self.last_pos = self.length/self.scale
@@ -72,7 +72,7 @@ class MainArm:
         self.otherPt = self.getOtherPt()
 
     def get_collision_bounds(self):
-        p = np.add(self.basePt.toArray(), [global_parameters.MAIN_ARM_WIDTH, global_parameters.MAIN_ARM_WIDTH])
+        p = np.add(self.basePt.toArray(), [global_parameters['MAIN_ARM_WIDTH'], global_parameters['MAIN_ARM_WIDTH']])
         r1 = np.array([0, -1000])
         r2 = np.array([-1000, 0])
 

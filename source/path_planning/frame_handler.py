@@ -7,20 +7,19 @@ from ..vision_identification import bounding_box
 from ..vision_identification import meat
 from ..model.robot import Robot
 from ..model.point import Point
-# from ..data_send_receive import data_io
-from .. import global_parameters
+from ..global_parameters import global_parameters
 
 class FrameHandler:
     def __init__(self):
         self.flip_flop = False # False = Left, True = Right 
         self.meats = []
         self.constants = []
-        self.end_point_1 = global_parameters.END_POINT_1 - Point(global_parameters.LOIN_WIDTH * global_parameters.VIDEO_SCALE, 0)
-        self.end_point_2 = global_parameters.END_POINT_2 + Point(global_parameters.LOIN_WIDTH * global_parameters.VIDEO_SCALE, 0)
+        self.end_point_1 = global_parameters['END_POINT_1'] - Point(global_parameters['LOIN_WIDTH'] * global_parameters['VIDEO_SCALE'], 0)
+        self.end_point_2 = global_parameters['END_POINT_2'] + Point(global_parameters['LOIN_WIDTH'] * global_parameters['VIDEO_SCALE'], 0)
 
         self.dt = None
         self.start = 0
-        self.model = Robot(global_parameters.ROBOT_BASE_POINT, global_parameters.VIDEO_SCALE)
+        self.model = Robot(global_parameters['ROBOT_BASE_POINT'], global_parameters['VIDEO_SCALE'])
     def __repr__(self):
         return "FrameHandler Object\n\tModel:" + self.model.__repr__()
 
@@ -63,13 +62,13 @@ class FrameHandler:
         self.dt = time.time() - self.start
         # Profiler model creates motion profiles, it updates as fast as possible in a separate thread
         if self.model.phase == 0:
-            dist = (global_parameters.PICKUP_POINT - self.meats[0].get_center_as_point()).y
+            dist = (global_parameters['PICKUP_POINT'] - self.meats[0].get_center_as_point()).y
             self.start_point_1 = self.meats[0].get_center_as_point() + Point(0, dist)
-            self.start_point_2 = self.meats[1].get_center_as_point() + Point(0, dist + self.dt * global_parameters.FRAME_RATE * global_parameters.CONVEYOR_SPEED)
+            self.start_point_2 = self.meats[1].get_center_as_point() + Point(0, dist + self.dt * global_parameters['FRAME_RATE'] * global_parameters['CONVEYOR_SPEED'])
 
             if dist > 0:
                 self.meats = []
-                self.model.moveMeat(self.start_point_1, self.start_point_2, self.end_point_1, self.end_point_2, dist / global_parameters.CONVEYOR_SPEED, phase_1_delay=False)
+                self.model.moveMeat(self.start_point_1, self.start_point_2, self.end_point_1, self.end_point_2, dist / global_parameters['CONVEYOR_SPEED'], phase_1_delay=False)
                 
                 # Given the start and end conditions, calculate the model motor profiles
                 self.model.run(read_time, dist) 

@@ -4,13 +4,13 @@ import numpy as np
 import cv2
 
 from ..model.point import Point 
-from .. import global_parameters
+from ..global_parameters import global_parameters
 from .. import vector_tools
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 
 class Meat():
-    def __init__(self, data, conveyor_speed=global_parameters.CONVEYOR_SPEED * global_parameters.RUNTIME_FACTOR, side="Left", center=(0,0)):
+    def __init__(self, data, conveyor_speed=global_parameters['CONVEYOR_SPEED'] * global_parameters['RUNTIME_FACTOR'], side="Left", center=(0,0)):
         self.conveyor_speed = conveyor_speed
         self.side = side
         self.bbox = data[0]
@@ -107,7 +107,7 @@ class Meat():
         if self.side == "Left":
             x *= -1
 
-        dir_vect = x * global_parameters.LOIN_WIDTH * global_parameters.VIDEO_SCALE
+        dir_vect = x * global_parameters['LOIN_WIDTH'] * global_parameters['VIDEO_SCALE']
         self.cut_line = self.loin_line + dir_vect
 
         # Return 

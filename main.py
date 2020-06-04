@@ -21,19 +21,10 @@ with PLC() as plc:
     count_flag = False
 
     while True:
-        ''' 
-            Read camera image if available 
-            Process image and store a sequential instruction set 
-            Read feedbaack data from PLC
-            Parse for errors
-
-
-            Note: Currently implemented is a mock camera "trigger" 
-            when 'c' is pressed. On the actual robot this will be
-            a physical trigger and automatically picked up by the software. 
-        '''
         #### Read and Process Image ####
         read_time = time.time()
+
+        #To be replaced by camera trigger software 
         (val, frame) = video_capture.read() 
 
         if not count_flag:
@@ -44,9 +35,10 @@ with PLC() as plc:
         if val != 0: # If image is available
             if frame_handler.process_frame(frame, read_time, draw=True):
                 time_stamps, profiles = frame_handler.get_results()
-                # print(time_stamps, profiles)
+
                 flag = False
                 for i in range(0, len(profiles)):
+                    # Adds full path to instruction handler 
                     instruction_handler.add(time_stamps[i], profiles[i])
                     flag = True
                 if flag:
@@ -55,9 +47,9 @@ with PLC() as plc:
 
 
         #### Just for visualization ####
-        else:
-            frame = bounding_box.scale(frame)
-            frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
+        # else:
+        frame = bounding_box.scale(frame)
+        frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
         global_parameters.PICKUP_POINT.draw(frame)
         cv2.imshow("Temp", frame)
@@ -78,5 +70,7 @@ with PLC() as plc:
 
         # Do something with read vals
         # val.TagName, val.Value, val.Status
+
+        #################################
         
     instruction_handler.stop()

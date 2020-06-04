@@ -15,7 +15,7 @@ from source.model.robot import Robot
 from source.model.point import Point
 from source.path_planning.path_runner import PathRunner
 from source.path_planning import graphing_tools
-from source import global_parameters
+from source.global_parameters import global_parameters
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect((socket.gethostname(), 2000))
@@ -110,7 +110,7 @@ def main(data_path=DATA_PATH):
         # out.write(frame)
 
         #Artifically slow the program to the desired frame rate
-        # cv2.waitKey(max(global_parameters.FRAME_RATE - round((time.time() - force_timer )*1000 + 1), 1))
+        # cv2.waitKey(max(global_parameters['FRAME_RATE'] - round((time.time() - force_timer )*1000 + 1), 1))
 
     print("Average frame time:", np.average(times))
     # out.release()

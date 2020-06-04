@@ -4,7 +4,23 @@ import cv2
 from context import source
 from source.vision_identification import bounding_box
 
+'''
+    Iterates through images allowing user to adjust HSV filter values to 
+    see the effect on the bounding box algorithm. At the end of the list, 
+    the lowest min value and highest max value are returned. 
+
+    Images files should be of the form "DATA_PATH<index value>.FILE_TYPE"
+
+    Controls: 
+    - press 'q' to quit
+    - press 'n' to go to the next image
+'''
+
+#Location of test images
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\test"
+FILE_TYPE = ".png"
+START_INDEX = 0
+END_INDEX = 9
 
 def n(x):
     pass
@@ -21,14 +37,9 @@ def main(input_path=DATA_PATH):
     vhigh = 255
     flag = False
 
-    for i in range(0, 10):
-        # temp = input_path + str(i) + ".png"
-        temp = input_path + str(i) + ".png"
-        # try: 
+    for i in range(START_INDEX, END_INDEX+1):
+        temp = input_path + str(i) + FILE_TYPE
         og = bounding_box.scale(cv2.imread(temp), width=500)
-        og.shape
-        # except:
-        #     continue
         
         src = 'Source'
         cv2.namedWindow(src)

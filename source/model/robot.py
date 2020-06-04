@@ -9,7 +9,7 @@ from .main_track import MainTrack
 from .main_arm import MainArm 
 from .secondary_arm import SecondaryArm
 from .carriage import Carriage
-from .. import global_parameters
+from ..global_parameters import global_parameters
 
 class Robot:
 
@@ -72,11 +72,11 @@ class Robot:
     def get_current_state(self):
         ret = []
         
-        ret += [self.main_track.length / global_parameters.VIDEO_SCALE] # Main track extension
-        ret += [self.main_arm.length / global_parameters.VIDEO_SCALE] # Main arm extension
+        ret += [self.main_track.length / global_parameters['VIDEO_SCALE']] # Main track extension
+        ret += [self.main_arm.length / global_parameters['VIDEO_SCALE']] # Main arm extension
         ret += [self.main_arm.angle] # Main arm rotation 
-        ret += [self.secondary_arm.length1 / global_parameters.VIDEO_SCALE] # Secondary arm extension 1
-        ret += [self.secondary_arm.length2 / global_parameters.VIDEO_SCALE] # Secondary arm extension 2
+        ret += [self.secondary_arm.length1 / global_parameters['VIDEO_SCALE']] # Secondary arm extension 1
+        ret += [self.secondary_arm.length2 / global_parameters['VIDEO_SCALE']] # Secondary arm extension 2
         ret += [self.secondary_arm.relative_angle] # Secondary arm rotation 
         ret += [self.carriage1.relative_angle] # Carriage 1 rotation
         ret += [self.carriage2.relative_angle] # Carriage 2 rotation
@@ -102,30 +102,30 @@ class Robot:
         self.acc_data = np.gradient(raw_vel_data, axis=0)
 
         # Convert from per frame to per second
-        self.acc_data = np.multiply(self.acc_data, global_parameters.FRAME_RATE)
+        self.acc_data = np.multiply(self.acc_data, global_parameters['FRAME_RATE'])
 
-        if abs(np.amax(self.acc_data[:,[0, 1, 3, 4]])) > global_parameters.LINEAR_ACCELERATION_MAX:
+        if abs(np.amax(self.acc_data[:,[0, 1, 3, 4]])) > global_parameters['LINEAR_ACCELERATION_MAX']:
             print("Linear acceleration fault. Val:", np.amax(self.acc_data[:,[0, 1, 3, 4]]))
             print(self.acc_data[:,[0, 1, 3, 4]])
             return False
-        if abs(np.amax(self.acc_data[:,[2, 5, 6, 7]])) > global_parameters.ROTATIONAL_ACCELERATION_MAX:
+        if abs(np.amax(self.acc_data[:,[2, 5, 6, 7]])) > global_parameters['ROTATIONAL_ACCELERATION_MAX']:
             print("Rotational acceleration fault. Val:", np.amax(self.acc_data[:,[2, 5, 6, 7]]))
             print(self.acc_data[:,[2, 5, 6, 7]])
             return False
 
         self.vel_data = np.asarray([integrate.simps(self.acc_data[0:i+1], axis=0).tolist() for i in range(0, len(self.acc_data))])
 
-        if abs(np.amax(self.vel_data[:,[0, 1, 3, 4]])) > global_parameters.LINEAR_VELOCITY_MAX:
-            print("Linear acceleration fault. Val:", np.amax(self.vel_data[:,[0, 1, 3, 4]]))
+        if abs(np.amax(self.vel_data[:,[0, 1, 3, 4]])) > global_parameters['LINEAR_VELOCITY_MAX']:
+            print("Linear velocity fault. Val:", np.amax(self.vel_data[:,[0, 1, 3, 4]]))
             print(self.vel_data[:,[0, 1, 3, 4]])
             return False
-        if abs(np.amax(self.vel_data[:,[2, 5, 6, 7]])) > global_parameters.ROTATIONAL_VELOCITY_MAX:
-            print("Rotational acceleration fault. Val:", np.amax(self.vel_data[:,[2, 5, 6, 7]]))
+        if abs(np.amax(self.vel_data[:,[2, 5, 6, 7]])) > global_parameters['ROTATIONAL_VELOCITY_MAX']:
+            print("Rotational velocity fault. Val:", np.amax(self.vel_data[:,[2, 5, 6, 7]]))
             print(self.vel_data[:,[2, 5, 6, 7]])
             return False
 
         # Convert from change per frame to change
-        # self.vel_data = np.multiply(self.vel_data, global_parameters.FRAME_RATE)
+        # self.vel_data = np.multiply(self.vel_data, global_parameters['FRAME_RATE)
         # self.pos_data = np.add(np.asarray([integrate.simps(self.vel_data[0:i+1], axis=0).tolist() for i in range(0, len(self.vel_data))]), self.constants)
 
         return True
@@ -308,8 +308,8 @@ class Robot:
                     self.profile_data += [self.get_current_state()]
                 # self.counter = 0
                 self.switched = False
-                self.follow_pt1.moveTo(self.s1, global_parameters.PHASE_1_SPEED)
-                self.follow_pt2.moveTo(self.s2, global_parameters.PHASE_1_SPEED)
+                self.follow_pt1.moveTo(self.s1, global_parameters['PHASE_1_SPEED'])
+                self.follow_pt2.moveTo(self.s2, global_parameters['PHASE_1_SPEED'])
                 self.phase_1_counter = 0
             if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 and self.delay < 1 and self.PHASE_1_DELAY: # End of step condition 
                 self.switched = True 
@@ -323,9 +323,9 @@ class Robot:
             self.delay -= 1
             if self.switched:
                 self.switched = False
-                self.delay = global_parameters.PHASE_2_DELAY
-                self.follow_pt1.moveTo(self.follow_pt1 + Point(0, self.delay * global_parameters.CONVEYOR_SPEED), global_parameters.PHASE_2_DELAY)
-                self.follow_pt2.moveTo(self.follow_pt2 + Point(0, self.delay * global_parameters.CONVEYOR_SPEED), global_parameters.PHASE_2_DELAY)
+                self.delay = global_parameters['PHASE_2_DELAY']
+                self.follow_pt1.moveTo(self.follow_pt1 + Point(0, self.delay * global_parameters['CONVEYOR_SPEED']), global_parameters['PHASE_2_DELAY'])
+                self.follow_pt2.moveTo(self.follow_pt2 + Point(0, self.delay * global_parameters['CONVEYOR_SPEED']), global_parameters['PHASE_2_DELAY'])
             if self.delay <= 1: # End of step condition 
                 self.switched = True 
                 self.phase = 3
@@ -335,16 +335,16 @@ class Robot:
         if self.phase == 3:
             if self.switched:
                 self.switched = False
-                self.followPath(global_parameters.PHASE_3_PATH1, global_parameters.PHASE_3_PATH2, global_parameters.PHASE_3_SPEED)
-                self.follow_pt1.moveTo(global_parameters.PHASE_3_PATH1[0], global_parameters.PHASE_3_INITIAL_SPEED)
-                self.follow_pt2.moveTo(global_parameters.PHASE_3_PATH2[0], global_parameters.PHASE_3_INITIAL_SPEED)
+                self.followPath(global_parameters['PHASE_3_PATH1'], global_parameters['PHASE_3_PATH2'], global_parameters['PHASE_3_SPEED'])
+                self.follow_pt1.moveTo(global_parameters['PHASE_3_PATH1'][0], global_parameters['PHASE_3_INITIAL_SPEED'])
+                self.follow_pt2.moveTo(global_parameters['PHASE_3_PATH2'][0], global_parameters['PHASE_3_INITIAL_SPEED'])
                 self.follow1_index = 0
                 self.follow2_index = 0
 
             # End condition 
             if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 \
-                and self.follow1_index >= len(global_parameters.PHASE_3_PATH1)-1 \
-                    and self.follow2_index >= len(global_parameters.PHASE_3_PATH2)-1: 
+                and self.follow1_index >= len(global_parameters['PHASE_3_PATH1'])-1 \
+                    and self.follow2_index >= len(global_parameters['PHASE_3_PATH2'])-1: 
                 self.switched = True 
                 self.phase = 4
 
@@ -352,19 +352,19 @@ class Robot:
                 self.follow_pt1.moveTo(self.follow_pt1, 1)
                 self.follow_pt2.moveTo(self.follow_pt2, 1)
 
-            if self.follow_pt1.steps_remaining <= 1 and self.follow1_index < len(global_parameters.PHASE_3_PATH1) - 1:
+            if self.follow_pt1.steps_remaining <= 1 and self.follow1_index < len(global_parameters['PHASE_3_PATH1']) - 1:
                 self.follow1_index += 1
-                self.follow_pt1.moveTo(global_parameters.PHASE_3_PATH1[self.follow1_index], self.dt1[self.follow1_index - 1])
-            if self.follow_pt2.steps_remaining <= 1 and self.follow2_index < len(global_parameters.PHASE_3_PATH2) - 1:
+                self.follow_pt1.moveTo(global_parameters['PHASE_3_PATH1'][self.follow1_index], self.dt1[self.follow1_index - 1])
+            if self.follow_pt2.steps_remaining <= 1 and self.follow2_index < len(global_parameters['PHASE_3_PATH2']) - 1:
                 self.follow2_index += 1
-                self.follow_pt2.moveTo(global_parameters.PHASE_3_PATH2[self.follow2_index], self.dt2[self.follow2_index - 1])
+                self.follow_pt2.moveTo(global_parameters['PHASE_3_PATH2'][self.follow2_index], self.dt2[self.follow2_index - 1])
 
         # Phase 4: "Step 2" -> Extending
         if self.phase == 4:
             if self.switched:
                 self.switched = False
-                self.follow_pt1.moveTo(self.e1, global_parameters.PHASE_4_SPEED)
-                self.follow_pt2.moveTo(self.e2, global_parameters.PHASE_4_SPEED)
+                self.follow_pt1.moveTo(self.e1, global_parameters['PHASE_4_SPEED'])
+                self.follow_pt2.moveTo(self.e2, global_parameters['PHASE_4_SPEED'])
             if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1: # End of step condition 
                 self.switched = True 
                 self.phase = 5
@@ -374,7 +374,7 @@ class Robot:
             self.delay -= 1
             if self.switched:
                 self.switched = False
-                self.delay = global_parameters.PHASE_5_DELAY
+                self.delay = global_parameters['PHASE_5_DELAY']
             if self.delay <= 0: # End of step condition 
                 self.switched = True 
                 self.phase = 6
@@ -385,14 +385,14 @@ class Robot:
             if self.switched:
                 self.switched = False
                 self.delay = round(np.sum(self.dt1))//3
-                self.followPath(global_parameters.PHASE_6_PATH1, global_parameters.PHASE_6_PATH2, global_parameters.PHASE_6_SPEED-self.delay)
+                self.followPath(global_parameters['PHASE_6_PATH1'], global_parameters['PHASE_6_PATH2'], global_parameters['PHASE_6_SPEED']-self.delay)
                 self.follow1_index = 0
                 self.follow2_index = 0
 
             # End condition 
             if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 \
-                and self.follow1_index >= len(global_parameters.PHASE_6_PATH1) - 1 \
-                    and self.follow2_index >= len(global_parameters.PHASE_6_PATH2) - 1: 
+                and self.follow1_index >= len(global_parameters['PHASE_6_PATH1']) - 1 \
+                    and self.follow2_index >= len(global_parameters['PHASE_6_PATH2']) - 1: 
                 self.switched = True 
                 self.phase = 0
 
@@ -400,20 +400,20 @@ class Robot:
                 self.follow_pt1.moveTo(self.follow_pt1, 1)
                 self.follow_pt2.moveTo(self.follow_pt2, 1)
 
-            if self.follow_pt1.steps_remaining <= 1 and self.follow1_index < len(global_parameters.PHASE_6_PATH1) - 1:
+            if self.follow_pt1.steps_remaining <= 1 and self.follow1_index < len(global_parameters['PHASE_6_PATH1']) - 1:
                 self.follow1_index += 1
-                self.follow_pt1.moveTo(global_parameters.PHASE_6_PATH1[self.follow1_index], self.dt1[self.follow1_index - 1])
-            if self.follow_pt2.steps_remaining <= 1 and self.follow2_index < len(global_parameters.PHASE_6_PATH2) - 1 \
+                self.follow_pt1.moveTo(global_parameters['PHASE_6_PATH1'][self.follow1_index], self.dt1[self.follow1_index - 1])
+            if self.follow_pt2.steps_remaining <= 1 and self.follow2_index < len(global_parameters['PHASE_6_PATH2']) - 1 \
                 and self.delay <= 0:
                 self.follow2_index += 1
-                self.follow_pt2.moveTo(global_parameters.PHASE_6_PATH2[self.follow2_index], self.dt2[self.follow2_index - 1])
+                self.follow_pt2.moveTo(global_parameters['PHASE_6_PATH2'][self.follow2_index], self.dt2[self.follow2_index - 1])
 
         self.moveTo(self.follow_pt1, self.follow_pt2)
 
-        frame = np.zeros([1200, 1200, 3])
-        self.draw(frame)
-        cv2.imshow("Temp", frame)
-        cv2.waitKey(1)
+        # frame = np.zeros([1200, 1200, 3])
+        # self.draw(frame)
+        # cv2.imshow("Temp", frame)
+        # cv2.waitKey(0)
 
         flag, report = self.collision_check()
         if flag:
@@ -422,7 +422,7 @@ class Robot:
             print("ERROR: Profile resulted in collision and was not sent.")
             print(report)
             self.scrap_data()
-            cv2.waitKey(0)
+            # cv2.waitKey(0)
             return False
 
         if self.recording:
@@ -439,18 +439,18 @@ class Robot:
 
         counter = 0
         self.xs = []
-        self.xs += [read_time - 2 / global_parameters.FRAME_RATE]
-        self.xs += [read_time - 1 / global_parameters.FRAME_RATE]
+        self.xs += [read_time - 2 / global_parameters['FRAME_RATE']]
+        self.xs += [read_time - 1 / global_parameters['FRAME_RATE']]
         while self.update():
-            self.xs += [read_time + counter / global_parameters.FRAME_RATE]
+            self.xs += [read_time + counter / global_parameters['FRAME_RATE']]
             counter += 1
-        self.xs += [read_time + counter / global_parameters.FRAME_RATE]
+        self.xs += [read_time + counter / global_parameters['FRAME_RATE']]
         counter += 1
-        self.xs += [read_time + counter / global_parameters.FRAME_RATE]
+        self.xs += [read_time + counter / global_parameters['FRAME_RATE']]
         counter += 1
 
         # c accounts for the time after the robot has moved into position but before it grabs the meat
-        c = (dist / global_parameters.CONVEYOR_SPEED - self.phase_1_counter) / global_parameters.FRAME_RATE
+        c = (dist / global_parameters['CONVEYOR_SPEED'] - self.phase_1_counter) / global_parameters['FRAME_RATE']
         self.xs = [self.xs[i] + c for i in range(0, len(self.xs))]
 
         self.recording = False

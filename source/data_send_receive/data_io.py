@@ -1,7 +1,7 @@
 import socket
 import select
 
-from .. import global_parameters
+from ..global_parameters import global_parameters
 
 HEADER_LENGTH = 10
 
@@ -25,13 +25,13 @@ def package_data(vel_data, start_time):
     full_data = ""
     for i in range(0, len(vel_data)):
         for j in range(0, len(vel_data[i])):
-            # print(f"{str(round(vel_data[i][j], 5)):<{global_parameters.DATA_CHUNK_SIZE}}")
-            full_data += f"{str(round(vel_data[i][j], 5)):<{global_parameters.DATA_CHUNK_SIZE}}"
+            # print(f"{str(round(vel_data[i][j], 5)):<{global_parameters['DATA_CHUNK_SIZE']}}")
+            full_data += f"{str(round(vel_data[i][j], 5)):<{global_parameters['DATA_CHUNK_SIZE']}}"
 
     encoded_data = full_data.encode('utf-8')
 
-    # for i in range(0, len(t), global_parameters.DATA_CHUNK_SIZE):
-    #     print("T",i,t[i:i+global_parameters.DATA_CHUNK_SIZE])
+    # for i in range(0, len(t), global_parameters['DATA_CHUNK_SIZE']):
+    #     print("T",i,t[i:i+global_parameters['DATA_CHUNK_SIZE']])
 
     return encoded_data
 

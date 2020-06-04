@@ -4,7 +4,7 @@ import errno # Error codes
 import sys
 
 from context import source
-from source import global_parameters
+from source.global_parameters import global_parameters
 
 EXPECTED_DATA_COUNT = 8
 
@@ -18,7 +18,7 @@ while True:
         data_total = []
         instruction = []
         while True: # Receive messages
-            chunk = client_socket.recv(global_parameters.DATA_CHUNK_SIZE)
+            chunk = client_socket.recv(global_parameters['DATA_CHUNK_SIZE'])
             if not len(chunk):
                 print("Connection closed by the serve")
                 sys.exit()

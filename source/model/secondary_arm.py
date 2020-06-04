@@ -3,7 +3,7 @@ import math
 import cv2
 
 from .point import Point
-from .. import global_parameters
+from ..global_parameters import global_parameters
 
 class SecondaryArm:
     def __init__(self, pt:Point, scale, length1=0.354, length2=0.354, angle=90):
@@ -11,8 +11,8 @@ class SecondaryArm:
         self.basePt = pt
         self.length1 = length1 * scale
         self.length2 = length2 * scale
-        self.min_length = global_parameters.SECONDARY_ARM_MIN_LENGTH * scale
-        self.max_length = global_parameters.SECONDARY_ARM_MAX_LENGTH * scale
+        self.min_length = global_parameters['SECONDARY_ARM_MIN_LENGTH'] * scale
+        self.max_length = global_parameters['SECONDARY_ARM_MAX_LENGTH'] * scale
         self.angle = angle 
         self.relative_angle = 90
         self.otherPt1 = self.getotherPt1()

@@ -7,6 +7,10 @@ from context import source
 from source.vision_identification import bounding_box
 from source.vision_identification.meat import Meat 
 
+'''
+    BROKEN 
+'''
+
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 
 def main(data_path=DATA_PATH):

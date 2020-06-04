@@ -10,7 +10,7 @@ import numpy as np
 from scipy import integrate
 
 from ..model.robot import Robot
-from .. import global_parameters
+from ..global_parameters import global_parameters
 
 class PathRunner:
     ''' Class that generates full motion profiles for the robot given start and end points. '''
@@ -39,18 +39,18 @@ class PathRunner:
 
         counter = 0
         self.xs = []
-        self.xs += [counter / global_parameters.FRAME_RATE]
+        self.xs += [counter / global_parameters['FRAME_RATE']]
         counter += 1
-        self.xs += [counter / global_parameters.FRAME_RATE]
+        self.xs += [counter / global_parameters['FRAME_RATE']]
         counter += 1
         while self.model.update():
-            self.xs += [counter / global_parameters.FRAME_RATE]
+            self.xs += [counter / global_parameters['FRAME_RATE']]
             counter += 1
             if self.stopped:
                 return 
-        self.xs += [counter / global_parameters.FRAME_RATE]
+        self.xs += [counter / global_parameters['FRAME_RATE']]
         counter += 1
-        self.xs += [counter / global_parameters.FRAME_RATE]
+        self.xs += [counter / global_parameters['FRAME_RATE']]
         counter += 1
 
         if not self.stopped:

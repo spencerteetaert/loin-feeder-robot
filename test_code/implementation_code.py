@@ -11,7 +11,12 @@ from source.model.robot import Robot
 from source.model.point import Point
 from source.path_planning.path_runner import PathRunner
 from source.path_planning import graphing_tools
-from source import global_parameters
+from source.global_parameters import global_parameters
+
+'''
+    A full implementation of all of the non-PLC specific functionality 
+    of the library. File 
+'''
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 DISPLAY_TOGGLE = True
@@ -19,11 +24,11 @@ PROFILER_TOGGLE = True
 
 # Model for creating acceleration profiles
 if PROFILER_TOGGLE:
-    profile_model = Robot(Point(280, 600), global_parameters.VIDEO_SCALE)
+    profile_model = Robot(Point(280, 600), global_parameters['VIDEO_SCALE'])
     path_runner = PathRunner(profile_model)
 # Model for display
 if DISPLAY_TOGGLE:
-    drawing_model = Robot(Point(280, 600), global_parameters.VIDEO_SCALE)
+    drawing_model = Robot(Point(280, 600), global_parameters['VIDEO_SCALE'])
     current_graph = np.zeros([830, 830, 3], dtype=np.uint8)
     grapher = graphing_tools.Grapher()
 
@@ -38,7 +43,7 @@ def on_mouse(event, pX, pY, flags, param):
 def main(data_path=DATA_PATH):
     global streamer, grapher, profile_model, drawing_model, current_graph, DISPLAY_TOGGLE
     # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output.mp4', 0x7634706d, 30, (1680,830))
-    out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, (1680,830))
+    # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, (1680,830))
 
     if DISPLAY_TOGGLE:
         win = "Window"
@@ -114,12 +119,12 @@ def main(data_path=DATA_PATH):
         # # Profiler model creates motion profiles, it updates as fast as possible in a separate thread
         if PROFILER_TOGGLE:
             if profile_model.phase == 0 and len(queue1) > 0 and not path_runner.running:
-                dist = (global_parameters.PICKUP_POINT - meats[queue1[0][0]].get_center_as_point()).y
+                dist = (global_parameters['PICKUP_POINT'] - meats[queue1[0][0]].get_center_as_point()).y
 
                 if dist > 0:
                     sp1 = meats[queue1[0][0]].get_center_as_point().copy() + Point(0, dist)
                     sp2 = meats[queue1[0][1]].get_center_as_point().copy() + Point(0, dist)
-                    profile_model.moveMeat(sp1, sp2, ep1, ep2, dist // global_parameters.CONVEYOR_SPEED, phase_1_delay=False)
+                    profile_model.moveMeat(sp1, sp2, ep1, ep2, dist // global_parameters['CONVEYOR_SPEED'], phase_1_delay=False)
                     queue1 = queue1[1:]
 
                     # Given the start and end conditions, calculate the profile_model motor profiles
@@ -128,12 +133,12 @@ def main(data_path=DATA_PATH):
         # Drawing model is just for drawing purposes, it updates at the frame rate displayed
         if DISPLAY_TOGGLE:
             if drawing_model.phase == 0 and len(queue2) > 0:
-                dist = (global_parameters.PICKUP_POINT - meats[queue2[0][0]].get_center_as_point()).y
+                dist = (global_parameters['PICKUP_POINT'] - meats[queue2[0][0]].get_center_as_point()).y
 
                 if dist > 0:
                     sp1 = meats[queue2[0][0]].get_center_as_point().copy() + Point(0, dist)
                     sp2 = meats[queue2[0][1]].get_center_as_point().copy() + Point(0, dist)
-                    drawing_model.moveMeat(sp1, sp2, ep1, ep2, dist // (global_parameters.CONVEYOR_SPEED * global_parameters.RUNTIME_FACTOR))
+                    drawing_model.moveMeat(sp1, sp2, ep1, ep2, dist // (global_parameters['CONVEYOR_SPEED'] * global_parameters['RUNTIME_FACTOR']))
                     queue2 = queue2[1:]
                     flip_flop2 = True
                     if PROFILER_TOGGLE:
@@ -188,13 +193,13 @@ def main(data_path=DATA_PATH):
                 current_graph = grapher.read()
             
         times += [time.time() - start]
-        out.write(frame)
+        # out.write(frame)
 
         #Artifically slow the program to the desired frame rate
-        # cv2.waitKey(max(global_parameters.FRAME_RATE - round((time.time() - force_timer )*1000 + 1), 1))
+        cv2.waitKey(max(global_parameters['FRAME_RATE'] - round((time.time() - force_timer )*1000 + 1), 1))
 
     print("Average frame time:", np.average(times))
-    out.release()
+    # out.release()
     streamer.stop()
     if PROFILER_TOGGLE:
         path_runner.stop()
