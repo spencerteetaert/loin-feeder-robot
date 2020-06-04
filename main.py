@@ -43,6 +43,7 @@ with PLC() as plc:
         if val != 0: # If image is available
             if frame_handler.process_frame(frame, read_time, draw=True):
                 time_stamps, profiles = frame_handler.get_results()
+                # print(time_stamps, profiles)
                 flag = False
                 for i in range(0, len(profiles)):
                     instruction_handler.add(time_stamps[i], profiles[i])
@@ -54,14 +55,13 @@ with PLC() as plc:
 
         #### Just for visualization ####
         else:
-            
             frame = bounding_box.scale(frame)
             frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
         global_parameters.PICKUP_POINT.draw(frame)
         cv2.imshow("Temp", frame)
 
-        k = cv2.waitKey(1) & 0xFF
+        k = cv2.waitKey(max(global_parameters.FRAME_RATE - round((time.time() - read_time )*1000 + 1), 1)) & 0xFF
         if k == ord('q'):    
             break
         elif k == ord('c'):

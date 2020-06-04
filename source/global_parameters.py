@@ -38,6 +38,9 @@ CONVEYOR_SPEED = 2 / RUNTIME_FACTOR #Px/frame
 RUNTIME_LIMIT = 300 # Maximum number of path points before program breaks 
 SAFE_ENVIRONMENT = [[[440, 190], [440, 730]], [[100, 735], [800, 735]], [[440, 600], [300, 735]], [[440, 600], [580, 735]]]#[[[440, 190], [440, 730]], [[145, 735], [665, 735]]]     # Lines that are safe to travel on
 
+ROTATIONAL_ACCELERATION_MAX = 8
+LINEAR_ACCELERATION_MAX = 0.1
+
 # Points 
 READY_POS_1 = Point(439, 504, angle=0)
 READY_POS_2 = Point(439, 654, angle=0)
@@ -56,7 +59,7 @@ END_POINT_2 = Point(250, 735, angle=90)
     Phase 6: Moving to "Ready Position" >> Phase 0
 '''
 
-TOTAL_EXECUTION_TIME = 6
+TOTAL_EXECUTION_TIME = 5.2
 PHASE_1_PERCENTAGE = 0.096
 PHASE_2_PERCENTAGE = 0.048
 PHASE_3_1_PERCENTAGE = 0.116

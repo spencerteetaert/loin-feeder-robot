@@ -2,7 +2,6 @@ import time
 
 import numpy as np 
 import cv2
-from scipy import integrate
 
 from source.vision_identification import bounding_box
 from source.vision_identification import meat
@@ -15,10 +14,6 @@ class FrameHandler:
     def __init__(self):
         self.flip_flop = False # False = Left, True = Right 
         self.meats = []
-        self.acc_data = []
-        self.vel_data = []
-        self.pos_data = []
-        self.xs = []
         self.constants = []
         self.end_point_1 = global_parameters.END_POINT_1 - Point(global_parameters.LOIN_WIDTH * global_parameters.VIDEO_SCALE, 0)
         self.end_point_2 = global_parameters.END_POINT_2 + Point(global_parameters.LOIN_WIDTH * global_parameters.VIDEO_SCALE, 0)
@@ -31,8 +26,6 @@ class FrameHandler:
 
     def process_frame(self, frame, read_time, draw=False):
         start = time.time()
-        if len(self.meats) == 0:
-            self.start = start
         self.frame = bounding_box.scale(frame)
         self.frame = cv2.copyMakeBorder(self.frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
@@ -48,6 +41,8 @@ class FrameHandler:
                 cY = int(data[i][1]["m01"] / data[i][1]["m00"])
 
                 if iH / 6 < cY and iH / 2 > cY:
+                    if len(self.meats) == 0: # Marks the time of the first of two meats 
+                        self.start = start
                     if self.flip_flop:
                         self.meats += [meat.Meat(data[i], side="Right", center=[cX, cY])]
                     else:
@@ -56,12 +51,9 @@ class FrameHandler:
 
                     if len(self.meats) > 1:
                         self.find_path(read_time)
-                        if not self.gen_profiles(): # If path creation failed (collision, etc)
+                        if not self.model.gen_profiles(): # If path creation failed (collision, etc)
                             # self.xs = []
                             return False
-                    else:
-                        self.xs = []
-                        self.vel_data = []
 
                     break # Ensures only one piece is identified 
         
@@ -71,59 +63,23 @@ class FrameHandler:
         self.dt = time.time() - self.start
         # Profiler model creates motion profiles, it updates as fast as possible in a separate thread
         if self.model.phase == 0:
-            self.dist = (global_parameters.PICKUP_POINT - self.meats[0].get_center_as_point()).y
-            self.start_point_1 = self.meats[1].get_center_as_point() + Point(0, self.dist)
-            self.start_point_2 = self.meats[0].get_center_as_point() + Point(0, self.dist + self.dt * global_parameters.FRAME_RATE * global_parameters.CONVEYOR_SPEED)
+            dist = (global_parameters.PICKUP_POINT - self.meats[0].get_center_as_point()).y
+            self.start_point_1 = self.meats[0].get_center_as_point() + Point(0, dist)
+            self.start_point_2 = self.meats[1].get_center_as_point() + Point(0, dist + self.dt * global_parameters.FRAME_RATE * global_parameters.CONVEYOR_SPEED)
 
-            if self.dist > 0:
+            if dist > 0:
                 self.meats = []
-                self.model.moveMeat(self.start_point_1, self.start_point_2, self.end_point_1, self.end_point_2, self.dist / global_parameters.CONVEYOR_SPEED, phase_1_delay=False)
+                self.model.moveMeat(self.start_point_1, self.start_point_2, self.end_point_1, self.end_point_2, dist / global_parameters.CONVEYOR_SPEED, phase_1_delay=False)
                 
                 # Given the start and end conditions, calculate the model motor profiles
-                self.run_model(read_time)       
-
-    def run_model(self, read_time):
-        self.model.clear_history()
-        self.model.recording = True
-        # self.constants = self.model.get_current_state()
-
-        counter = 0
-        self.xs = []
-        self.xs += [read_time - 2 / global_parameters.FRAME_RATE]
-        self.xs += [read_time - 1 / global_parameters.FRAME_RATE]
-        while self.model.update():
-            self.xs += [read_time + counter / global_parameters.FRAME_RATE]
-            counter += 1
-        self.xs += [read_time + counter / global_parameters.FRAME_RATE]
-        counter += 1
-        self.xs += [read_time + counter / global_parameters.FRAME_RATE]
-        counter += 1
-
-        c = (self.dist / global_parameters.CONVEYOR_SPEED - self.model.phase_1_counter) / global_parameters.FRAME_RATE
-
-        print(self.xs[0])
-        self.xs = [self.xs[i] + c for i in range(0, len(self.xs))]
-        print(self.xs[0])
-        print(time.time(), "\n")
-
-        self.model.recording = False
-
-    def gen_profiles(self):
-        # Discrete data as derived from the model
-        raw_pos_data = np.asarray(self.model.get_data())
-        if len(raw_pos_data) == 0:
-            return False
-        raw_vel_data = np.gradient(raw_pos_data, axis=0)
-        
-        # Integrated data. Closer representation of how robot will move 
-        self.acc_data = np.gradient(raw_vel_data, axis=0)
-        self.vel_data = np.asarray([integrate.simps(self.acc_data[0:i+1], axis=0).tolist() for i in range(0, len(self.acc_data))])
-        # self.pos_data = np.add(np.asarray([integrate.simps(self.vel_data[0:i+1], axis=0).tolist() for i in range(0, len(self.vel_data))]), self.constants)
-
-        return True
+                self.model.run(read_time, dist) 
 
     def get_results(self):
-        return self.xs, self.vel_data
+        if len(self.meats) == 0:
+            xs, _, vels = self.model.get_data()
+            return xs, vels
+        else:
+            return [], []
 
     # def package_data(self):
     #     # vel_data is a list of velocity values for each actuator 

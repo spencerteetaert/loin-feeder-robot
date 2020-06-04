@@ -49,13 +49,11 @@ class InstructionHandler:
                 if current_time < time.time() and current_time > 0:
                     if counter == 0:
                         s = time.time()
-                        print("Robot command started at:", s)
+                        print("Sending instructions to PLC...")
                     counter += 1
                     if not self.instruction_Q.empty():
                         instruction = self.instruction_Q.get()
                         to_send = np.around(instruction, 2)
-
-                        print("Sent to PLC:", to_send)
 
                         ### PLC write instruction ###
                         # plc.Write("<tag0>", value=instruction[0])
@@ -68,12 +66,14 @@ class InstructionHandler:
                         # plc.Write("<tag7>", value=instruction[7])
 
                         current_time = self.time_Q.get()
+                    else:
+                        print("ERROR: Instruction size mismatch.")
 
                 elif current_time == 0 and counter != 0:
                     counter = 0
-                    print("Execution time:", time.time() - s)
+                    print("Instruction completed. \nExecution time:", round(time.time() - s, 2),"s\n")
                     current_time = self.time_Q.get() # get is a locking function so it stays here until the next instruction comes in
-                    # self.instruction_Q.get()
+                    self.instruction_Q.get() # Clears out the 0 instruction 
                     
     def add(self, time, instruction):
         ''' Adds a time stamp and instruction profile to the queue. 

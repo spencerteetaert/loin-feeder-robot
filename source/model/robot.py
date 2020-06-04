@@ -2,6 +2,7 @@ import time
 
 import cv2
 import numpy as np
+from scipy import integrate
 
 from .point import Point
 from .main_track import MainTrack
@@ -11,6 +12,7 @@ from .carriage import Carriage
 from .. import global_parameters
 
 class Robot:
+    
     #######################
     ### Basic Functions ###
     #######################
@@ -36,7 +38,10 @@ class Robot:
         self.counter = 0
         self.phase_1_counter = 0
 
-        self.data = []
+        self.profile_data = []
+        self.xs = []
+        self.acc_data = []
+        self.vel_data = []
         self.recording = False
 
     def __repr__(self):
@@ -53,6 +58,17 @@ class Robot:
     ### Profile Functions ###
     #########################
 
+    def scrap_data(self):
+        self.recording = False
+        self.phase = 0
+        self.profile_data = []
+        self.xs = []
+        self.acc_data = []
+        self.vel_data = []
+
+    def confirm_acceleration(self):
+        return True
+
     def get_current_state(self):
         ret = []
         
@@ -68,10 +84,36 @@ class Robot:
         return ret
 
     def clear_history(self):
-        self.data = []
+        self.profile_data = []
 
     def get_data(self):
-        return self.data
+        if not self.confirm_acceleration():
+            self.scrap_data()
+        return self.xs, self.profile_data, self.vel_data
+
+    def gen_profiles(self):
+        # Discrete data as derived from the model
+        _, raw_pos_data, _ = self.get_data()
+        if len(raw_pos_data) == 0:
+            return False
+        raw_vel_data = np.gradient(np.asarray(raw_pos_data), axis=0)
+        
+        # Integrated data. Closer representation of how robot will move 
+        self.acc_data = np.gradient(raw_vel_data, axis=0)
+
+        if abs(np.amax(self.acc_data[:,[0, 1, 3, 4]])) > 0.03:
+            print("Linear acceleration fault. Val:", np.amax(self.acc_data[:,[0, 1, 3, 4]]))
+            print(self.acc_data[:,[0, 1, 3, 4]])
+            return False
+        if abs(np.amax(self.acc_data[:,[2, 5, 6, 7]])) > 5:
+            print("Rotational acceleration fault. Val:", np.amax(self.acc_data[:,[2, 5, 6, 7]]))
+            print(self.acc_data[:,[2, 5, 6, 7]])
+            return False
+
+        self.vel_data = np.asarray([integrate.simps(self.acc_data[0:i+1], axis=0).tolist() for i in range(0, len(self.acc_data))])
+        # self.pos_data = np.add(np.asarray([integrate.simps(self.vel_data[0:i+1], axis=0).tolist() for i in range(0, len(self.vel_data))]), self.constants)
+
+        return True
 
     ########################
     ### Helper Functions ###
@@ -89,6 +131,9 @@ class Robot:
         self.carriage2.draw(canvas, color=(0, 0, 255))
         self.secondary_arm.draw(canvas)
         self.main_arm.draw(canvas)
+
+        self.follow_pt1.draw(canvas, color=(0, 255, 0))
+        self.follow_pt2.draw(canvas, color=(0, 0, 255))
         
         font = cv2.FONT_HERSHEY_SIMPLEX
         y0, dy = 30, 18
@@ -244,8 +289,8 @@ class Robot:
             self.phase_1_counter += 1
             if self.switched:
                 if self.recording:
-                    self.data += [self.get_current_state()]
-                    self.data += [self.get_current_state()]
+                    self.profile_data += [self.get_current_state()]
+                    self.profile_data += [self.get_current_state()]
                 # self.counter = 0
                 self.switched = False
                 self.follow_pt1.moveTo(self.s1, global_parameters.PHASE_1_SPEED)
@@ -350,26 +395,47 @@ class Robot:
 
         self.moveTo(self.follow_pt1, self.follow_pt2)
 
+        # frame = np.zeros([1200, 1200, 3])
+        # self.draw(frame)
+        # cv2.imshow("Temp", frame)
+        # cv2.waitKey(1)
+
         flag, report = self.collision_check()
         if flag:
             # If a collision occured in this step, turn off recording so that it is not added to the recommended path.
             # Resets robot to phase 0. Stops current path.
             print("ERROR: Profile resulted in collision and was not sent.")
             print(report)
-            self.recording = False
-            self.phase = 0
-            self.data = []
+            self.scrap_data()
+            # cv2.waitKey(0)
             return False
 
         if self.recording:
-            self.data += [self.get_current_state()]
+            self.profile_data += [self.get_current_state()]
             if self.phase == 0: # This only ever hits immediately after phase 6
-                self.data += [self.get_current_state()]
-                self.data += [self.get_current_state()]
-
-        # frame = np.zeros([1200, 1200, 3])
-        # self.draw(frame)
-        # cv2.imshow("Temp", frame)
-        # cv2.waitKey(1)
+                self.profile_data += [self.get_current_state()]
+                self.profile_data += [self.get_current_state()]
 
         return True
+
+    def run(self, read_time, dist):
+        self.clear_history()
+        self.recording = True
+
+        counter = 0
+        self.xs = []
+        self.xs += [read_time - 2 / global_parameters.FRAME_RATE]
+        self.xs += [read_time - 1 / global_parameters.FRAME_RATE]
+        while self.update():
+            self.xs += [read_time + counter / global_parameters.FRAME_RATE]
+            counter += 1
+        self.xs += [read_time + counter / global_parameters.FRAME_RATE]
+        counter += 1
+        self.xs += [read_time + counter / global_parameters.FRAME_RATE]
+        counter += 1
+
+        # c accounts for the time after the robot has moved into position but before it grabs the meat
+        c = (dist / global_parameters.CONVEYOR_SPEED - self.phase_1_counter) / global_parameters.FRAME_RATE
+        self.xs = [self.xs[i] + c for i in range(0, len(self.xs))]
+
+        self.recording = False
