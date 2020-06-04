@@ -12,7 +12,7 @@ from .carriage import Carriage
 from .. import global_parameters
 
 class Robot:
-    
+
     #######################
     ### Basic Functions ###
     #######################
@@ -101,16 +101,31 @@ class Robot:
         # Integrated data. Closer representation of how robot will move 
         self.acc_data = np.gradient(raw_vel_data, axis=0)
 
-        if abs(np.amax(self.acc_data[:,[0, 1, 3, 4]])) > 0.03:
+        # Convert from per frame to per second
+        self.acc_data = np.multiply(self.acc_data, global_parameters.FRAME_RATE)
+
+        if abs(np.amax(self.acc_data[:,[0, 1, 3, 4]])) > global_parameters.LINEAR_ACCELERATION_MAX:
             print("Linear acceleration fault. Val:", np.amax(self.acc_data[:,[0, 1, 3, 4]]))
             print(self.acc_data[:,[0, 1, 3, 4]])
             return False
-        if abs(np.amax(self.acc_data[:,[2, 5, 6, 7]])) > 5:
+        if abs(np.amax(self.acc_data[:,[2, 5, 6, 7]])) > global_parameters.ROTATIONAL_ACCELERATION_MAX:
             print("Rotational acceleration fault. Val:", np.amax(self.acc_data[:,[2, 5, 6, 7]]))
             print(self.acc_data[:,[2, 5, 6, 7]])
             return False
 
         self.vel_data = np.asarray([integrate.simps(self.acc_data[0:i+1], axis=0).tolist() for i in range(0, len(self.acc_data))])
+
+        if abs(np.amax(self.vel_data[:,[0, 1, 3, 4]])) > global_parameters.LINEAR_VELOCITY_MAX:
+            print("Linear acceleration fault. Val:", np.amax(self.vel_data[:,[0, 1, 3, 4]]))
+            print(self.vel_data[:,[0, 1, 3, 4]])
+            return False
+        if abs(np.amax(self.vel_data[:,[2, 5, 6, 7]])) > global_parameters.ROTATIONAL_VELOCITY_MAX:
+            print("Rotational acceleration fault. Val:", np.amax(self.vel_data[:,[2, 5, 6, 7]]))
+            print(self.vel_data[:,[2, 5, 6, 7]])
+            return False
+
+        # Convert from change per frame to change
+        # self.vel_data = np.multiply(self.vel_data, global_parameters.FRAME_RATE)
         # self.pos_data = np.add(np.asarray([integrate.simps(self.vel_data[0:i+1], axis=0).tolist() for i in range(0, len(self.vel_data))]), self.constants)
 
         return True
@@ -395,10 +410,10 @@ class Robot:
 
         self.moveTo(self.follow_pt1, self.follow_pt2)
 
-        # frame = np.zeros([1200, 1200, 3])
-        # self.draw(frame)
-        # cv2.imshow("Temp", frame)
-        # cv2.waitKey(1)
+        frame = np.zeros([1200, 1200, 3])
+        self.draw(frame)
+        cv2.imshow("Temp", frame)
+        cv2.waitKey(1)
 
         flag, report = self.collision_check()
         if flag:
@@ -407,7 +422,7 @@ class Robot:
             print("ERROR: Profile resulted in collision and was not sent.")
             print(report)
             self.scrap_data()
-            # cv2.waitKey(0)
+            cv2.waitKey(0)
             return False
 
         if self.recording:

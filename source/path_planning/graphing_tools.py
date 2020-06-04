@@ -39,12 +39,12 @@ class Grapher:
             xs, ys, _ = path_runner.read()
             ax1_label = "(m)"
             ax2_label = "(°)"
-            title = "Raw position profiles"
+            title = "Position profiles"
         elif switch == 'i':
             xs, _, ys = path_runner.read()
-            ax1_label = "(m)"
-            ax2_label = "(°)"
-            title = "Integrated position profiles"
+            ax1_label = "(m/s)"
+            ax2_label = "(°/s)"
+            title = "Veloicty profiles"
         else: 
             return np.zeros([size[0], size[1], 3])
         

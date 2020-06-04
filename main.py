@@ -1,6 +1,7 @@
+import time
+
 import cv2
 from pylogix import PLC
-import time
 import numpy as np
 
 from source import global_parameters

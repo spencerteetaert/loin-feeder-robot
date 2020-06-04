@@ -38,6 +38,7 @@ def on_mouse(event, pX, pY, flags, param):
 def main(data_path=DATA_PATH):
     global streamer, grapher, profile_model, drawing_model, current_graph, DISPLAY_TOGGLE
     # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output.mp4', 0x7634706d, 30, (1680,830))
+    out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, (1680,830))
 
     if DISPLAY_TOGGLE:
         win = "Window"
@@ -187,13 +188,13 @@ def main(data_path=DATA_PATH):
                 current_graph = grapher.read()
             
         times += [time.time() - start]
-        # out.write(frame)
+        out.write(frame)
 
         #Artifically slow the program to the desired frame rate
         # cv2.waitKey(max(global_parameters.FRAME_RATE - round((time.time() - force_timer )*1000 + 1), 1))
 
     print("Average frame time:", np.average(times))
-    # out.release()
+    out.release()
     streamer.stop()
     if PROFILER_TOGGLE:
         path_runner.stop()

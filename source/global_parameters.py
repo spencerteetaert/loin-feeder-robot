@@ -38,8 +38,11 @@ CONVEYOR_SPEED = 2 / RUNTIME_FACTOR #Px/frame
 RUNTIME_LIMIT = 300 # Maximum number of path points before program breaks 
 SAFE_ENVIRONMENT = [[[440, 190], [440, 730]], [[100, 735], [800, 735]], [[440, 600], [300, 735]], [[440, 600], [580, 735]]]#[[[440, 190], [440, 730]], [[145, 735], [665, 735]]]     # Lines that are safe to travel on
 
-ROTATIONAL_ACCELERATION_MAX = 8
-LINEAR_ACCELERATION_MAX = 0.1
+
+ROTATIONAL_ACCELERATION_MAX = 360 # °/s^2
+LINEAR_ACCELERATION_MAX = 1 # m/s^2
+ROTATIONAL_VELOCITY_MAX = 360 # °/s
+LINEAR_VELOCITY_MAX = 0.5 # m/2
 
 # Points 
 READY_POS_1 = Point(439, 504, angle=0)

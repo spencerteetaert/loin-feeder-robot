@@ -3,12 +3,12 @@ import time
 import numpy as np 
 import cv2
 
-from source.vision_identification import bounding_box
-from source.vision_identification import meat
-from source.model.robot import Robot
-from source.model.point import Point
-# from source.data_send_receive import data_io
-from source import global_parameters
+from ..vision_identification import bounding_box
+from ..vision_identification import meat
+from ..model.robot import Robot
+from ..model.point import Point
+# from ..data_send_receive import data_io
+from .. import global_parameters
 
 class FrameHandler:
     def __init__(self):
@@ -80,18 +80,3 @@ class FrameHandler:
             return xs, vels
         else:
             return [], []
-
-    # def package_data(self):
-    #     # vel_data is a list of velocity values for each actuator 
-    #     full_data = ""
-    #     for i in range(0, len(self.vel_data)):
-    #         for j in range(0, len(self.vel_data[i])):
-    #             # print(f"{str(round(vel_data[i][j], 5)):<{DATA_CHUNK_SIZE}}")
-    #             full_data += f"{str(round(self.vel_data[i][j], 5)):<{global_parameters.DATA_CHUNK_SIZE}}"
-
-    #     encoded_data = full_data.encode('utf-8')
-
-    #     # for i in range(0, len(t), DATA_CHUNK_SIZE):
-    #     #     print("T",i,t[i:i+DATA_CHUNK_SIZE])
-
-    #     return encoded_data

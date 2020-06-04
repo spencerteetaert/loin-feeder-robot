@@ -73,7 +73,7 @@ class PathRunner:
             
     def read(self):
         if not self.running:
-            return self.xs, self.raw_acc_data, self.int_pos_data
+            return self.xs, self.int_pos_data, self.int_vel_data
         else:
             with Lock():
                 print("ERROR: Request for data made before results computed")

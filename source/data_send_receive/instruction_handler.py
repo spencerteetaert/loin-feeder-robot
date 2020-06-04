@@ -1,8 +1,9 @@
-from pylogix import PLC
 from threading import Thread
 from threading import Lock
 from queue import Queue
 import time
+
+from pylogix import PLC
 import numpy as np
 np.set_printoptions(suppress=True, precision=2)
 
@@ -54,6 +55,8 @@ class InstructionHandler:
                     if not self.instruction_Q.empty():
                         instruction = self.instruction_Q.get()
                         to_send = np.around(instruction, 2)
+
+                        print(instruction)
 
                         ### PLC write instruction ###
                         # plc.Write("<tag0>", value=instruction[0])
