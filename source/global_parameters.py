@@ -1,7 +1,16 @@
 import numpy as np
 import pickle
 
-from .model.point import Point
+'''
+    Running this file directly will save the current settings. 
+'''
+
+if __name__=="__main__":
+    from model.point import Point
+else:
+    from .model.point import Point
+
+EXPORT_FILE_PATH = "resources\configs\main"
 
 params_1 = { # Parameters 
     ################################
@@ -108,10 +117,21 @@ params_3 = {
 
 global_parameters = {**{**params_1, **params_2}, **params_3}
 
+
 def set_parameters(file_path):
-    try:
-        f = open(file_path, 'r')
-        data = pickle.load(f)
-        global_params = data
-    except:
-        print("ERROR: Invalid configuration file.")
+    global global_parameters
+    # try:
+    f = open(file_path, 'rb')
+    data = pickle.load(f)
+    global_parameters = data
+    f.close()
+    # except:
+    #     print("ERROR: Invalid configuration file.")
+
+def save_parameters(file_path):
+    f = open(file_path, 'wb')
+    pickle.dump(global_parameters, f)
+    f.close()
+
+if __name__=="__main__":
+    save_parameters(EXPORT_FILE_PATH)

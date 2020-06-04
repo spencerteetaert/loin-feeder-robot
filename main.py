@@ -1,10 +1,16 @@
 import time
+import sys
 
 import cv2
 from pylogix import PLC
 import numpy as np
 
-from source import global_parameters
+from source import model
+sys.modules['model'] = model
+from source.global_parameters import global_parameters
+from source.global_parameters import set_parameters
+set_parameters("resources\configs\main")
+
 from source.path_planning.frame_handler import FrameHandler
 from source.data_send_receive.instruction_handler import InstructionHandler
 from source.vision_identification import bounding_box
@@ -17,7 +23,7 @@ times = []
 instruction_handler.start()
 
 with PLC() as plc:
-    plc.IPAddress = global_parameters.PLC_IP
+    plc.IPAddress = global_parameters['PLC_IP']
     count_flag = False
 
     while True:
@@ -51,10 +57,10 @@ with PLC() as plc:
         frame = bounding_box.scale(frame)
         frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
-        global_parameters.PICKUP_POINT.draw(frame)
+        global_parameters['PICKUP_POINT'].draw(frame)
         cv2.imshow("Temp", frame)
 
-        k = cv2.waitKey(max(global_parameters.FRAME_RATE - round((time.time() - read_time )*1000 + 1), 1)) & 0xFF
+        k = cv2.waitKey(max(global_parameters['FRAME_RATE'] - round((time.time() - read_time )*1000 + 1), 1)) & 0xFF
         if k == ord('q'):    
             break
         elif k == ord('c'):
