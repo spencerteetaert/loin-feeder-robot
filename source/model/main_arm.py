@@ -79,4 +79,9 @@ class MainArm:
         return [[p, r1], [p, r2]]
 
     def set_model_state(self, state):
-        pass
+        '''
+            0: Main track other pt
+            1: Length
+            2: Angle
+        '''
+        self.__init__(state[0], self.scale, state[1], state[2])

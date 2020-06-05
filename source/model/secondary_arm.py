@@ -6,7 +6,7 @@ from .point import Point
 from ..global_parameters import global_parameters
 
 class SecondaryArm:
-    def __init__(self, pt:Point, scale, length1=0.354, length2=0.354, angle=90):
+    def __init__(self, pt:Point, scale, length1=0.354, length2=0.354, angle=90, relative_angle=90):
         self.scale = scale
         self.basePt = pt
         self.length1 = length1 * scale
@@ -14,7 +14,7 @@ class SecondaryArm:
         self.min_length = global_parameters['SECONDARY_ARM_MIN_LENGTH'] * scale
         self.max_length = global_parameters['SECONDARY_ARM_MAX_LENGTH'] * scale
         self.angle = angle 
-        self.relative_angle = 90
+        self.relative_angle = relative_angle
         self.otherPt1 = self.getotherPt1()
         self.otherPt2 = self.getotherPt2()
         self.refresh()
@@ -31,6 +31,9 @@ class SecondaryArm:
         self.angle = (self.otherPt1 - self.basePt).vector_angle()
         if main_arm_angle != None:
             self.relative_angle = (self.angle - main_arm_angle + 360 + 180) % 360
+
+# rel = ang - main + 180 - 360n
+# ang = rel + main - 180 + 360n
 
     def getotherPt1(self):
         return Point(round(self.basePt.x + self.length1 * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length1 * math.sin(math.radians(self.angle))))
@@ -86,4 +89,12 @@ class SecondaryArm:
         return [[p, r]]
 
     def set_model_state(self, state):
-        pass
+        '''
+            0: Main arm other pt
+            1: Main arm angle
+            2: Length1
+            3: Length2
+            4: Angle
+        '''
+        angle = (state[4] + state[1] + 180 + 720) % 360
+        self.__init__(state[0], self.scale, length1=state[2], length2=state[3], angle=angle, relative_angle=state[1])

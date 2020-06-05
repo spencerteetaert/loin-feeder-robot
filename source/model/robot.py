@@ -450,7 +450,7 @@ class Robot:
 
         self.recording = False
 
-    def set_model_state(self, state:list):
+    def set_model_state(self, state, extras_included=False):
         '''
         State:
             Main Track
@@ -480,45 +480,64 @@ class Robot:
         '''
         self.main_track.set_model_state(state[0])
 
-        state.insert(1, self.main_track.otherPt)
+        if not extras_included:
+            state.insert(1, self.main_track.otherPt)
         self.main_arm.set_model_state(state[1:4])
 
-        state.insert(4, self.main_arm.otherPt)
-        state.insert(5, self.main_arm.angle)
+        if not extras_included:
+            state.insert(4, self.main_arm.otherPt)
+            state.insert(5, self.main_arm.angle)
         self.secondary_arm.set_model_state(state[4:9])
 
-        state.insert(9, self.secondary_arm.otherPt1) 
-        state.insert(10, self.secondary_arm.angle)
+        if not extras_included:
+            state.insert(9, self.secondary_arm.otherPt1) 
+            state.insert(10, self.secondary_arm.angle)
         self.carriage1.set_model_state(state[9:14])
 
-        state.insert(9, self.secondary_arm.otherPt2) 
-        state.insert(10, self.secondary_arm.angle)
+        if not extras_included:
+            state.insert(14, self.secondary_arm.otherPt2) 
+            state.insert(15, self.secondary_arm.angle)
         self.carriage2.set_model_state(state[14:19])
+
+        self.follow_pt1 = self.get_current_point(1)
+        self.follow_pt2 = self.get_current_point(2)
+
+        self.phase = 0
+        self.switched = False
+        self.delay = 0
+        self.counter = 0
+        self.phase_1_counter = 0
+
+        self.profile_data = []
+        self.xs = []
+        self.acc_data = []
+        self.vel_data = []
+        self.recording = False
 
     def get_model_state(self):
         state = []
-        state += self.main_track.length
+        state += [self.main_track.length/self.scale]
 
-        state += self.main_track.otherPt
-        state += self.main_arm.length
-        state += self.main_arm.angle 
+        state += [self.main_track.otherPt]
+        state += [self.main_arm.length/self.scale]
+        state += [self.main_arm.angle]
 
-        state += self.main_arm.otherPt
-        state += self.main_arm.angle
-        state += self.secondary_arm.length1
-        state += self.secondary_arm.length2
-        state += self.secondary_arm.angle
+        state += [self.main_arm.otherPt]
+        state += [self.main_arm.angle]
+        state += [self.secondary_arm.length1/self.scale]
+        state += [self.secondary_arm.length2/self.scale]
+        state += [self.secondary_arm.relative_angle]
 
-        state += self.secondary_arm.otherPt1
-        state += self.secondary_arm.angle
-        state += self.carriage1.angle
-        state += self.carriage1.is_down
-        state += self.carriage1.gripper_extension
+        state += [self.secondary_arm.otherPt1]
+        state += [self.secondary_arm.angle]
+        state += [self.carriage1.relative_angle]
+        state += [self.carriage1.is_down]
+        state += [self.carriage1.gripper_extension/self.scale]
 
-        state += self.secondary_arm.otherPt2
-        state += self.secondary_arm.angle
-        state += self.carriage2.angle
-        state += self.carriage2.is_down
-        state += self.carriage2.gripper_extension
+        state += [self.secondary_arm.otherPt2]
+        state += [self.secondary_arm.angle]
+        state += [self.carriage2.relative_angle]
+        state += [self.carriage2.is_down]
+        state += [self.carriage2.gripper_extension/self.scale]
 
         return state

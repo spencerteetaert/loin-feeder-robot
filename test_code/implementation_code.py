@@ -58,6 +58,7 @@ def main(data_path=DATA_PATH):
     queue1 = []
     queue2 = []
     times = []
+    saved_state = []
 
     while(streamer.running):
         start = time.time()
@@ -191,6 +192,13 @@ def main(data_path=DATA_PATH):
                 while grapher.running:
                     pass
                 current_graph = grapher.read()
+            elif k == ord('s'):
+                saved_state = drawing_model.get_model_state()
+                cv2.waitKey(0)
+                print("State saved.\n", saved_state)
+            elif k == ord('r'):
+                drawing_model.set_model_state(saved_state, extras_included=True)
+                print("State uploaded.")
             
         times += [time.time() - start]
         # out.write(frame)
