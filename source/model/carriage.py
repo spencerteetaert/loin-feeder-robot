@@ -66,22 +66,26 @@ class Carriage:
         self.points += [(self.basePt.toArray() + k - x1)] # top left
         self.points += [(self.basePt.toArray() - k - x1)] # bottom left
         self.points += [(self.basePt.toArray() - k + x1)] # bottom right 
-        self.points += [(self.basePt.toArray() + k - x1 + x2)] # gripper top
-        self.points += [(self.basePt.toArray() - k - x1 + x2)] # gripper bottom 
+        self.points += [(self.basePt.toArray() + k - x1 + x2)] # gripper top right
+        self.points += [(self.basePt.toArray() - k - x1 + x2)] # gripper bottom right 
         self.otherPt = self.getOtherPt()
 
     def get_collision_bounds(self):
         r1 = np.subtract(self.points[1], self.points[2])
         if self.gripper_extension < global_parameters['CARRIAGE_WIDTH']:
+            print("less")
             r2 = np.subtract(self.points[1], self.points[0]) 
             r3 = np.subtract(self.points[3], self.points[2])
             r4 = np.subtract(self.points[3], self.points[0])
+
+            return [[self.points[1], r3], [self.points[1], r4], [self.points[3], r1], [self.points[3], r2]]
         else:
+            print("more")
             r2 = np.subtract(self.points[1], self.points[4]) 
             r3 = np.subtract(self.points[5], self.points[2])
             r4 = np.subtract(self.points[5], self.points[4])
         
-        return [[self.points[1], r3], [self.points[1], r4], [self.points[3], r1], [self.points[3], r2]]
+            return [[self.points[1], r3], [self.points[1], r4], [self.points[5], r1], [self.points[5], r2]]
 
     def set_model_state(self, state):
         '''
@@ -97,19 +101,19 @@ class Carriage:
     def close(self, width):
         if self.gripper_extension > width:
             self.gripper_extension -= global_parameters['GRIPPER_SPEED'] / global_parameters['FRAME_RATE']
-        self.gripper_extension = max(self.gripper_extension, global_parameters['GRIPPER_MIN_EXTENSION'])
+            self.gripper_extension = max(self.gripper_extension, global_parameters['GRIPPER_MIN_EXTENSION'])
 
     def open(self):
         if self.gripper_extension < global_parameters['GRIPPER_MAX_EXTENSION']:
             self.gripper_extension += global_parameters['GRIPPER_SPEED'] / global_parameters['FRAME_RATE']
-        self.gripper_extension = min(self.gripper_extension, global_parameters['GRIPPER_MAX_EXTENSION'])
+            self.gripper_extension = min(self.gripper_extension, global_parameters['GRIPPER_MAX_EXTENSION'])
 
     def lower(self):
         if self.downward_extension < global_parameters['DOWNWARD_MAX_EXTENSION']:
             self.downward_extension += global_parameters['DOWNWARD_SPEED'] / global_parameters['FRAME_RATE']
-        self.downward_extension = min(self.downward_extension, global_parameters['DOWNWARD_MAX_EXTENSION'])
+            self.downward_extension = min(self.downward_extension, global_parameters['DOWNWARD_MAX_EXTENSION'])
 
     def lift(self):
         if self.downward_extension > global_parameters['DOWNWARD_MIN_EXTENSION']:
             self.downward_extension -= global_parameters['DOWNWARD_SPEED'] / global_parameters['FRAME_RATE']
-        self.downward_extension = max(self.downward_extension, global_parameters['DOWNWARD_MIN_EXTENSION'])
+            self.downward_extension = max(self.downward_extension, global_parameters['DOWNWARD_MIN_EXTENSION'])

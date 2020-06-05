@@ -424,10 +424,10 @@ class Robot:
 
         self.moveTo(self.follow_pt1, self.follow_pt2)
 
-        # frame = np.zeros([1200, 1200, 3])
-        # self.draw(frame)
-        # cv2.imshow("Temp", frame)
-        # cv2.waitKey(0)
+        frame = np.zeros([1200, 1200, 3])
+        self.draw(frame)
+        cv2.imshow("Temp", frame)
+        cv2.waitKey(0)
 
         flag, report = self.collision_check()
         if flag:
@@ -471,6 +471,7 @@ class Robot:
         self.recording = False
 
     def set_model_state(self, state):
+        print("MODEL BACK UPPED")
         '''
         Using a list of the parameters required to fully define the robot, 
         set the robot parameters using to match the given state. 
@@ -551,10 +552,10 @@ class Robot:
 
         state += [self.carriage1.relative_angle]
         state += [self.carriage1.downward_extension]
-        state += [self.carriage1.gripper_extension/self.scale]
+        state += [self.carriage1.gripper_extension]
 
         state += [self.carriage2.relative_angle]
         state += [self.carriage2.downward_extension]
-        state += [self.carriage2.gripper_extension/self.scale]
+        state += [self.carriage2.gripper_extension]
 
         return state
