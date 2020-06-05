@@ -15,7 +15,7 @@ from source.global_parameters import global_parameters
 
 '''
     A full implementation of all of the non-PLC specific functionality 
-    of the library. File 
+    of the library.
 '''
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"

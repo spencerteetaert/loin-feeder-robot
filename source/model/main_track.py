@@ -52,4 +52,7 @@ class MainTrack:
         self.otherPt = self.getOtherPt()
 
     def set_model_state(self, state):
+        '''
+            state = length 
+        '''
         self.__init__(self.basePt, self.scale, length=state)

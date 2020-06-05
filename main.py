@@ -27,6 +27,51 @@ with PLC() as plc:
     count_flag = False
 
     while True:
+        ### Read and process PLC data ### 
+        '''
+        Before any frame is processed, the model
+        is updated to reflect the current physical
+        state of the robot.
+        
+        State:
+            Main Track
+                0: Length
+            Main Arm
+                1: Length
+                2: Angle
+            Secondary Arm
+                3: Length1
+                4: Length2
+                5: Angle 
+            Carriage1
+                6: Angle
+                7: Raised/Lowered
+                8: Gripper extension
+            Carriage2
+                9: Angle
+                10: Raised/Lowered
+                11: Gripper extension
+        '''
+
+        v1 = plc.Read("<tag1>").Value
+        v2 = plc.Read("<tag2>").Value
+        v3 = plc.Read("<tag3>").Value
+        v4 = plc.Read("<tag4>").Value
+        v5 = plc.Read("<tag5>").Value
+        v6 = plc.Read("<tag6>").Value
+        v7 = plc.Read("<tag7>").Value
+        v8 = plc.Read("<tag8>").Value
+        v9 = plc.Read("<tag9>").Value
+        v10 = plc.Read("<tag10>").Value
+        v11 = plc.Read("<tag11>").Value
+
+        frame_handler.model.set_model_state([v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11])
+
+        # val.TagName, val.Value, val.Status
+
+        #################################
+
+
         #### Read and Process Image ####
         read_time = time.time()
 
@@ -65,18 +110,6 @@ with PLC() as plc:
             break
         elif k == ord('c'):
             count_flag = True
-        #################################
-
-
-        ### Read and process PLC data ### 
-
-        # val1 = plc.Read("<tag1>")
-        # val2 = plc.Read("<tag2>")
-        # val3 = plc.Read("<tag3>")
-
-        # Do something with read vals
-        # val.TagName, val.Value, val.Status
-
         #################################
         
     instruction_handler.stop()

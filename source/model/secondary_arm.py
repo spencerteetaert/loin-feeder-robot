@@ -32,9 +32,6 @@ class SecondaryArm:
         if main_arm_angle != None:
             self.relative_angle = (self.angle - main_arm_angle + 360 + 180) % 360
 
-# rel = ang - main + 180 - 360n
-# ang = rel + main - 180 + 360n
-
     def getotherPt1(self):
         return Point(round(self.basePt.x + self.length1 * math.cos(math.radians(self.angle))), round(self.basePt.y - self.length1 * math.sin(math.radians(self.angle))))
     def getotherPt2(self):
