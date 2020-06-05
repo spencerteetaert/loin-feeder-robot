@@ -94,6 +94,7 @@ class Robot:
         # Discrete data as derived from the model
         _, raw_pos_data, _ = self.get_data()
         if len(raw_pos_data) == 0:
+            self.set_model_state(self.backup_state)
             return False
         raw_vel_data = np.gradient(np.asarray(raw_pos_data), axis=0)
         
@@ -104,23 +105,27 @@ class Robot:
         self.acc_data = np.multiply(self.acc_data, global_parameters['FRAME_RATE'])
 
         if abs(np.amax(self.acc_data[:,[0, 1, 3, 4, 7, 8, 10, 11]])) > global_parameters['LINEAR_ACCELERATION_MAX']:
-            print("Linear acceleration fault. Val:", np.amax(self.acc_data[:,[0, 1, 3, 4, 7, 8, 10, 11]]))
+            print("ERROR: Linear acceleration fault. Val:", np.amax(self.acc_data[:,[0, 1, 3, 4, 7, 8, 10, 11]]))
             print(self.acc_data[:,[0, 1, 3, 4, 7, 8, 10, 11]])
+            self.set_model_state(self.backup_state)
             return False
         if abs(np.amax(self.acc_data[:,[2, 5, 6, 9]])) > global_parameters['ROTATIONAL_ACCELERATION_MAX']:
-            print("Rotational acceleration fault. Val:", np.amax(self.acc_data[:,[2, 5, 6, 9]]))
+            print("ERROR: Rotational acceleration fault. Val:", np.amax(self.acc_data[:,[2, 5, 6, 9]]))
             print(self.acc_data[:,[2, 5, 6, 9]])
+            self.set_model_state(self.backup_state)
             return False
 
         self.vel_data = np.asarray([integrate.simps(self.acc_data[0:i+1], axis=0).tolist() for i in range(0, len(self.acc_data))])
 
         if abs(np.amax(self.vel_data[:,[0, 1, 3, 4, 7, 8, 10, 11]])) > global_parameters['LINEAR_VELOCITY_MAX']:
-            print("Linear velocity fault. Val:", np.amax(self.vel_data[:,[0, 1, 3, 4, 7, 8, 10, 11]]))
+            print("ERROR: Linear velocity fault. Val:", np.amax(self.vel_data[:,[0, 1, 3, 4, 7, 8, 10, 11]]))
             print(self.vel_data[:,[0, 1, 3, 4, 7, 8, 10, 11]])
+            self.set_model_state(self.backup_state)
             return False
         if abs(np.amax(self.vel_data[:,[2, 5, 6, 9]])) > global_parameters['ROTATIONAL_VELOCITY_MAX']:
-            print("Rotational velocity fault. Val:", np.amax(self.vel_data[:,[2, 5, 6, 9]]))
+            print("ERROR: Rotational velocity fault. Val:", np.amax(self.vel_data[:,[2, 5, 6, 9]]))
             print(self.vel_data[:,[2, 5, 6, 9]])
+            self.set_model_state(self.backup_state)
             return False
 
         return True
@@ -175,6 +180,8 @@ class Robot:
         if self.phase != 0:
             print("ERROR: Robot in use")
             return False 
+
+        self.backup_state = self.get_model_state()
         
         self.s1 = s1
         self.s2 = s2
@@ -426,9 +433,10 @@ class Robot:
         if flag:
             # If a collision occured in this step, turn off recording so that it is not added to the recommended path.
             # Resets robot to phase 0. Stops current path.
-            print("ERROR: Profile resulted in collision and was not sent.")
+            print("ERROR: Profile resulted in collision.")
             print(report)
             self.scrap_data()
+            self.set_model_state(self.backup_state)
             # cv2.waitKey(0)
             return False
 
@@ -542,11 +550,11 @@ class Robot:
         state += [self.secondary_arm.relative_angle]
 
         state += [self.carriage1.relative_angle]
-        state += [self.carriage1.is_down]
+        state += [self.carriage1.downward_extension]
         state += [self.carriage1.gripper_extension/self.scale]
 
         state += [self.carriage2.relative_angle]
-        state += [self.carriage2.is_down]
+        state += [self.carriage2.downward_extension]
         state += [self.carriage2.gripper_extension/self.scale]
 
         return state
