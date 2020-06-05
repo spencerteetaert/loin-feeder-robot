@@ -84,3 +84,6 @@ class SecondaryArm:
         p = self.otherPt1.toArray()
         r = (self.otherPt2 - self.otherPt1).toArray()
         return [[p, r]]
+
+    def set_model_state(self, state):
+        pass

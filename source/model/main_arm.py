@@ -77,3 +77,6 @@ class MainArm:
         r2 = np.array([-1000, 0])
 
         return [[p, r1], [p, r2]]
+
+    def set_model_state(self, state):
+        pass

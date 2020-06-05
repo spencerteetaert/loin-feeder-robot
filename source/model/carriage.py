@@ -16,6 +16,8 @@ class Carriage:
         self.angle = angle 
         self.relative_angle = 90
         self.otherPt = self.getOtherPt()
+        self.is_down = False
+        self.gripper_extension = 0
 
         self.last_angle = self.relative_angle
         self.delta_angle = 0
@@ -70,3 +72,6 @@ class Carriage:
         r4 = np.subtract(self.points[3], self.points[0])
         
         return [[self.points[1], r3], [self.points[1], r4], [self.points[3], r1], [self.points[3], r2]]
+
+    def set_model_state(self, state):
+        pass
