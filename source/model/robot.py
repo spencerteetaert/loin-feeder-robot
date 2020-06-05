@@ -66,9 +66,6 @@ class Robot:
         self.acc_data = []
         self.vel_data = []
 
-    def confirm_acceleration(self):
-        return True
-
     def get_current_state(self):
         ret = []
         
@@ -87,8 +84,6 @@ class Robot:
         self.profile_data = []
 
     def get_data(self):
-        if not self.confirm_acceleration():
-            self.scrap_data()
         return self.xs, self.profile_data, self.vel_data
 
     def gen_profiles(self):
@@ -454,3 +449,6 @@ class Robot:
         self.xs = [self.xs[i] + c for i in range(0, len(self.xs))]
 
         self.recording = False
+
+    def set_state(self, state):
+        pass

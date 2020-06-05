@@ -120,18 +120,20 @@ global_parameters = {**{**params_1, **params_2}, **params_3}
 
 def set_parameters(file_path):
     global global_parameters
-    # try:
-    f = open(file_path, 'rb')
-    data = pickle.load(f)
-    global_parameters = data
-    f.close()
-    # except:
-    #     print("ERROR: Invalid configuration file.")
+    try:
+        f = open(file_path, 'rb')
+        data = pickle.load(f)
+        global_parameters = data
+        f.close()
+    except:
+        print("ERROR: Invalid configuration file.")
 
 def save_parameters(file_path):
     f = open(file_path, 'wb')
     pickle.dump(global_parameters, f)
     f.close()
+
+    print("Current configuration saved to:",file_path)
 
 if __name__=="__main__":
     save_parameters(EXPORT_FILE_PATH)
