@@ -52,7 +52,7 @@ class Meat():
         dist3 = (self.bbox[3] - self.bbox[0])[0]**2 + (self.bbox[3] - self.bbox[0])[1]**2
         maxD = max(dist1, dist2, dist3)
         minD = min(dist1, dist2, dist3)
-        self.width = minD
+        self.width = minD ** 0.5
 
         if maxD == dist1:
             if minD == dist2:

@@ -64,11 +64,14 @@ class FrameHandler:
         if self.model.phase == 0:
             dist = (global_parameters['PICKUP_POINT'] - self.meats[0].get_center_as_point()).y
             self.start_point_1 = self.meats[0].get_center_as_point() + Point(0, dist)
-            self.start_point_2 = self.meats[1].get_center_as_point() + Point(0, dist + self.dt * global_parameters['FRAME_RATE'] * global_parameters['CONVEYOR_SPEED'])
+            self.start_point_2 = self.meats[1].get_center_as_point() + Point(0, dist + \
+                self.dt * global_parameters['FRAME_RATE'] * global_parameters['CONVEYOR_SPEED'])
 
             if dist > 0:
                 self.meats = []
-                self.model.moveMeat(self.start_point_1, self.start_point_2, self.end_point_1, self.end_point_2, dist / global_parameters['CONVEYOR_SPEED'], phase_1_delay=False)
+                self.model.moveMeat(self.start_point_1, self.start_point_2, self.end_point_1, \
+                    self.end_point_2, dist / global_parameters['CONVEYOR_SPEED'], self.meats[0].width, \
+                        self.meats[1].width, phase_1_delay=False)
                 
                 # Given the start and end conditions, calculate the model motor profiles
                 self.model.run(read_time, dist) 

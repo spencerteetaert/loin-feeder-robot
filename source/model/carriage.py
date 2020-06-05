@@ -8,7 +8,7 @@ from ..global_parameters import global_parameters
 from .. import vector_tools
 
 class Carriage:
-    def __init__(self, pt:Point, scale, angle=0, is_down=False, gripper_extension=0.1):
+    def __init__(self, pt:Point, scale, angle=0, is_down=False, gripper_extension=0.5):
         self.scale = scale
         self.basePt = pt
         self.width = global_parameters['CARRIAGE_WIDTH'] * scale
@@ -36,9 +36,11 @@ class Carriage:
     def getOtherPt(self):
         return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))/2), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))/2))
 
-    def draw(self, canvas, color=(255, 255, 255)):      
+    def draw(self, canvas, color=(255, 255, 255)):  
+        self.update_points()    
         contour = np.array(self.points[0:4]).reshape((-1, 1, 2)).astype(np.int32)
         cv2.drawContours(canvas, [contour], 0, color, 2)
+        cv2.line(canvas, (int(round(self.points[4][0])), int(round(self.points[4][1]))), (int(round(self.points[5][0])), int(round(self.points[5][1]))), color, 4)
 
     def follow(self, pt:Point):
         if pt.angle != None:
@@ -57,12 +59,15 @@ class Carriage:
 
         k = np.array([self.length*math.cos(math.radians(self.angle))/2, -1 * self.length*math.sin(math.radians(self.angle))/2])
         x = vector_tools.get_normal_unit([0, 0], k)
-        x *= self.width/2
+        x1 = x * self.width/2
+        x2 = x * self.gripper_extension * self.scale
 
-        self.points += [(self.basePt.toArray() + k + x)] # top right
-        self.points += [(self.basePt.toArray() + k - x)] # top left
-        self.points += [(self.basePt.toArray() - k - x)] # bottom left
-        self.points += [(self.basePt.toArray() - k + x)] # bottom right 
+        self.points += [(self.basePt.toArray() + k + x1)] # top right
+        self.points += [(self.basePt.toArray() + k - x1)] # top left
+        self.points += [(self.basePt.toArray() - k - x1)] # bottom left
+        self.points += [(self.basePt.toArray() - k + x1)] # bottom right 
+        self.points += [(self.basePt.toArray() + k - x1 + x2)] # gripper top
+        self.points += [(self.basePt.toArray() - k - x1 + x2)] # gripper bottom 
         self.otherPt = self.getOtherPt()
 
     def get_collision_bounds(self):
@@ -83,3 +88,19 @@ class Carriage:
         '''
         angle = (state[2] + state[1] + 180 + 720) % 360
         self.__init__(state[0], self.scale, angle, state[3], state[4])
+
+    def close(self, width):
+        if self.gripper_extension > width:
+            self.gripper_extension -= global_parameters['GRIPPER_SPEED'] / global_parameters['FRAME_RATE']
+        self.gripper_extension = max(self.gripper_extension, global_parameters['GRIPPER_MIN_EXTENSION'])
+
+    def open(self):
+        if self.gripper_extension < global_parameters['GRIPPER_MAX_EXTENSION']:
+            self.gripper_extension += global_parameters['GRIPPER_SPEED'] / global_parameters['FRAME_RATE']
+        self.gripper_extension = min(self.gripper_extension, global_parameters['GRIPPER_MAX_EXTENSION'])
+
+    def lower(self):
+        pass
+
+    def lift(self):
+        pass 

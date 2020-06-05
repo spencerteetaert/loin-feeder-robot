@@ -171,7 +171,7 @@ class Robot:
         Phase 6: Moving to "Ready Position" >> Phase 0
     '''
 
-    def moveMeat(self, s1, s2, e1, e2, delay, counter=0, phase_1_delay=True):
+    def moveMeat(self, s1, s2, e1, e2, delay, meat1_width, meat2_width, counter=0, phase_1_delay=True):
         if self.phase != 0:
             print("ERROR: Robot in use")
             return False 
@@ -183,6 +183,8 @@ class Robot:
         self.phase = 1
         self.switched = True
         self.delay = delay
+        self.meat1_width = meat1_width / self.scale
+        self.meat2_width = meat2_width / self.scale
         self.counter = counter
         self.PHASE_1_DELAY = phase_1_delay
 
@@ -324,6 +326,8 @@ class Robot:
             if self.delay <= 1: # End of step condition 
                 self.switched = True 
                 self.phase = 3
+            self.carriage1.close(self.meat1_width)
+            self.carriage2.close(self.meat2_width)
             
 
         # Phase 3: "Step 0" -> Rotating meat according to pre-set path
@@ -373,6 +377,8 @@ class Robot:
             if self.delay <= 0: # End of step condition 
                 self.switched = True 
                 self.phase = 6
+            self.carriage1.open()
+            self.carriage2.open()
 
         # Phase 6: Moving to "Ready Position"
         if self.phase == 6:
