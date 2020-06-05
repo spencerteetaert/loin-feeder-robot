@@ -20,7 +20,7 @@ from source.global_parameters import global_parameters
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 DISPLAY_TOGGLE = True
-PROFILER_TOGGLE = False
+PROFILER_TOGGLE = True
 
 # Model for creating acceleration profiles
 if PROFILER_TOGGLE:
