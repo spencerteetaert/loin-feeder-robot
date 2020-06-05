@@ -50,26 +50,26 @@ class Meat():
         dist1 = (self.bbox[1] - self.bbox[0])[0]**2 + (self.bbox[1] - self.bbox[0])[1]**2
         dist2 = (self.bbox[2] - self.bbox[0])[0]**2 + (self.bbox[2] - self.bbox[0])[1]**2
         dist3 = (self.bbox[3] - self.bbox[0])[0]**2 + (self.bbox[3] - self.bbox[0])[1]**2
-        maxD = max(dist1, dist2, dist3)
-        minD = min(dist1, dist2, dist3)
-        self.width = minD ** 0.5
+        max_distance = max(dist1, dist2, dist3)
+        min_distance = min(dist1, dist2, dist3)
+        self.width = min_distance ** 0.5
 
-        if maxD == dist1:
-            if minD == dist2:
+        if max_distance == dist1:
+            if min_distance == dist2:
                 long_line_indeces = [[1, 2], [0, 3]]
                 # short_line_indeces = [[0, 2], [1, 3]]
             else:
                 long_line_indeces = [[1, 3], [0, 2]]
                 # short_line_indeces = [[0, 3], [1, 2]]
-        elif maxD == dist2:
-            if minD == dist1:
+        elif max_distance == dist2:
+            if min_distance == dist1:
                 long_line_indeces = [[1, 2], [0, 3]]
                 # short_line_indeces = [[0, 1], [2, 3]]
             else:
                 long_line_indeces = [[2, 3], [0, 1]]
                 # short_line_indeces = [[0, 3], [1, 2]]
         else:
-            if minD == dist1:
+            if min_distance == dist1:
                 long_line_indeces = [[1, 3], [0, 2]]
                 # short_line_indeces = [[0, 1], [2, 3]]
             else:

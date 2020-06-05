@@ -64,12 +64,12 @@ class Point:
         self.y = ret.y
 
     def draw(self, canvas, color=(0, 0, 255), size=3):
-        cv2.circle(canvas, self.toTuple(), size, color)
+        cv2.circle(canvas, self.to_tuple(), size, color)
         if self.angle != None:
-            cv2.line(canvas, self.toTuple(), (int(round(self.x + 20*math.cos(math.radians(self.angle)))), int(round(self.y - 20*math.sin(math.radians(self.angle))))), color)
-    def toTuple(self):
+            cv2.line(canvas, self.to_tuple(), (int(round(self.x + 20*math.cos(math.radians(self.angle)))), int(round(self.y - 20*math.sin(math.radians(self.angle))))), color)
+    def to_tuple(self):
         return (int(round(self.x)), int(round(self.y)))
-    def toArray(self):
+    def to_array(self):
         return np.array([self.x, self.y])
     def copy(self):
         ret = Point(self.x, self.y, angle=self.angle)

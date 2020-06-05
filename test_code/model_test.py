@@ -36,7 +36,7 @@ def mouseEvent(event, x, y, flags, param):
                 pt2.set_heading(points2[0], 150)
                 i = 1
 
-        model.moveTo(pt1, pt2)
+        model.move_to(pt1, pt2)
 
         times += [time.time() - start]
 

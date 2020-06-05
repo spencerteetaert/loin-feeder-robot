@@ -10,12 +10,12 @@ from .. import vector_tools
 class Carriage:
     def __init__(self, pt:Point, scale, angle=0, downward_extension=0, gripper_extension=0.5):
         self.scale = scale
-        self.basePt = pt
+        self.base_pt = pt
         self.width = global_parameters['CARRIAGE_WIDTH'] * scale
         self.length = global_parameters['CARRIAGE_LENGTH'] * scale
         self.angle = angle 
         self.relative_angle = 90
-        self.otherPt = self.getOtherPt()
+        self.other_pt = self.get_other_pt()
         self.downward_extension = downward_extension
         self.gripper_extension = gripper_extension
 
@@ -33,8 +33,8 @@ class Carriage:
         if secondary_arm_angle != None:
             self.relative_angle = (self.angle - secondary_arm_angle + 360 + 180) % 360
 
-    def getOtherPt(self):
-        return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))/2), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))/2))
+    def get_other_pt(self):
+        return Point(round(self.base_pt.x + self.length * math.cos(math.radians(self.angle))/2), round(self.base_pt.y - self.length * math.sin(math.radians(self.angle))/2))
 
     def draw(self, canvas, color=(255, 255, 255)):  
         self.update_points()    
@@ -49,9 +49,9 @@ class Carriage:
         self.delta_angle = self.relative_angle - self.last_angle
         self.last_angle = self.relative_angle
         
-    def moveBase(self, pt:Point, secondary_arm_angle):
+    def move_base(self, pt:Point, secondary_arm_angle):
         self.refresh(secondary_arm_angle)
-        self.basePt = pt
+        self.base_pt = pt
         self.update_points()
 
     def update_points(self):
@@ -62,13 +62,13 @@ class Carriage:
         x1 = x * self.width/2
         x2 = x * self.gripper_extension * self.scale
 
-        self.points += [(self.basePt.toArray() + k + x1)] # top right
-        self.points += [(self.basePt.toArray() + k - x1)] # top left
-        self.points += [(self.basePt.toArray() - k - x1)] # bottom left
-        self.points += [(self.basePt.toArray() - k + x1)] # bottom right 
-        self.points += [(self.basePt.toArray() + k - x1 + x2)] # gripper top right
-        self.points += [(self.basePt.toArray() - k - x1 + x2)] # gripper bottom right 
-        self.otherPt = self.getOtherPt()
+        self.points += [(self.base_pt.toArray() + k + x1)] # top right
+        self.points += [(self.base_pt.toArray() + k - x1)] # top left
+        self.points += [(self.base_pt.toArray() - k - x1)] # bottom left
+        self.points += [(self.base_pt.toArray() - k + x1)] # bottom right 
+        self.points += [(self.base_pt.toArray() + k - x1 + x2)] # gripper top right
+        self.points += [(self.base_pt.toArray() - k - x1 + x2)] # gripper bottom right 
+        self.other_pt = self.get_other_pt()
 
     def get_collision_bounds(self):
         r1 = np.subtract(self.points[1], self.points[2])

@@ -125,7 +125,7 @@ def main(data_path=DATA_PATH):
                 if dist > 0:
                     sp1 = meats[queue1[0][0]].get_center_as_point().copy() + Point(0, dist)
                     sp2 = meats[queue1[0][1]].get_center_as_point().copy() + Point(0, dist)
-                    profile_model.moveMeat(sp1, sp2, ep1, ep2, dist // global_parameters['CONVEYOR_SPEED'], \
+                    profile_model.move_meat(sp1, sp2, ep1, ep2, dist // global_parameters['CONVEYOR_SPEED'], \
                         meats[queue1[0][0]].width, meats[queue1[0][1]].width, phase_1_delay=False)
                     queue1 = queue1[1:]
 
@@ -140,7 +140,7 @@ def main(data_path=DATA_PATH):
                 if dist > 0:
                     sp1 = meats[queue2[0][0]].get_center_as_point().copy() + Point(0, dist)
                     sp2 = meats[queue2[0][1]].get_center_as_point().copy() + Point(0, dist)
-                    drawing_model.moveMeat(sp1, sp2, ep1, ep2, dist // (global_parameters['CONVEYOR_SPEED'] * \
+                    drawing_model.move_meat(sp1, sp2, ep1, ep2, dist // (global_parameters['CONVEYOR_SPEED'] * \
                         global_parameters['RUNTIME_FACTOR']), meats[queue2[0][0]].width, meats[queue2[0][1]].width)
                     queue2 = queue2[1:]
                     flip_flop2 = True

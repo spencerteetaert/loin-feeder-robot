@@ -14,8 +14,8 @@ class FrameHandler:
         self.flip_flop = False # False = Left, True = Right 
         self.meats = []
         self.constants = []
-        self.end_point_1 = global_parameters['END_POINT_1'] - Point(global_parameters['LOIN_WIDTH'] * global_parameters['VIDEO_SCALE'], 0)
-        self.end_point_2 = global_parameters['END_POINT_2'] + Point(global_parameters['LOIN_WIDTH'] * global_parameters['VIDEO_SCALE'], 0)
+        self.end_pt1 = global_parameters['END_POINT_1'] - Point(global_parameters['LOIN_WIDTH'] * global_parameters['VIDEO_SCALE'], 0)
+        self.end_pt2 = global_parameters['END_POINT_2'] + Point(global_parameters['LOIN_WIDTH'] * global_parameters['VIDEO_SCALE'], 0)
 
         self.dt = None
         self.start = 0
@@ -68,8 +68,8 @@ class FrameHandler:
                 self.dt * global_parameters['FRAME_RATE'] * global_parameters['CONVEYOR_SPEED'])
 
             if dist > 0:
-                self.model.moveMeat(self.start_point_1, self.start_point_2, self.end_point_1, \
-                    self.end_point_2, dist / global_parameters['CONVEYOR_SPEED'], self.meats[0].width, \
+                self.model.move_meat(self.start_point_1, self.start_point_2, self.end_pt1, \
+                    self.end_pt2, dist / global_parameters['CONVEYOR_SPEED'], self.meats[0].width, \
                         self.meats[1].width, phase_1_delay=False)
                 self.meats = []
                 # Given the start and end conditions, calculate the model motor profiles

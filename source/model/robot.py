@@ -21,12 +21,12 @@ class Robot:
         self.scale = scale
 
         # Initializes robot parts 
-        self.basePt = robot_base_pt
-        self.main_track = MainTrack(self.basePt, scale)
-        self.main_arm = MainArm(self.main_track.otherPt, scale)
-        self.secondary_arm = SecondaryArm(self.main_arm.otherPt, scale)
-        self.carriage1 = Carriage(self.secondary_arm.otherPt1, scale)
-        self.carriage2 = Carriage(self.secondary_arm.otherPt2, scale)
+        self.base_pt = robot_base_pt
+        self.main_track = MainTrack(self.base_pt, scale)
+        self.main_arm = MainArm(self.main_track.other_pt, scale)
+        self.secondary_arm = SecondaryArm(self.main_arm.other_pt, scale)
+        self.carriage1 = Carriage(self.secondary_arm.other_pt1, scale)
+        self.carriage2 = Carriage(self.secondary_arm.other_pt2, scale)
 
         # Points the robot follows when update() is called 
         self.follow_pt1 = self.get_current_point(1)
@@ -136,9 +136,9 @@ class Robot:
 
     def get_current_point(self, num):
         if num == 1:
-            return Point(self.secondary_arm.otherPt1.x, self.secondary_arm.otherPt1.y, angle=self.carriage1.angle)
+            return Point(self.secondary_arm.other_pt1.x, self.secondary_arm.other_pt1.y, angle=self.carriage1.angle)
         elif num == 2:
-            return Point(self.secondary_arm.otherPt2.x, self.secondary_arm.otherPt2.y, angle=self.carriage2.angle)
+            return Point(self.secondary_arm.other_pt2.x, self.secondary_arm.other_pt2.y, angle=self.carriage2.angle)
 
     def draw(self, canvas):
         self.main_track.draw(canvas)
@@ -176,7 +176,7 @@ class Robot:
         Phase 6: Moving to "Ready Position" >> Phase 0
     '''
 
-    def moveMeat(self, s1, s2, e1, e2, delay, meat1_width, meat2_width, counter=0, phase_1_delay=True):
+    def move_meat(self, s1, s2, e1, e2, delay, meat1_width, meat2_width, counter=0, phase_1_delay=True):
         if self.phase != 0:
             print("ERROR: Robot in use")
             return False 
@@ -256,22 +256,22 @@ class Robot:
 
         return True
 
-    def moveTo(self, pt1, pt2):
+    def move_to(self, pt1, pt2):
         # First moves all the components to the desired points
         self.carriage1.follow(pt1)
         self.carriage2.follow(pt2)
         self.secondary_arm.follow(pt1, pt2)
-        self.main_arm.follow(self.secondary_arm.basePt, self.secondary_arm.angle)
-        self.main_track.follow(self.main_arm.basePt)
+        self.main_arm.follow(self.secondary_arm.base_pt, self.secondary_arm.angle)
+        self.main_track.follow(self.main_arm.base_pt)
 
         # Then restricts movements by translating constrained points back 
-        self.main_track.moveBase(self.basePt)
-        self.main_arm.moveBase(self.main_track.otherPt)
-        self.secondary_arm.moveBase(self.main_arm.otherPt, self.main_arm.angle)
-        self.carriage1.moveBase(self.secondary_arm.otherPt1, self.secondary_arm.angle)
-        self.carriage2.moveBase(self.secondary_arm.otherPt2, self.secondary_arm.angle)
+        self.main_track.move_base(self.base_pt)
+        self.main_arm.move_base(self.main_track.other_pt)
+        self.secondary_arm.move_base(self.main_arm.other_pt, self.main_arm.angle)
+        self.carriage1.move_base(self.secondary_arm.other_pt1, self.secondary_arm.angle)
+        self.carriage2.move_base(self.secondary_arm.other_pt2, self.secondary_arm.angle)
 
-    def followPath(self, path1, path2, execution_time):
+    def follow_path(self, path1, path2, execution_time):
         self.follow1_index = 0
         self.follow2_index = 0
 
@@ -344,7 +344,7 @@ class Robot:
         if self.phase == 3:
             if self.switched:
                 self.switched = False
-                self.followPath(global_parameters['PHASE_3_PATH1'], global_parameters['PHASE_3_PATH2'], global_parameters['PHASE_3_SPEED'])
+                self.follow_path(global_parameters['PHASE_3_PATH1'], global_parameters['PHASE_3_PATH2'], global_parameters['PHASE_3_SPEED'])
                 self.follow_pt1.set_heading(global_parameters['PHASE_3_PATH1'][0], global_parameters['PHASE_3_INITIAL_SPEED'])
                 self.follow_pt2.set_heading(global_parameters['PHASE_3_PATH2'][0], global_parameters['PHASE_3_INITIAL_SPEED'])
                 self.follow1_index = 0
@@ -399,7 +399,7 @@ class Robot:
             if self.switched:
                 self.switched = False
                 self.delay = round(np.sum(self.dt1))//3
-                self.followPath(global_parameters['PHASE_6_PATH1'], global_parameters['PHASE_6_PATH2'], global_parameters['PHASE_6_SPEED']-self.delay)
+                self.follow_path(global_parameters['PHASE_6_PATH1'], global_parameters['PHASE_6_PATH2'], global_parameters['PHASE_6_SPEED']-self.delay)
                 self.follow1_index = 0
                 self.follow2_index = 0
 
@@ -422,7 +422,7 @@ class Robot:
                 self.follow2_index += 1
                 self.follow_pt2.set_heading(global_parameters['PHASE_6_PATH2'][self.follow2_index], self.dt2[self.follow2_index - 1])
 
-        self.moveTo(self.follow_pt1, self.follow_pt2)
+        self.move_to(self.follow_pt1, self.follow_pt2)
 
         frame = np.zeros([1200, 1200, 3])
         self.draw(frame)
@@ -505,18 +505,18 @@ class Robot:
         temp = state.copy()
         self.main_track.set_model_state(temp[0])
 
-        temp.insert(1, self.main_track.otherPt)
+        temp.insert(1, self.main_track.other_pt)
         self.main_arm.set_model_state(temp[1:4])
 
-        temp.insert(4, self.main_arm.otherPt)
+        temp.insert(4, self.main_arm.other_pt)
         temp.insert(5, self.main_arm.angle)
         self.secondary_arm.set_model_state(temp[4:9])
 
-        temp.insert(9, self.secondary_arm.otherPt1) 
+        temp.insert(9, self.secondary_arm.other_pt1) 
         temp.insert(10, self.secondary_arm.angle)
         self.carriage1.set_model_state(temp[9:14])
 
-        temp.insert(14, self.secondary_arm.otherPt2) 
+        temp.insert(14, self.secondary_arm.other_pt2) 
         temp.insert(15, self.secondary_arm.angle)
         self.carriage2.set_model_state(temp[14:19])
 
