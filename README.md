@@ -15,7 +15,7 @@ This folder contains the necessary classes required for creating a digital model
 
 #### Test code: model_test.py
 
-![Robot model implementation](/images/model.PNG)
+![Robot model implementation](/resources/images/model.PNG)
 
 ### path_planning
 
@@ -23,7 +23,7 @@ This folder contains functions for path planning. The current algorithm uses the
 
 Raw position data          |  Integrated position data
 :-------------------------:|:-------------------------:
-![](/images/figure_o.png)  |  ![](/images/figure_i.png)
+![](/resources/images/figure_o.png)  |  ![](/resources/images/figure_i.png)
 
 * graphing_tools.py contains a class to thread the graphing process. 
 * path_runner.py contains a class to thread the path finder.
@@ -38,7 +38,7 @@ This folder contains the tools needed for identifying pieces of product as they 
 * meat.py contains the meat class. This object determines important features of the meat to use in path planning.
 * video_reader.py contains a video reader class. This class allows reading of video to be threaded to increase runtime efficiency. 
 
-![Meat object identification](/images/meat_identified.PNG)
+![Meat object identification](/resources/images/meat_identified.PNG)
 
 ## tools 
 
@@ -52,4 +52,4 @@ Contains tools used for finding parameter values, testing functions, and timing 
 ## main.py
 main.py is a full implementation of the library. 
 
-![](/images/main.PNG)
+![](/resources/images/main.PNG)
