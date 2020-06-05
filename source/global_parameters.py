@@ -1,7 +1,20 @@
 import numpy as np
 import pickle
+from datetime import datetime
 
-from .model.point import Point
+
+'''
+    Running this file directly will save the current settings. 
+'''
+
+if __name__=="__main__":
+    from model.point import Point
+else:
+    from .model.point import Point
+
+now = datetime.now()
+dt_string = now.strftime("-%d%m%Y-%H%M%S")
+EXPORT_FILE_PATH = "resources\configs\main" + dt_string
 
 params_1 = { # Parameters 
     ################################
@@ -48,6 +61,8 @@ params_1 = { # Parameters
     "PICKUP_POINT" : Point(440, 504),
     "END_POINT_1" : Point(625, 735, angle=90),
     "END_POINT_2" : Point(250, 735, angle=90),
+
+    "SAFE_ENVIRONMENT" : [[[440, 190], [440, 730]], [[100, 735], [800, 735]], [[440, 600], [300, 735]], [[440, 600], [580, 735]]],
 
     # Phase Parameters 
     "TOTAL_EXECUTION_TIME" : 5.2,
@@ -108,10 +123,23 @@ params_3 = {
 
 global_parameters = {**{**params_1, **params_2}, **params_3}
 
+
 def set_parameters(file_path):
+    global global_parameters
     try:
-        f = open(file_path, 'r')
+        f = open(file_path, 'rb')
         data = pickle.load(f)
-        global_params = data
+        global_parameters = data
+        f.close()
     except:
         print("ERROR: Invalid configuration file.")
+
+def save_parameters(file_path):
+    f = open(file_path, 'wb')
+    pickle.dump(global_parameters, f)
+    f.close()
+
+    print("Current configuration saved to:",file_path)
+
+if __name__=="__main__":
+    save_parameters(EXPORT_FILE_PATH)

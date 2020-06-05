@@ -28,12 +28,12 @@ def mouseEvent(event, x, y, flags, param):
         pt2.update()
         if not pt1.update():
             if i < len(points1):
-                pt1.moveTo(points1[i], 50)
-                pt2.moveTo(points2[i], 50)
+                pt1.set_heading(points1[i], 50)
+                pt2.set_heading(points2[i], 50)
                 i+= 1
             else:
-                pt1.moveTo(points1[0], 150)
-                pt2.moveTo(points2[0], 150)
+                pt1.set_heading(points1[0], 150)
+                pt2.set_heading(points2[0], 150)
                 i = 1
 
         model.moveTo(pt1, pt2)

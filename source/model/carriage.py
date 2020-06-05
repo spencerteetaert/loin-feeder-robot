@@ -8,7 +8,7 @@ from ..global_parameters import global_parameters
 from .. import vector_tools
 
 class Carriage:
-    def __init__(self, pt:Point, scale, angle=0):
+    def __init__(self, pt:Point, scale, angle=0, is_down=False, gripper_extension=0.1):
         self.scale = scale
         self.basePt = pt
         self.width = global_parameters['CARRIAGE_WIDTH'] * scale
@@ -16,6 +16,8 @@ class Carriage:
         self.angle = angle 
         self.relative_angle = 90
         self.otherPt = self.getOtherPt()
+        self.is_down = is_down
+        self.gripper_extension = gripper_extension
 
         self.last_angle = self.relative_angle
         self.delta_angle = 0
@@ -35,7 +37,7 @@ class Carriage:
         return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))/2), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))/2))
 
     def draw(self, canvas, color=(255, 255, 255)):      
-        contour = np.array(self.points).reshape((-1, 1, 2)).astype(np.int32)
+        contour = np.array(self.points[0:4]).reshape((-1, 1, 2)).astype(np.int32)
         cv2.drawContours(canvas, [contour], 0, color, 2)
 
     def follow(self, pt:Point):
@@ -70,3 +72,14 @@ class Carriage:
         r4 = np.subtract(self.points[3], self.points[0])
         
         return [[self.points[1], r3], [self.points[1], r4], [self.points[3], r1], [self.points[3], r2]]
+
+    def set_model_state(self, state):
+        '''
+            0: Secondary arm other pt
+            1: Secondary arm abs angle
+            2: Angle
+            3: Raised/Lowered
+            4: Gripper extension
+        '''
+        angle = (state[2] + state[1] + 180 + 720) % 360
+        self.__init__(state[0], self.scale, angle, state[3], state[4])

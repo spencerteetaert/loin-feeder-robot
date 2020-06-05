@@ -50,3 +50,9 @@ class MainTrack:
     def moveBase(self, pt:Point):
         self.basePt = pt
         self.otherPt = self.getOtherPt()
+
+    def set_model_state(self, state):
+        '''
+            state = length 
+        '''
+        self.__init__(self.basePt, self.scale, length=state)
