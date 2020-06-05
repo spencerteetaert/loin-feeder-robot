@@ -123,10 +123,6 @@ class Robot:
             print(self.vel_data[:,[2, 5, 6, 9]])
             return False
 
-        # Convert from change per frame to change
-        # self.vel_data = np.multiply(self.vel_data, global_parameters['FRAME_RATE)
-        # self.pos_data = np.add(np.asarray([integrate.simps(self.vel_data[0:i+1], axis=0).tolist() for i in range(0, len(self.vel_data))]), self.constants)
-
         return True
 
     ########################

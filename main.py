@@ -9,7 +9,7 @@ from source import model
 sys.modules['model'] = model
 from source.global_parameters import global_parameters
 from source.global_parameters import set_parameters
-set_parameters("resources\configs\main-05062020-104503")
+set_parameters("resources\configs\main-05062020-132549")
 
 from source.path_planning.frame_handler import FrameHandler
 from source.data_send_receive.instruction_handler import InstructionHandler

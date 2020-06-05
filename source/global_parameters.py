@@ -123,7 +123,7 @@ params_3 = {
     "PHASE_3_INITIAL_SPEED" : params_1['PHASE_3_1_PERCENTAGE'] * params_1['TOTAL_EXECUTION_TIME'] * params_2['FRAME_RATE'],
     "PHASE_4_SPEED" : params_1['PHASE_4_PERCENTAGE'] * params_1['TOTAL_EXECUTION_TIME'] * params_2['FRAME_RATE'],
     "PHASE_5_DELAY" : params_1['PHASE_5_PERCENTAGE'] * params_1['TOTAL_EXECUTION_TIME'] * params_2['FRAME_RATE'],
-    "PHASE_6_SPEED" : params_1['PHASE_6_PERCENTAGE'] * params_1['TOTAL_EXECUTION_TIME'] * params_2['FRAME_RATE'],
+    "PHASE_6_SPEED" : params_1['PHASE_6_PERCENTAGE'] * params_1['TOTAL_EXECUTION_TIME'] * params_2['FRAME_RATE']
 }
 
 global_parameters = {**{**params_1, **params_2}, **params_3}

@@ -68,11 +68,10 @@ class FrameHandler:
                 self.dt * global_parameters['FRAME_RATE'] * global_parameters['CONVEYOR_SPEED'])
 
             if dist > 0:
-                self.meats = []
                 self.model.moveMeat(self.start_point_1, self.start_point_2, self.end_point_1, \
                     self.end_point_2, dist / global_parameters['CONVEYOR_SPEED'], self.meats[0].width, \
                         self.meats[1].width, phase_1_delay=False)
-                
+                self.meats = []
                 # Given the start and end conditions, calculate the model motor profiles
                 self.model.run(read_time, dist) 
 

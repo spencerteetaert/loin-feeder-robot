@@ -5,7 +5,7 @@ import time
 
 from pylogix import PLC
 import numpy as np
-np.set_printoptions(suppress=True, precision=3)
+np.set_printoptions(suppress=True, precision=3, linewidth=180)
 
 from ..global_parameters import global_parameters
 
