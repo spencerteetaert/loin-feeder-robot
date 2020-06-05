@@ -78,7 +78,7 @@ class Point:
         return ret
 
 
-    def moveTo(self, otherPt, dt, delay=0):
+    def set_heading(self, otherPt, dt, delay=0):
         dX = (otherPt.x - self.x)/dt
         dY = (otherPt.y - self.y)/dt
         dA = 0

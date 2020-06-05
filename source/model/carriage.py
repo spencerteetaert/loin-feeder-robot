@@ -37,7 +37,7 @@ class Carriage:
         return Point(round(self.basePt.x + self.length * math.cos(math.radians(self.angle))/2), round(self.basePt.y - self.length * math.sin(math.radians(self.angle))/2))
 
     def draw(self, canvas, color=(255, 255, 255)):      
-        contour = np.array(self.points).reshape((-1, 1, 2)).astype(np.int32)
+        contour = np.array(self.points[0:4]).reshape((-1, 1, 2)).astype(np.int32)
         cv2.drawContours(canvas, [contour], 0, color, 2)
 
     def follow(self, pt:Point):

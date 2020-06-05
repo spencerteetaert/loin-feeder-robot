@@ -303,8 +303,8 @@ class Robot:
                     self.profile_data += [self.get_physical_state()]
                 # self.counter = 0
                 self.switched = False
-                self.follow_pt1.moveTo(self.s1, global_parameters['PHASE_1_SPEED'])
-                self.follow_pt2.moveTo(self.s2, global_parameters['PHASE_1_SPEED'])
+                self.follow_pt1.set_heading(self.s1, global_parameters['PHASE_1_SPEED'])
+                self.follow_pt2.set_heading(self.s2, global_parameters['PHASE_1_SPEED'])
                 self.phase_1_counter = 0
             if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 and self.delay < 1 and self.PHASE_1_DELAY: # End of step condition 
                 self.switched = True 
@@ -319,8 +319,8 @@ class Robot:
             if self.switched:
                 self.switched = False
                 self.delay = global_parameters['PHASE_2_DELAY']
-                self.follow_pt1.moveTo(self.follow_pt1 + Point(0, self.delay * global_parameters['CONVEYOR_SPEED']), global_parameters['PHASE_2_DELAY'])
-                self.follow_pt2.moveTo(self.follow_pt2 + Point(0, self.delay * global_parameters['CONVEYOR_SPEED']), global_parameters['PHASE_2_DELAY'])
+                self.follow_pt1.set_heading(self.follow_pt1 + Point(0, self.delay * global_parameters['CONVEYOR_SPEED']), global_parameters['PHASE_2_DELAY'])
+                self.follow_pt2.set_heading(self.follow_pt2 + Point(0, self.delay * global_parameters['CONVEYOR_SPEED']), global_parameters['PHASE_2_DELAY'])
             if self.delay <= 1: # End of step condition 
                 self.switched = True 
                 self.phase = 3
@@ -331,8 +331,8 @@ class Robot:
             if self.switched:
                 self.switched = False
                 self.followPath(global_parameters['PHASE_3_PATH1'], global_parameters['PHASE_3_PATH2'], global_parameters['PHASE_3_SPEED'])
-                self.follow_pt1.moveTo(global_parameters['PHASE_3_PATH1'][0], global_parameters['PHASE_3_INITIAL_SPEED'])
-                self.follow_pt2.moveTo(global_parameters['PHASE_3_PATH2'][0], global_parameters['PHASE_3_INITIAL_SPEED'])
+                self.follow_pt1.set_heading(global_parameters['PHASE_3_PATH1'][0], global_parameters['PHASE_3_INITIAL_SPEED'])
+                self.follow_pt2.set_heading(global_parameters['PHASE_3_PATH2'][0], global_parameters['PHASE_3_INITIAL_SPEED'])
                 self.follow1_index = 0
                 self.follow2_index = 0
 
@@ -344,22 +344,22 @@ class Robot:
                 self.phase = 4
 
                 #Stops robot in its tracks
-                self.follow_pt1.moveTo(self.follow_pt1, 1)
-                self.follow_pt2.moveTo(self.follow_pt2, 1)
+                self.follow_pt1.set_heading(self.follow_pt1, 1)
+                self.follow_pt2.set_heading(self.follow_pt2, 1)
 
             if self.follow_pt1.steps_remaining <= 1 and self.follow1_index < len(global_parameters['PHASE_3_PATH1']) - 1:
                 self.follow1_index += 1
-                self.follow_pt1.moveTo(global_parameters['PHASE_3_PATH1'][self.follow1_index], self.dt1[self.follow1_index - 1])
+                self.follow_pt1.set_heading(global_parameters['PHASE_3_PATH1'][self.follow1_index], self.dt1[self.follow1_index - 1])
             if self.follow_pt2.steps_remaining <= 1 and self.follow2_index < len(global_parameters['PHASE_3_PATH2']) - 1:
                 self.follow2_index += 1
-                self.follow_pt2.moveTo(global_parameters['PHASE_3_PATH2'][self.follow2_index], self.dt2[self.follow2_index - 1])
+                self.follow_pt2.set_heading(global_parameters['PHASE_3_PATH2'][self.follow2_index], self.dt2[self.follow2_index - 1])
 
         # Phase 4: "Step 2" -> Extending
         if self.phase == 4:
             if self.switched:
                 self.switched = False
-                self.follow_pt1.moveTo(self.e1, global_parameters['PHASE_4_SPEED'])
-                self.follow_pt2.moveTo(self.e2, global_parameters['PHASE_4_SPEED'])
+                self.follow_pt1.set_heading(self.e1, global_parameters['PHASE_4_SPEED'])
+                self.follow_pt2.set_heading(self.e2, global_parameters['PHASE_4_SPEED'])
             if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1: # End of step condition 
                 self.switched = True 
                 self.phase = 5
@@ -392,16 +392,16 @@ class Robot:
                 self.phase = 0
 
                 #Stops robot in its tracks
-                self.follow_pt1.moveTo(self.follow_pt1, 1)
-                self.follow_pt2.moveTo(self.follow_pt2, 1)
+                self.follow_pt1.set_heading(self.follow_pt1, 1)
+                self.follow_pt2.set_heading(self.follow_pt2, 1)
 
             if self.follow_pt1.steps_remaining <= 1 and self.follow1_index < len(global_parameters['PHASE_6_PATH1']) - 1:
                 self.follow1_index += 1
-                self.follow_pt1.moveTo(global_parameters['PHASE_6_PATH1'][self.follow1_index], self.dt1[self.follow1_index - 1])
+                self.follow_pt1.set_heading(global_parameters['PHASE_6_PATH1'][self.follow1_index], self.dt1[self.follow1_index - 1])
             if self.follow_pt2.steps_remaining <= 1 and self.follow2_index < len(global_parameters['PHASE_6_PATH2']) - 1 \
                 and self.delay <= 0:
                 self.follow2_index += 1
-                self.follow_pt2.moveTo(global_parameters['PHASE_6_PATH2'][self.follow2_index], self.dt2[self.follow2_index - 1])
+                self.follow_pt2.set_heading(global_parameters['PHASE_6_PATH2'][self.follow2_index], self.dt2[self.follow2_index - 1])
 
         self.moveTo(self.follow_pt1, self.follow_pt2)
 
@@ -450,54 +450,54 @@ class Robot:
 
         self.recording = False
 
-    def set_model_state(self, state, extras_included=False):
+    def set_model_state(self, state):
         '''
+        Using a list of the parameters required to fully define the robot, 
+        set the robot parameters using to match the given state. 
+
         State:
             Main Track
                 0: Length
             Main Arm
-                1: Main track other pt 
+                1: Main track other pt (added)
                 2: Length
                 3: Angle
             Secondary Arm
-                4: Main arm other pt
-                5: Main arm angle
+                4: Main arm other pt (added)
+                5: Main arm angle (added)
                 6: Length1
                 7: Length2
                 8: Angle 
             Carriage1
-                9: Secondary arm other pt
-                10: Secondary arm abs angle
+                9: Secondary arm other pt (added)
+                10: Secondary arm abs angle (added)
                 11: Angle
                 12: Raised/Lowered
                 13: Gripper extension
             Carriage2
-                14: Secondary arm other pt
-                15: Secondary arm abs angle
+                14: Secondary arm other pt (added)
+                15: Secondary arm abs angle (added)
                 16: Angle
                 17: Raised/Lowered
                 18: Gripper extension
         '''
-        self.main_track.set_model_state(state[0])
+        temp = state.copy()
+        self.main_track.set_model_state(temp[0])
 
-        if not extras_included:
-            state.insert(1, self.main_track.otherPt)
-        self.main_arm.set_model_state(state[1:4])
+        temp.insert(1, self.main_track.otherPt)
+        self.main_arm.set_model_state(temp[1:4])
 
-        if not extras_included:
-            state.insert(4, self.main_arm.otherPt)
-            state.insert(5, self.main_arm.angle)
-        self.secondary_arm.set_model_state(state[4:9])
+        temp.insert(4, self.main_arm.otherPt)
+        temp.insert(5, self.main_arm.angle)
+        self.secondary_arm.set_model_state(temp[4:9])
 
-        if not extras_included:
-            state.insert(9, self.secondary_arm.otherPt1) 
-            state.insert(10, self.secondary_arm.angle)
-        self.carriage1.set_model_state(state[9:14])
+        temp.insert(9, self.secondary_arm.otherPt1) 
+        temp.insert(10, self.secondary_arm.angle)
+        self.carriage1.set_model_state(temp[9:14])
 
-        if not extras_included:
-            state.insert(14, self.secondary_arm.otherPt2) 
-            state.insert(15, self.secondary_arm.angle)
-        self.carriage2.set_model_state(state[14:19])
+        temp.insert(14, self.secondary_arm.otherPt2) 
+        temp.insert(15, self.secondary_arm.angle)
+        self.carriage2.set_model_state(temp[14:19])
 
         self.follow_pt1 = self.get_current_point(1)
         self.follow_pt2 = self.get_current_point(2)
@@ -515,27 +515,24 @@ class Robot:
         self.recording = False
 
     def get_model_state(self):
+        '''
+            Returns all required parameters to determine the fully defined 
+            state of the robot. 
+        '''
         state = []
         state += [self.main_track.length/self.scale]
 
-        state += [self.main_track.otherPt]
         state += [self.main_arm.length/self.scale]
         state += [self.main_arm.angle]
 
-        state += [self.main_arm.otherPt]
-        state += [self.main_arm.angle]
         state += [self.secondary_arm.length1/self.scale]
         state += [self.secondary_arm.length2/self.scale]
         state += [self.secondary_arm.relative_angle]
 
-        state += [self.secondary_arm.otherPt1]
-        state += [self.secondary_arm.angle]
         state += [self.carriage1.relative_angle]
         state += [self.carriage1.is_down]
         state += [self.carriage1.gripper_extension/self.scale]
 
-        state += [self.secondary_arm.otherPt2]
-        state += [self.secondary_arm.angle]
         state += [self.carriage2.relative_angle]
         state += [self.carriage2.is_down]
         state += [self.carriage2.gripper_extension/self.scale]

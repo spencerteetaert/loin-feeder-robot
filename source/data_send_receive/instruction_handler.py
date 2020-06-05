@@ -73,6 +73,17 @@ class InstructionHandler:
                         print("ERROR: Instruction size mismatch.")
 
                 elif current_time == 0 and counter != 0:
+
+                    # Send a stop order to stop all motion
+                    # plc.Write("<tag0>", value=instruction[0])
+                    # plc.Write("<tag1>", value=instruction[1])
+                    # plc.Write("<tag2>", value=instruction[2])
+                    # plc.Write("<tag3>", value=instruction[3])
+                    # plc.Write("<tag4>", value=instruction[4])
+                    # plc.Write("<tag5>", value=instruction[5])
+                    # plc.Write("<tag6>", value=instruction[6])
+                    # plc.Write("<tag7>", value=instruction[7])
+
                     counter = 0
                     print("Instruction completed. \nExecution time:", round(time.time() - s, 2),"s\n")
                     current_time = self.time_Q.get() # get is a locking function so it stays here until the next instruction comes in
