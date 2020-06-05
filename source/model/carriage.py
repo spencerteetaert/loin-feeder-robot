@@ -72,9 +72,14 @@ class Carriage:
 
     def get_collision_bounds(self):
         r1 = np.subtract(self.points[1], self.points[2])
-        r2 = np.subtract(self.points[1], self.points[0]) 
-        r3 = np.subtract(self.points[3], self.points[2])
-        r4 = np.subtract(self.points[3], self.points[0])
+        if self.gripper_extension < global_parameters['CARRIAGE_WIDTH']:
+            r2 = np.subtract(self.points[1], self.points[0]) 
+            r3 = np.subtract(self.points[3], self.points[2])
+            r4 = np.subtract(self.points[3], self.points[0])
+        else:
+            r2 = np.subtract(self.points[1], self.points[4]) 
+            r3 = np.subtract(self.points[5], self.points[2])
+            r4 = np.subtract(self.points[5], self.points[4])
         
         return [[self.points[1], r3], [self.points[1], r4], [self.points[3], r1], [self.points[3], r2]]
 
@@ -100,7 +105,7 @@ class Carriage:
         self.gripper_extension = min(self.gripper_extension, global_parameters['GRIPPER_MAX_EXTENSION'])
 
     def lower(self):
-        pass
+        self.is_down = True
 
     def lift(self):
-        pass 
+        self.is_down = False

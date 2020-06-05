@@ -326,6 +326,9 @@ class Robot:
             if self.delay <= 1: # End of step condition 
                 self.switched = True 
                 self.phase = 3
+            
+            self.carriage1.lower()
+            self.carriage2.lower()
             self.carriage1.close(self.meat1_width)
             self.carriage2.close(self.meat2_width)
             
@@ -377,8 +380,11 @@ class Robot:
             if self.delay <= 0: # End of step condition 
                 self.switched = True 
                 self.phase = 6
+
             self.carriage1.open()
             self.carriage2.open()
+            self.carriage1.lift()
+            self.carriage2.lift()
 
         # Phase 6: Moving to "Ready Position"
         if self.phase == 6:
