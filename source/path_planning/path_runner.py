@@ -35,7 +35,7 @@ class PathRunner:
         start = time.time()
         self.model.clear_history()
         self.model.recording = True
-        self.constants = self.model.get_current_state()
+        self.constants = self.model.get_physical_state()
 
         counter = 0
         self.xs = []

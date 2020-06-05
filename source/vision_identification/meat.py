@@ -15,6 +15,7 @@ class Meat():
         self.side = side
         self.bbox = data[0]
         self.center = center
+        self.width = 0
 
         if (self.bbox == []):
             print("ERR: Meat object created with empty bbox.")
@@ -51,6 +52,7 @@ class Meat():
         dist3 = (self.bbox[3] - self.bbox[0])[0]**2 + (self.bbox[3] - self.bbox[0])[1]**2
         maxD = max(dist1, dist2, dist3)
         minD = min(dist1, dist2, dist3)
+        self.width = minD
 
         if maxD == dist1:
             if minD == dist2:

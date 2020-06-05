@@ -15,7 +15,7 @@ from source.global_parameters import global_parameters
 
 '''
     A full implementation of all of the non-PLC specific functionality 
-    of the library. File 
+    of the library.
 '''
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
@@ -58,6 +58,7 @@ def main(data_path=DATA_PATH):
     queue1 = []
     queue2 = []
     times = []
+    saved_state = []
 
     while(streamer.running):
         start = time.time()
@@ -176,7 +177,8 @@ def main(data_path=DATA_PATH):
             meats[i].step()
 
         if DISPLAY_TOGGLE:
-            k = cv2.waitKey(1) & 0xFF
+            # k = cv2.waitKey(1) & 0xFF
+            k = cv2.waitKey(max(global_parameters['FRAME_RATE'] - round((time.time() - force_timer )*1000 + 1), 1)) & 0xFF
             if k == ord('q'):
                 break
             elif k == ord('p'):
@@ -191,12 +193,19 @@ def main(data_path=DATA_PATH):
                 while grapher.running:
                     pass
                 current_graph = grapher.read()
+            elif k == ord('s'):
+                saved_state = drawing_model.get_model_state()
+                cv2.waitKey(0)
+                print("State saved.\n")
+            elif k == ord('r'):
+                drawing_model.set_model_state(saved_state)
+                print("State uploaded.")
             
         times += [time.time() - start]
         # out.write(frame)
 
         #Artifically slow the program to the desired frame rate
-        cv2.waitKey(max(global_parameters['FRAME_RATE'] - round((time.time() - force_timer )*1000 + 1), 1))
+        
 
     print("Average frame time:", np.average(times))
     # out.release()

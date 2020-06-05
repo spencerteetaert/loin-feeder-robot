@@ -3,7 +3,7 @@ import cv2
 
 from context import source
 from source.model.point import Point
-from source import global_parameters
+from source.global_parameters import global_parameters
 from source.path_planning.path import PathFinder
 
 path = []
@@ -19,8 +19,9 @@ def on_mouse(event, pX, pY, flags, param):
         path = pf(sp, ep, 30)
         
         canvas = np.zeros([1000, 1000, 3], dtype=np.uint8)
-        for i in range(0, len(global_parameters.SAFE_ENVIRONMENT)):
-            cv2.line(canvas, (global_parameters.SAFE_ENVIRONMENT[i][0][0], global_parameters.SAFE_ENVIRONMENT[i][0][1]), (global_parameters.SAFE_ENVIRONMENT[i][1][0], global_parameters.SAFE_ENVIRONMENT[i][1][1]), (50, 50, 50))
+        for i in range(0, len(global_parameters['SAFE_ENVIRONMENT'])):
+            cv2.line(canvas, (global_parameters['SAFE_ENVIRONMENT'][i][0][0], global_parameters['SAFE_ENVIRONMENT'][i][0][1]), \
+                (global_parameters['SAFE_ENVIRONMENT'][i][1][0], global_parameters['SAFE_ENVIRONMENT'][i][1][1]), (50, 50, 50))
         for i in range(1, len(path)-1):
             path[i].draw(canvas, color=(255, 255, 255))
 
