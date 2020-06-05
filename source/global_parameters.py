@@ -54,7 +54,7 @@ params_1 = { # Parameters
     "ROTATIONAL_VELOCITY_MAX" : 360, # °/s
     "LINEAR_VELOCITY_MAX" : 1.5, # m/s
     "GRIPPER_SPEED" : 0.5, #m/s
-    "LIFT_LOWER_SPEED" : 0.1, #m/s
+    "DOWNWARD_SPEED" : 1, #m/s
 
     # Points 
     "READY_POS_1" : Point(439, 504, angle=0),
@@ -101,7 +101,9 @@ params_1 = { # Parameters
     "CARRIAGE_LENGTH" : 0.875,
     "CARRIAGE_WIDTH" : 0.406,
     "GRIPPER_MAX_EXTENSION" : 0.5,
-    "GRIPPER_MIN_EXTENSION" : 0.3
+    "GRIPPER_MIN_EXTENSION" : 0.3,
+    "DOWNWARD_MAX_EXTENSION" : 0.2, 
+    "DOWNWARD_MIN_EXTENSION" : 0.02
 }
 
 params_2 = {

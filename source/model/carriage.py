@@ -8,7 +8,7 @@ from ..global_parameters import global_parameters
 from .. import vector_tools
 
 class Carriage:
-    def __init__(self, pt:Point, scale, angle=0, is_down=False, gripper_extension=0.5):
+    def __init__(self, pt:Point, scale, angle=0, downward_extension=0, gripper_extension=0.5):
         self.scale = scale
         self.basePt = pt
         self.width = global_parameters['CARRIAGE_WIDTH'] * scale
@@ -16,7 +16,7 @@ class Carriage:
         self.angle = angle 
         self.relative_angle = 90
         self.otherPt = self.getOtherPt()
-        self.is_down = is_down
+        self.downward_extension = downward_extension
         self.gripper_extension = gripper_extension
 
         self.last_angle = self.relative_angle
@@ -105,7 +105,11 @@ class Carriage:
         self.gripper_extension = min(self.gripper_extension, global_parameters['GRIPPER_MAX_EXTENSION'])
 
     def lower(self):
-        self.is_down = True
+        if self.downward_extension < global_parameters['DOWNWARD_MAX_EXTENSION']:
+            self.downward_extension += global_parameters['DOWNWARD_SPEED'] / global_parameters['FRAME_RATE']
+        self.downward_extension = min(self.downward_extension, global_parameters['DOWNWARD_MAX_EXTENSION'])
 
     def lift(self):
-        self.is_down = False
+        if self.downward_extension > global_parameters['DOWNWARD_MIN_EXTENSION']:
+            self.downward_extension -= global_parameters['DOWNWARD_SPEED'] / global_parameters['FRAME_RATE']
+        self.downward_extension = max(self.downward_extension, global_parameters['DOWNWARD_MIN_EXTENSION'])

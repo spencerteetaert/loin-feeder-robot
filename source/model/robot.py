@@ -69,14 +69,18 @@ class Robot:
     def get_physical_state(self):
         ret = []
         
-        ret += [self.main_track.length / global_parameters['VIDEO_SCALE']] # Main track extension
-        ret += [self.main_arm.length / global_parameters['VIDEO_SCALE']] # Main arm extension
+        ret += [self.main_track.length / self.scale] # Main track extension
+        ret += [self.main_arm.length / self.scale] # Main arm extension
         ret += [self.main_arm.angle] # Main arm rotation 
-        ret += [self.secondary_arm.length1 / global_parameters['VIDEO_SCALE']] # Secondary arm extension 1
-        ret += [self.secondary_arm.length2 / global_parameters['VIDEO_SCALE']] # Secondary arm extension 2
+        ret += [self.secondary_arm.length1 / self.scale] # Secondary arm extension 1
+        ret += [self.secondary_arm.length2 / self.scale] # Secondary arm extension 2
         ret += [self.secondary_arm.relative_angle] # Secondary arm rotation 
         ret += [self.carriage1.relative_angle] # Carriage 1 rotation
+        ret += [self.carriage1.gripper_extension] # Carriage 1 gripper 
+        ret += [self.carriage1.downward_extension] # Carriage 1 height
         ret += [self.carriage2.relative_angle] # Carriage 2 rotation
+        ret += [self.carriage2.gripper_extension] # Carriage 2 gripper
+        ret += [self.carriage2.downward_extension] # Carriage 2 height
 
         return ret
 
@@ -99,24 +103,24 @@ class Robot:
         # Convert from per frame to per second
         self.acc_data = np.multiply(self.acc_data, global_parameters['FRAME_RATE'])
 
-        if abs(np.amax(self.acc_data[:,[0, 1, 3, 4]])) > global_parameters['LINEAR_ACCELERATION_MAX']:
-            print("Linear acceleration fault. Val:", np.amax(self.acc_data[:,[0, 1, 3, 4]]))
-            print(self.acc_data[:,[0, 1, 3, 4]])
+        if abs(np.amax(self.acc_data[:,[0, 1, 3, 4, 7, 8, 10, 11]])) > global_parameters['LINEAR_ACCELERATION_MAX']:
+            print("Linear acceleration fault. Val:", np.amax(self.acc_data[:,[0, 1, 3, 4, 7, 8, 10, 11]]))
+            print(self.acc_data[:,[0, 1, 3, 4, 7, 8, 10, 11]])
             return False
-        if abs(np.amax(self.acc_data[:,[2, 5, 6, 7]])) > global_parameters['ROTATIONAL_ACCELERATION_MAX']:
-            print("Rotational acceleration fault. Val:", np.amax(self.acc_data[:,[2, 5, 6, 7]]))
-            print(self.acc_data[:,[2, 5, 6, 7]])
+        if abs(np.amax(self.acc_data[:,[2, 5, 6, 9]])) > global_parameters['ROTATIONAL_ACCELERATION_MAX']:
+            print("Rotational acceleration fault. Val:", np.amax(self.acc_data[:,[2, 5, 6, 9]]))
+            print(self.acc_data[:,[2, 5, 6, 9]])
             return False
 
         self.vel_data = np.asarray([integrate.simps(self.acc_data[0:i+1], axis=0).tolist() for i in range(0, len(self.acc_data))])
 
-        if abs(np.amax(self.vel_data[:,[0, 1, 3, 4]])) > global_parameters['LINEAR_VELOCITY_MAX']:
-            print("Linear velocity fault. Val:", np.amax(self.vel_data[:,[0, 1, 3, 4]]))
-            print(self.vel_data[:,[0, 1, 3, 4]])
+        if abs(np.amax(self.vel_data[:,[0, 1, 3, 4, 7, 8, 10, 11]])) > global_parameters['LINEAR_VELOCITY_MAX']:
+            print("Linear velocity fault. Val:", np.amax(self.vel_data[:,[0, 1, 3, 4, 7, 8, 10, 11]]))
+            print(self.vel_data[:,[0, 1, 3, 4, 7, 8, 10, 11]])
             return False
-        if abs(np.amax(self.vel_data[:,[2, 5, 6, 7]])) > global_parameters['ROTATIONAL_VELOCITY_MAX']:
-            print("Rotational velocity fault. Val:", np.amax(self.vel_data[:,[2, 5, 6, 7]]))
-            print(self.vel_data[:,[2, 5, 6, 7]])
+        if abs(np.amax(self.vel_data[:,[2, 5, 6, 9]])) > global_parameters['ROTATIONAL_VELOCITY_MAX']:
+            print("Rotational velocity fault. Val:", np.amax(self.vel_data[:,[2, 5, 6, 9]]))
+            print(self.vel_data[:,[2, 5, 6, 9]])
             return False
 
         # Convert from change per frame to change
