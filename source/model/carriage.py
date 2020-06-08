@@ -62,25 +62,23 @@ class Carriage:
         x1 = x * self.width/2
         x2 = x * self.gripper_extension * self.scale
 
-        self.points += [(self.base_pt.toArray() + k + x1)] # top right
-        self.points += [(self.base_pt.toArray() + k - x1)] # top left
-        self.points += [(self.base_pt.toArray() - k - x1)] # bottom left
-        self.points += [(self.base_pt.toArray() - k + x1)] # bottom right 
-        self.points += [(self.base_pt.toArray() + k - x1 + x2)] # gripper top right
-        self.points += [(self.base_pt.toArray() - k - x1 + x2)] # gripper bottom right 
+        self.points += [(self.base_pt.to_array() + k + x1)] # top right
+        self.points += [(self.base_pt.to_array() + k - x1)] # top left
+        self.points += [(self.base_pt.to_array() - k - x1)] # bottom left
+        self.points += [(self.base_pt.to_array() - k + x1)] # bottom right 
+        self.points += [(self.base_pt.to_array() + k - x1 + x2)] # gripper top right
+        self.points += [(self.base_pt.to_array() - k - x1 + x2)] # gripper bottom right 
         self.other_pt = self.get_other_pt()
 
     def get_collision_bounds(self):
         r1 = np.subtract(self.points[1], self.points[2])
         if self.gripper_extension < global_parameters['CARRIAGE_WIDTH']:
-            print("less")
             r2 = np.subtract(self.points[1], self.points[0]) 
             r3 = np.subtract(self.points[3], self.points[2])
             r4 = np.subtract(self.points[3], self.points[0])
 
             return [[self.points[1], r3], [self.points[1], r4], [self.points[3], r1], [self.points[3], r2]]
         else:
-            print("more")
             r2 = np.subtract(self.points[1], self.points[4]) 
             r3 = np.subtract(self.points[5], self.points[2])
             r4 = np.subtract(self.points[5], self.points[4])

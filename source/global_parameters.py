@@ -33,8 +33,10 @@ params_1 = { # Parameters
 
     "MINIMUM_MIDDLE_SIZE" : 0.18,                              # Minimum middle size in m^2
 
-    "LOWER_MASK" : np.array([0, 71, 99]),      # Default lower mask
-    "UPPER_MASK" : np.array([9, 191, 212]),    # Default upper mask
+    # "LOWER_MASK" : np.array([0, 71, 99]),      # Default lower mask
+    # "UPPER_MASK" : np.array([9, 191, 212]),    # Default upper mask
+    "LOWER_MASK" : np.array([0, 100, 98]),      # Default lower mask
+    "UPPER_MASK" : np.array([21, 194, 236]),    # Default upper mask
 
     "BOUNDING_BOX_THESHOLD" : 10,
     "LOIN_WIDTH" : 0.021,                      # How far from loin side to make cut in pixels

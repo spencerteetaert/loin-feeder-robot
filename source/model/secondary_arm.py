@@ -43,9 +43,9 @@ class SecondaryArm:
         return self.base_pt - Point(round(self.base_pt.x + self.min_length * math.cos(math.radians(self.angle))), round(self.base_pt.y - self.min_length * math.sin(math.radians(self.angle))))
 
     def draw(self, canvas):
-        cv2.line(canvas, (self.base_pt + self.get_max_pt_vector()).toTuple(), (self.base_pt - self.get_max_pt_vector()).toTuple(), (255, 255, 255), 8) 
-        cv2.line(canvas, (self.base_pt + self.get_max_pt_vector()).toTuple(), (self.base_pt + self.get_min_pt_vector()).toTuple(), (0, 0, 0), 3) 
-        cv2.line(canvas, (self.base_pt - self.get_max_pt_vector()).toTuple(), (self.base_pt - self.get_min_pt_vector()).toTuple(), (0, 0, 0), 3) 
+        cv2.line(canvas, (self.base_pt + self.get_max_pt_vector()).to_tuple(), (self.base_pt - self.get_max_pt_vector()).to_tuple(), (255, 255, 255), 8) 
+        cv2.line(canvas, (self.base_pt + self.get_max_pt_vector()).to_tuple(), (self.base_pt + self.get_min_pt_vector()).to_tuple(), (0, 0, 0), 3) 
+        cv2.line(canvas, (self.base_pt - self.get_max_pt_vector()).to_tuple(), (self.base_pt - self.get_min_pt_vector()).to_tuple(), (0, 0, 0), 3) 
         cv2.circle(canvas, self.other_pt1.to_tuple(), self.scale//20, (255, 255, 255))
         cv2.circle(canvas, self.other_pt2.to_tuple(), self.scale//20, (255, 255, 255))
 

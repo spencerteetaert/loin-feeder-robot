@@ -37,7 +37,7 @@ class MainArm:
         return Point(round(self.base_pt.x - self.max_length * math.cos(math.radians(self.angle))), round(self.base_pt.y + self.max_length * math.sin(math.radians(self.angle))))
 
     def draw(self, canvas):
-        cv2.line(canvas, self.get_max_pt_vector().to_tuple(), self.base_pt.toTuple(), (255, 255, 255), 8) 
+        cv2.line(canvas, self.get_max_pt_vector().to_tuple(), self.base_pt.to_tuple(), (255, 255, 255), 8) 
         cv2.line(canvas, self.get_max_pt_vector().to_tuple(), self.get_min_pt_vector().to_tuple(), (0, 0, 0), 3) 
         cv2.circle(canvas, self.other_pt.to_tuple(), self.scale//15, (255, 255, 255))
     
@@ -72,7 +72,7 @@ class MainArm:
         self.other_pt = self.get_other_pt()
 
     def get_collision_bounds(self):
-        p = np.add(self.base_pt.toArray(), [global_parameters['MAIN_ARM_WIDTH'], global_parameters['MAIN_ARM_WIDTH']])
+        p = np.add(self.base_pt.to_array(), [global_parameters['MAIN_ARM_WIDTH'], global_parameters['MAIN_ARM_WIDTH']])
         r1 = np.array([0, -1000])
         r2 = np.array([-1000, 0])
 

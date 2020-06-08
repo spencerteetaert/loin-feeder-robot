@@ -28,7 +28,7 @@ class MainTrack:
         return Point(round(self.base_pt.x), round(self.base_pt.y - self.max_length))
 
     def draw(self, canvas):
-        cv2.line(canvas, self.get_max_pt_vector().to_tuple(), self.base_pt.toTuple(), (255, 255, 255), 8) 
+        cv2.line(canvas, self.get_max_pt_vector().to_tuple(), self.base_pt.to_tuple(), (255, 255, 255), 8) 
         cv2.line(canvas, self.get_max_pt_vector().to_tuple(), self.get_min_pt_vector().to_tuple(), (0, 0, 0), 3) 
         cv2.circle(canvas, self.other_pt.to_tuple(), self.scale//10, (255, 255, 255))
     

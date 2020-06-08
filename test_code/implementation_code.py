@@ -20,7 +20,7 @@ from source.global_parameters import global_parameters
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 DISPLAY_TOGGLE = True
-PROFILER_TOGGLE = True
+PROFILER_TOGGLE = False
 
 # Model for creating acceleration profiles
 if PROFILER_TOGGLE:
@@ -51,6 +51,7 @@ def main(data_path=DATA_PATH):
         cv2.setMouseCallback(win, on_mouse)
 
     delay = 0
+    counter = 0 
     flip_flop = False 
     flip_flop2 = False
 
@@ -78,11 +79,11 @@ def main(data_path=DATA_PATH):
         # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
 
         temp = streamer.read()
-        frame = bounding_box.scale(temp)
-        frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
+        temp = bounding_box.scale(temp)
+        frame = cv2.copyMakeBorder(temp, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
         iH, iW, iD = frame.shape
-        box, _, _ = bounding_box.get_bbox(frame)
+        box, _, temp2 = bounding_box.get_bbox(frame)
 
         # for i in range(0, len(box)):
         #     cv2.drawContours(frame, [box[i][0]], 0, (255, 255, 255), 3)
@@ -166,7 +167,6 @@ def main(data_path=DATA_PATH):
                 for i in range(1, len(meats)):
                     meats[i].draw(frame, color=(255, 255, 0))
             drawing_model.draw(frame)
-
             if PROFILER_TOGGLE:
                 frame = np.concatenate((frame, current_graph), axis=1)
             cv2.imshow(win, frame)
@@ -177,7 +177,7 @@ def main(data_path=DATA_PATH):
 
         for i in range(1, len(meats)):
             meats[i].step()
-
+        
         if DISPLAY_TOGGLE:
             # k = cv2.waitKey(1) & 0xFF
             k = cv2.waitKey(max(global_parameters['FRAME_RATE'] - round((time.time() - force_timer )*1000 + 1), 1)) & 0xFF
@@ -202,6 +202,11 @@ def main(data_path=DATA_PATH):
             elif k == ord('r'):
                 drawing_model.set_model_state(saved_state)
                 print("State uploaded.")
+            elif k == ord('w'):
+                # Save frame 
+                cv2.imwrite(r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\FilterImg\img" + str(counter) + ".png", temp)
+                counter += 1
+
             
         times += [time.time() - start]
         # out.write(frame)

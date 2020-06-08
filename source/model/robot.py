@@ -424,10 +424,10 @@ class Robot:
 
         self.move_to(self.follow_pt1, self.follow_pt2)
 
-        frame = np.zeros([1200, 1200, 3])
-        self.draw(frame)
-        cv2.imshow("Temp", frame)
-        cv2.waitKey(0)
+        # frame = np.zeros([1200, 1200, 3])
+        # self.draw(frame)
+        # cv2.imshow("Temp", frame)
+        # cv2.waitKey(0)
 
         flag, report = self.collision_check()
         if flag:

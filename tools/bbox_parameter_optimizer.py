@@ -17,10 +17,10 @@ from source.vision_identification import bounding_box
 '''
 
 #Location of test images
-DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\test"
+DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\FilterImg\img"
 FILE_TYPE = ".png"
 START_INDEX = 0
-END_INDEX = 9
+END_INDEX = 89
 
 def n(x):
     pass
@@ -30,16 +30,16 @@ def main(input_path=DATA_PATH):
     s = [0, 255]
     v = [0, 255]
     hlow = 0
-    hhigh = 15
-    slow = 51
-    shigh = 204
-    vlow = 51
-    vhigh = 255
+    hhigh = 21
+    slow = 100
+    shigh = 194
+    vlow = 98
+    vhigh = 236
     flag = False
 
     for i in range(START_INDEX, END_INDEX+1):
         temp = input_path + str(i) + FILE_TYPE
-        og = bounding_box.scale(cv2.imread(temp), width=500)
+        og = bounding_box.scale(cv2.imread(temp))
         
         src = 'Source'
         cv2.namedWindow(src)
@@ -68,7 +68,7 @@ def main(input_path=DATA_PATH):
             LOWER_MASK = np.array([hlow, slow, vlow])
             UPPER_MASK = np.array([hhigh, shigh, vhigh])
 
-            box, contours, _ = bounding_box.get_bbox(og, source=src, lower_mask=LOWER_MASK, upper_mask=UPPER_MASK)
+            box, contours, img = bounding_box.get_bbox(og, lower_mask=LOWER_MASK, upper_mask=UPPER_MASK)
             temp = og.copy()
 
             if contours != 0:
