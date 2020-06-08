@@ -35,7 +35,6 @@ class Robot:
         self.phase = 0
         self.switched = False
         self.delay1 = 0
-        self.counter = 0
         self.phase_1_counter = 0
 
         self.profile_data = []
@@ -176,7 +175,7 @@ class Robot:
         Phase 6: Moving to "Ready Position" >> Phase 0
     '''
 
-    def move_meat(self, s1, s2, e1, e2, delay1, delay2, meat1_width, meat2_width, counter=0, phase_1_delay=True):
+    def move_meat(self, s1, s2, e1, e2, meat1_width, meat2_width, phase_1_delay=True):
         if self.phase != 0:
             print("ERROR: Robot in use")
             return False 
@@ -189,11 +188,12 @@ class Robot:
         self.e2 = e2
         self.phase = 1
         self.switched = True
-        self.delay1 = delay1
-        self.delay2 = delay2
+
+        self.delay1 = (global_parameters['PICKUP_POINT1'] - self.s1).y / global_parameters['CONVEYOR_SPEED']
+        self.delay2 = (global_parameters['PICKUP_POINT2'] - self.s2).y / global_parameters['CONVEYOR_SPEED']
+
         self.meat1_width = meat1_width / self.scale
         self.meat2_width = meat2_width / self.scale
-        self.counter = counter
         self.PHASE_1_DELAY = phase_1_delay
 
     def collision_check(self):
@@ -295,7 +295,6 @@ class Robot:
         self.dt2 = np.divide(np.multiply(self.dt2, execution_time), longest)
 
     def update(self):
-        self.counter += 1
         # Phase 0: Not moving, in ready position
         if self.phase == 0:
             return False
@@ -305,26 +304,26 @@ class Robot:
 
         # Phase 1: Moving to predicted meat location
         if self.phase == 1:
-            self.delay1 -= 1 # Delay here tracks time until meat is at start points 
+            self.delay1 -= 1
             self.delay2 -= 1
             self.phase_1_counter += 1
             if self.switched:
                 if self.recording:
                     self.profile_data += [self.get_physical_state()]
                     self.profile_data += [self.get_physical_state()]
-                self.counter = 0
                 self.switched = False
-                self.follow_pt1.set_heading(self.s1, global_parameters['PHASE_1_SPEED'])
-                self.follow_pt2.set_heading(self.s2, global_parameters['PHASE_1_SPEED'])
+                self.follow_pt1.set_heading(self.s1 + Point(0, (global_parameters['PICKUP_POINT1'] - self.s1).y), global_parameters['PHASE_1_SPEED'])
+                self.follow_pt2.set_heading(self.s2 + Point(0, (global_parameters['PICKUP_POINT2'] - self.s2).y), global_parameters['PHASE_1_SPEED'])
                 self.phase_1_counter = 0
-            if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 and self.delay1 < 0 and self.PHASE_1_DELAY: # End of step condition 
+            if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 and self.delay1 < 1 and self.PHASE_1_DELAY: # End of step condition 
                 self.switched = True 
                 self.phase = 2
             if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 and not self.PHASE_1_DELAY: # End of step condition 
                 self.switched = True 
+                self.delay2 -= self.delay1
                 self.phase = 2
 
-        if self.phase == 2: # Top piece grabbing, bottom not
+        if self.phase == 2:
             self.delay1 -= 1
             self.delay2 -= 1
             if self.switched:
@@ -343,10 +342,7 @@ class Robot:
 
             if self.delay1 < 0 and self.delay2 < -1 * global_parameters['PHASE_2_DELAY']: # End of step condition 
                 self.switched = True 
-                self.phase = 3
-            
-            
-            
+                self.phase = 3            
 
         # Phase 3: "Step 0" -> Rotating meat according to pre-set path
         if self.phase == 3:
@@ -422,8 +418,6 @@ class Robot:
                 self.follow_pt1.set_heading(self.follow_pt1, 1)
                 self.follow_pt2.set_heading(self.follow_pt2, 1)
 
-                print("MOVE TIME:", self.counter / global_parameters['FRAME_RATE'])
-
             if self.follow_pt1.steps_remaining <= 1 and self.follow1_index < len(global_parameters['PHASE_6_PATH1']) - 1:
                 self.follow1_index += 1
                 self.follow_pt1.set_heading(global_parameters['PHASE_6_PATH1'][self.follow1_index], self.dt1[self.follow1_index - 1])
@@ -437,7 +431,7 @@ class Robot:
         # frame = np.zeros([1200, 1200, 3])
         # self.draw(frame)
         # cv2.imshow("Temp", frame)
-        # cv2.waitKey(0)
+        # cv2.waitKey(1)
 
         flag, report = self.collision_check()
         if flag:
@@ -458,7 +452,7 @@ class Robot:
 
         return True
 
-    def run(self, read_time, dist):
+    def run(self, read_time):
         self.clear_history()
         self.recording = True
 
@@ -475,7 +469,8 @@ class Robot:
         counter += 1
 
         # c accounts for the time after the robot has moved into position but before it grabs the meat
-        c = (dist / global_parameters['CONVEYOR_SPEED'] - self.phase_1_counter) / global_parameters['FRAME_RATE']
+        
+        c = ((global_parameters['PICKUP_POINT1'] - self.s1).y / global_parameters['CONVEYOR_SPEED'] - self.phase_1_counter) / global_parameters['FRAME_RATE']
         self.xs = [self.xs[i] + c for i in range(0, len(self.xs))]
 
         self.recording = False
@@ -536,7 +531,6 @@ class Robot:
         self.phase = 0
         self.switched = False
         self.delay1 = 0
-        self.counter = 0
         self.phase_1_counter = 0
 
         self.profile_data = []

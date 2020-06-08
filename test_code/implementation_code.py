@@ -20,7 +20,7 @@ from source.global_parameters import global_parameters
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
 DISPLAY_TOGGLE = True
-PROFILER_TOGGLE = False
+PROFILER_TOGGLE = True
 
 # Model for creating acceleration profiles
 if PROFILER_TOGGLE:
@@ -54,6 +54,7 @@ def main(data_path=DATA_PATH):
     counter = 90 
     flip_flop = False 
     flip_flop2 = False
+    flag = False
 
     meats = [0]
     queue1 = []
@@ -80,6 +81,9 @@ def main(data_path=DATA_PATH):
 
         temp = streamer.read()
         temp = bounding_box.scale(temp)
+        if flag:
+            cv2.imwrite(r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\FilterImg\disp" + str(counter) + ".png", cv2.rotate(temp, cv2.ROTATE_90_CLOCKWISE))
+            flag = False
         frame = cv2.copyMakeBorder(temp, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
         iH, iW, iD = frame.shape
@@ -122,12 +126,13 @@ def main(data_path=DATA_PATH):
         if PROFILER_TOGGLE:
             if profile_model.phase == 0 and len(queue1) > 0 and not path_runner.running:
                 dist1 = (global_parameters['PICKUP_POINT1'] - meats[queue1[0][0]].get_center_as_point()).y
+                dist2 = (global_parameters['PICKUP_POINT2'] - meats[queue1[0][1]].get_center_as_point()).y
 
                 if dist1 > 0:
-                    sp1 = meats[queue1[0][0]].get_center_as_point().copy() + Point(0, dist1)
-                    sp2 = meats[queue1[0][1]].get_center_as_point().copy() + Point(0, dist1)
-                    profile_model.move_meat(sp1, sp2, ep1, ep2, dist1 // global_parameters['CONVEYOR_SPEED'], 0, \
-                        meats[queue1[0][0]].width, meats[queue1[0][1]].width, phase_1_delay=False)
+                    sp1 = meats[queue1[0][0]].get_center_as_point().copy()
+                    sp2 = meats[queue1[0][1]].get_center_as_point().copy()
+                    profile_model.move_meat(sp1, sp2, ep1, ep2, meats[queue1[0][0]].width, meats[queue1[0][1]].width, \
+                        phase_1_delay=False)
                     queue1 = queue1[1:]
 
                     # Given the start and end conditions, calculate the profile_model motor profiles
@@ -140,11 +145,9 @@ def main(data_path=DATA_PATH):
                 dist2 = (global_parameters['PICKUP_POINT2'] - meats[queue2[0][1]].get_center_as_point()).y
 
                 if dist1 > 0:
-                    sp1 = meats[queue2[0][0]].get_center_as_point().copy() + Point(0, dist1)
-                    sp2 = meats[queue2[0][1]].get_center_as_point().copy() + Point(0, dist2)
-                    drawing_model.move_meat(sp1, sp2, ep1, ep2, dist1 // (global_parameters['CONVEYOR_SPEED'] * \
-                        global_parameters['RUNTIME_FACTOR']), dist2 // (global_parameters['CONVEYOR_SPEED'] * \
-                        global_parameters['RUNTIME_FACTOR']), meats[queue2[0][0]].width, meats[queue2[0][1]].width)
+                    sp1 = meats[queue2[0][0]].get_center_as_point().copy()
+                    sp2 = meats[queue2[0][1]].get_center_as_point().copy()
+                    drawing_model.move_meat(sp1, sp2, ep1, ep2, meats[queue2[0][0]].width, meats[queue2[0][1]].width)
                     queue2 = queue2[1:]
                     flip_flop2 = True
                     if PROFILER_TOGGLE:
@@ -208,7 +211,8 @@ def main(data_path=DATA_PATH):
                 print("State uploaded.")
             elif k == ord('w'):
                 # Save frame 
-                cv2.imwrite(r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\FilterImg\img" + str(counter) + ".png", temp)
+                cv2.imwrite(r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\FilterImg\disp" + str(counter) + ".png", cv2.rotate(temp, cv2.ROTATE_90_CLOCKWISE))
+                flag = True
                 counter += 1
             
         times += [time.time() - start]
