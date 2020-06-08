@@ -51,7 +51,7 @@ def main(data_path=DATA_PATH):
         cv2.setMouseCallback(win, on_mouse)
 
     delay = 0
-    counter = 0 
+    counter = 90 
     flip_flop = False 
     flip_flop2 = False
 
@@ -121,12 +121,12 @@ def main(data_path=DATA_PATH):
         # # Profiler model creates motion profiles, it updates as fast as possible in a separate thread
         if PROFILER_TOGGLE:
             if profile_model.phase == 0 and len(queue1) > 0 and not path_runner.running:
-                dist = (global_parameters['PICKUP_POINT'] - meats[queue1[0][0]].get_center_as_point()).y
+                dist1 = (global_parameters['PICKUP_POINT1'] - meats[queue1[0][0]].get_center_as_point()).y
 
-                if dist > 0:
-                    sp1 = meats[queue1[0][0]].get_center_as_point().copy() + Point(0, dist)
-                    sp2 = meats[queue1[0][1]].get_center_as_point().copy() + Point(0, dist)
-                    profile_model.move_meat(sp1, sp2, ep1, ep2, dist // global_parameters['CONVEYOR_SPEED'], \
+                if dist1 > 0:
+                    sp1 = meats[queue1[0][0]].get_center_as_point().copy() + Point(0, dist1)
+                    sp2 = meats[queue1[0][1]].get_center_as_point().copy() + Point(0, dist1)
+                    profile_model.move_meat(sp1, sp2, ep1, ep2, dist1 // global_parameters['CONVEYOR_SPEED'], 0, \
                         meats[queue1[0][0]].width, meats[queue1[0][1]].width, phase_1_delay=False)
                     queue1 = queue1[1:]
 
@@ -136,12 +136,14 @@ def main(data_path=DATA_PATH):
         # Drawing model is just for drawing purposes, it updates at the frame rate displayed
         if DISPLAY_TOGGLE:
             if drawing_model.phase == 0 and len(queue2) > 0:
-                dist = (global_parameters['PICKUP_POINT'] - meats[queue2[0][0]].get_center_as_point()).y
+                dist1 = (global_parameters['PICKUP_POINT1'] - meats[queue2[0][0]].get_center_as_point()).y
+                dist2 = (global_parameters['PICKUP_POINT2'] - meats[queue2[0][1]].get_center_as_point()).y
 
-                if dist > 0:
-                    sp1 = meats[queue2[0][0]].get_center_as_point().copy() + Point(0, dist)
-                    sp2 = meats[queue2[0][1]].get_center_as_point().copy() + Point(0, dist)
-                    drawing_model.move_meat(sp1, sp2, ep1, ep2, dist // (global_parameters['CONVEYOR_SPEED'] * \
+                if dist1 > 0:
+                    sp1 = meats[queue2[0][0]].get_center_as_point().copy() + Point(0, dist1)
+                    sp2 = meats[queue2[0][1]].get_center_as_point().copy() + Point(0, dist2)
+                    drawing_model.move_meat(sp1, sp2, ep1, ep2, dist1 // (global_parameters['CONVEYOR_SPEED'] * \
+                        global_parameters['RUNTIME_FACTOR']), dist2 // (global_parameters['CONVEYOR_SPEED'] * \
                         global_parameters['RUNTIME_FACTOR']), meats[queue2[0][0]].width, meats[queue2[0][1]].width)
                     queue2 = queue2[1:]
                     flip_flop2 = True
@@ -167,6 +169,8 @@ def main(data_path=DATA_PATH):
                 for i in range(1, len(meats)):
                     meats[i].draw(frame, color=(255, 255, 0))
             drawing_model.draw(frame)
+            global_parameters['PICKUP_POINT1'].draw(frame, color=(0,255,0))
+            global_parameters['PICKUP_POINT2'].draw(frame, color=(0,0,255))
             if PROFILER_TOGGLE:
                 frame = np.concatenate((frame, current_graph), axis=1)
             cv2.imshow(win, frame)
@@ -179,8 +183,8 @@ def main(data_path=DATA_PATH):
             meats[i].step()
         
         if DISPLAY_TOGGLE:
-            # k = cv2.waitKey(1) & 0xFF
-            k = cv2.waitKey(max(global_parameters['FRAME_RATE'] - round((time.time() - force_timer )*1000 + 1), 1)) & 0xFF
+            k = cv2.waitKey(1) & 0xFF
+            # k = cv2.waitKey(max(global_parameters['FRAME_RATE'] - round((time.time() - force_timer )*1000 + 1), 1)) & 0xFF
             if k == ord('q'):
                 break
             elif k == ord('p'):
@@ -206,7 +210,6 @@ def main(data_path=DATA_PATH):
                 # Save frame 
                 cv2.imwrite(r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\FilterImg\img" + str(counter) + ".png", temp)
                 counter += 1
-
             
         times += [time.time() - start]
         # out.write(frame)

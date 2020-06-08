@@ -59,11 +59,12 @@ params_1 = { # Parameters
     "DOWNWARD_SPEED" : 1, #m/s
 
     # Points 
-    "READY_POS_1" : Point(439, 504, angle=0),
-    "READY_POS_2" : Point(439, 654, angle=0),
-    "PICKUP_POINT" : Point(440, 504),
-    "END_POINT_1" : Point(625, 735, angle=90),
-    "END_POINT_2" : Point(250, 735, angle=90),
+    "READY_POS1" : Point(439, 504, angle=0),
+    "READY_POS2" : Point(439, 654, angle=0),
+    "PICKUP_POINT1" : Point(440, 460),
+    "PICKUP_POINT2" : Point(440, 660),
+    "END_POINT1" : Point(625, 735, angle=90),
+    "END_POINT2" : Point(250, 735, angle=90),
 
     "SAFE_ENVIRONMENT" : [[[440, 190], [440, 730]], [[100, 735], [800, 735]], [[440, 600], [300, 735]], [[440, 600], [580, 735]]],
 
@@ -114,8 +115,8 @@ params_2 = {
 
     "CONVEYOR_SPEED" : 2 / params_1['RUNTIME_FACTOR'], #Px/frame
 
-    "PHASE_6_PATH1" : [Point(450, 435, angle=0), params_1['READY_POS_1']],
-    "PHASE_6_PATH2" : [Point(345, 695, angle=0), params_1['READY_POS_2']]
+    "PHASE_6_PATH1" : [Point(450, 435, angle=0), params_1['READY_POS1']],
+    "PHASE_6_PATH2" : [Point(345, 695, angle=0), params_1['READY_POS2']]
 }
 
 params_3 = {
