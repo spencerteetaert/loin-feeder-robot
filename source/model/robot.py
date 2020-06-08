@@ -312,51 +312,40 @@ class Robot:
                 if self.recording:
                     self.profile_data += [self.get_physical_state()]
                     self.profile_data += [self.get_physical_state()]
-                # self.counter = 0
+                self.counter = 0
                 self.switched = False
                 self.follow_pt1.set_heading(self.s1, global_parameters['PHASE_1_SPEED'])
                 self.follow_pt2.set_heading(self.s2, global_parameters['PHASE_1_SPEED'])
                 self.phase_1_counter = 0
             if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 and self.delay1 < 0 and self.PHASE_1_DELAY: # End of step condition 
                 self.switched = True 
-                self.phase = 7
+                self.phase = 2
             if self.follow_pt1.steps_remaining <= 1 and self.follow_pt2.steps_remaining <= 1 and not self.PHASE_1_DELAY: # End of step condition 
                 self.switched = True 
-                self.phase = 7
+                self.phase = 2
 
-        if self.phase == 7: # Top piece grabbing, bottom not
+        if self.phase == 2: # Top piece grabbing, bottom not
             self.delay1 -= 1
             self.delay2 -= 1
             if self.switched:
                 self.switched = False
                 self.delay1 = global_parameters['PHASE_2_DELAY']
-                self.follow_pt1.set_heading(self.follow_pt1 + Point(0, self.delay1 * global_parameters['CONVEYOR_SPEED']), global_parameters['PHASE_2_DELAY'])
+                self.follow_pt1.set_heading(self.follow_pt1 + Point(0, global_parameters['PHASE_2_DELAY'] * global_parameters['CONVEYOR_SPEED']), global_parameters['PHASE_2_DELAY'])
                 # self.follow_pt2.set_heading(self.follow_pt2 + Point(0, self.delay1 * global_parameters['CONVEYOR_SPEED']), global_parameters['PHASE_2_DELAY'])
-            if self.delay1 <= 0: # End of step condition 
-                self.switched = True 
-                self.phase = 2
-            
-            self.carriage1.lower()
-            # self.carriage2.lower()
-            self.carriage1.close(self.meat1_width)
-            # self.carriage2.close(self.meat2_width)
 
-        # Phase 2: Grabbing (Follow meat)
-        if self.phase == 2:
-            self.delay2 -= 1
-            if self.switched and self.delay2 < 0:
-                self.switched = False
-                self.delay2 = global_parameters['PHASE_2_DELAY']
-                # self.follow_pt1.set_heading(self.follow_pt1 + Point(0, self.delay2 * global_parameters['CONVEYOR_SPEED']), global_parameters['PHASE_2_DELAY'])
-                self.follow_pt2.set_heading(self.follow_pt2 + Point(0, self.delay2 * global_parameters['CONVEYOR_SPEED']), global_parameters['PHASE_2_DELAY'])
-            if self.delay2 < 0: # End of step condition 
+            self.carriage1.lower()
+            self.carriage1.close(self.meat1_width)
+
+            if self.delay2 < 0:
+                self.follow_pt2.set_heading(self.follow_pt2 + Point(0, global_parameters['PHASE_2_DELAY'] * global_parameters['CONVEYOR_SPEED']), global_parameters['PHASE_2_DELAY'])
+                self.carriage2.lower()
+                self.carriage2.close(self.meat2_width)
+
+            if self.delay1 < 0 and self.delay2 < -1 * global_parameters['PHASE_2_DELAY']: # End of step condition 
                 self.switched = True 
                 self.phase = 3
             
-            # self.carriage1.lower()
-            self.carriage2.lower()
-            # self.carriage1.close(self.meat1_width)
-            self.carriage2.close(self.meat2_width)
+            
             
 
         # Phase 3: "Step 0" -> Rotating meat according to pre-set path
@@ -432,6 +421,8 @@ class Robot:
                 #Stops robot in its tracks
                 self.follow_pt1.set_heading(self.follow_pt1, 1)
                 self.follow_pt2.set_heading(self.follow_pt2, 1)
+
+                print("MOVE TIME:", self.counter / global_parameters['FRAME_RATE'])
 
             if self.follow_pt1.steps_remaining <= 1 and self.follow1_index < len(global_parameters['PHASE_6_PATH1']) - 1:
                 self.follow1_index += 1
