@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-from skimage import feature 
 
 from ..global_parameters import global_parameters
 
