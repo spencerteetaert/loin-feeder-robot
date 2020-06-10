@@ -37,7 +37,6 @@ class Robot:
         self.switched = False
         self.delay1 = 0
         self.phase_1_counter = 0
-        self.flag = False
 
         self.profile_data = []
         self.xs = []
@@ -124,8 +123,6 @@ class Robot:
             return Point(self.secondary_arm.other_pt2.x, self.secondary_arm.other_pt2.y, angle=self.carriage2.angle)
 
     def draw(self, canvas):
-        if self.flag:
-            print("YAYAYYADSFASDHJFJ")
         self.main_track.draw(canvas)
         self.carriage1.draw(canvas, color=(0, 255, 0))
         self.carriage2.draw(canvas, color=(0, 0, 255))
@@ -474,7 +471,6 @@ class Robot:
         self.recording = False
 
     def set_model_state(self, state):
-        self.flag = True
         '''
         Using a list of the parameters required to fully define the robot, 
         set the robot parameters using to match the given state. 

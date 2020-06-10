@@ -26,6 +26,9 @@ def on_mouse(event, pX, pY, flags, param):
 
 def run(Q, shared_data):   
     with PLC() as plc:
+        win = "Window"
+        cv2.namedWindow(win)
+
         plc.IPAddress = global_parameters['PLC_IP']
         current_time = Q.get()
         counter = 0
@@ -43,8 +46,8 @@ def run(Q, shared_data):
                     to_send = np.around(instruction, 2)
 
                     ### PLC write instruction ###
-                    print(instruction)
-                    shared_data[0].set_model_state(to_send)
+                    # print(instruction)
+                    shared_data.set_model_state(to_send)
                     # plc.Write("<tag0>", value=instruction[0])
                     # plc.Write("<tag1>", value=instruction[1])
                     # plc.Write("<tag2>", value=instruction[2])
@@ -73,10 +76,14 @@ def run(Q, shared_data):
                 print("Instruction completed. \nExecution time:", round(time.time() - s, 2),"s\n")
                 current_time = Q.get()
 
+            frame = np.zeros([800, 800, 3])
+            shared_data.draw(frame)
+            cv2.imshow(win, frame)
+            cv2.waitKey(1)
+
 def main():  
     manager = mp.Manager()
-    shared_data = manager.list()
-    shared_data.append(Robot(global_parameters['ROBOT_BASE_POINT'], global_parameters['VIDEO_SCALE']))
+    shared_data = Robot(global_parameters['ROBOT_BASE_POINT'], global_parameters['VIDEO_SCALE'])
 
     Q = mp.Queue(maxsize=1048)
     process = mp.Process(target=run, args=(Q,shared_data,))
@@ -160,7 +167,7 @@ def main():
             if timer1 > 0:
                 cv2.circle(frame, (int(iW / 2), int(iH / 3)), 5, (0, 255, 0), 5)
 
-            shared_data[0].draw(frame)
+            shared_data.draw(frame)
             cv2.imshow(win, frame)
 
             ################
