@@ -59,12 +59,12 @@ params_1 = { # Parameters
     "DOWNWARD_SPEED" : 1, #m/s
 
     # Points 
-    "READY_POS1" : Point(439, 504, angle=0),
-    "READY_POS2" : Point(439, 654, angle=0),
-    "PICKUP_POINT1" : Point(440, 460),
-    "PICKUP_POINT2" : Point(440, 660),
-    "END_POINT1" : Point(625, 735, angle=90),
-    "END_POINT2" : Point(250, 735, angle=90),
+    "READY_POS1" : Point(2.071, 2.377, angle=0),
+    "READY_POS2" : Point(2.071, 3.085, angle=0),
+    "PICKUP_POINT1" : Point(2.075, 2.170),
+    "PICKUP_POINT2" : Point(2.075, 3.113),
+    "END_POINT1" : Point(2.948, 3.467, angle=90),
+    "END_POINT2" : Point(1.179, 3.467, angle=90),
 
     "SAFE_ENVIRONMENT" : [[[440, 190], [440, 730]], [[100, 735], [800, 735]], [[440, 600], [300, 735]], [[440, 600], [580, 735]]],
 
@@ -78,14 +78,14 @@ params_1 = { # Parameters
     "PHASE_5_PERCENTAGE" : 0.048,
     "PHASE_6_PERCENTAGE" : 0.288,
 
-    "PHASE_3_PATH1" : [Point(440, 435, angle=60), Point(440, 580, angle=110), Point(530, 680, angle=90)],
-    "PHASE_3_PATH2" : [Point(440, 730, angle=60), Point(320, 720, angle=110)],
+    "PHASE_3_PATH1" : [Point(2.075, 2.052, angle=60), Point(2.075, 2.736, angle=110), Point(2.500, 3.208, angle=90)],
+    "PHASE_3_PATH2" : [Point(2.075, 3.443, angle=60), Point(1.509, 3.396, angle=110)],
 
     ###########################
     ### Physical Parameters ###
     ###########################
 
-    "ROBOT_BASE_POINT" : Point(280, 600),
+    "ROBOT_BASE_POINT" : Point(1.321, 2.830),
 
     # In meters
     "MAIN_TRACK_MIN_LENGTH" : 0,
@@ -113,10 +113,10 @@ params_2 = {
     "FRAME_RATE" : params_1['FPS'] * params_1['RUNTIME_FACTOR'],
     "MINIMUM_AREA" : params_1['MINIMUM_MIDDLE_SIZE'] * params_1['VIDEO_SCALE']**2,     # Pixel area for an acceptable contour 
 
-    "CONVEYOR_SPEED" : 2 / params_1['RUNTIME_FACTOR'], #Px/frame
+    "CONVEYOR_SPEED" : 9.434e-3 / params_1['RUNTIME_FACTOR'], #Px/frame
 
-    "PHASE_6_PATH1" : [Point(450, 435, angle=0), params_1['READY_POS1']],
-    "PHASE_6_PATH2" : [Point(345, 695, angle=0), params_1['READY_POS2']]
+    "PHASE_6_PATH1" : [Point(2.123, 2.052, angle=0), params_1['READY_POS1']],
+    "PHASE_6_PATH2" : [Point(1.627, 3.278, angle=0), params_1['READY_POS2']]
 }
 
 params_3 = {

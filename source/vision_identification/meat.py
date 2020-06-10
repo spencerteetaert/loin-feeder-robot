@@ -10,12 +10,13 @@ from .. import vector_tools
 font = cv2.FONT_HERSHEY_SIMPLEX
 
 class Meat():
-    def __init__(self, data, conveyor_speed=global_parameters['CONVEYOR_SPEED'] * global_parameters['RUNTIME_FACTOR'], side="Left", center=(0,0)):
-        self.conveyor_speed = conveyor_speed
+    def __init__(self, data, scale, conveyor_speed=global_parameters['CONVEYOR_SPEED'] * global_parameters['RUNTIME_FACTOR'], side="Left", center=(0,0)):
+        self.conveyor_speed = conveyor_speed * scale
         self.side = side
         self.bbox = data[0]
         self.center = center
         self.width = 0
+        self.scale = scale
 
         if (self.bbox == []):
             print("ERR: Meat object created with empty bbox.")
@@ -24,7 +25,7 @@ class Meat():
 
     def __repr__(self):
         t1 = self.side + " piece\n"
-        t2 = "Velocity: " + str(self.conveyor_speed) + "px/frame\n"
+        t2 = "Velocity: " + str(round(self.conveyor_speed, 3)) + "px/frame\n"
         # t3 = repr(self.bbox) + "\n"
         return t1 + t2 #+ t3
 

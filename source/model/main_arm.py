@@ -8,38 +8,39 @@ from ..global_parameters import global_parameters
 
 class MainArm:
     def __init__(self, pt:Point, scale, length=0.75, angle=180):
+        ''' Input parameter units: m '''
         self.scale = scale
         self.base_pt = pt
-        self.length = length * scale
-        self.min_length = global_parameters['MAIN_ARM_MIN_LENGTH'] * scale
-        self.max_length = global_parameters['MAIN_ARM_MAX_LENGTH'] * scale
+        self.length = length
+        self.min_length = global_parameters['MAIN_ARM_MIN_LENGTH']
+        self.max_length = global_parameters['MAIN_ARM_MAX_LENGTH']
         self.angle = angle 
         self.other_pt = self.get_other_pt()
         self.refresh()
 
         self.last_pos = 0
-        self.delta_pos = self.length/self.scale - self.last_pos
+        self.delta_pos = self.length - self.last_pos
         self.last_angle = 0
         self.delta_angle = self.angle - self.last_angle
 
     def __repr__(self):
-        return "Main Arm\n\tExtension " + str(round(self.length/self.scale, 3)) + "m\n\tAngle " + str(round(self.angle, 1)) + "\n\tdL " + str(round(self.delta_pos, 3)) + "m/frame\n\tdA " + str(round(self.delta_angle, 3)) + "\n" 
+        return "Main Arm\n\tExtension " + str(round(self.length, 3)) + "m\n\tAngle " + str(round(self.angle, 1)) + "\n\tdL " + str(round(self.delta_pos, 3)) + "m/frame\n\tdA " + str(round(self.delta_angle, 3)) + "\n" 
 
     def refresh(self):
         self.angle = ((self.other_pt - self.base_pt).vector_angle() + 180) % 360
 
     def get_other_pt(self):
-        return Point(round(self.base_pt.x - self.length * math.cos(math.radians(self.angle))), round(self.base_pt.y + self.length * math.sin(math.radians(self.angle))))
+        return Point(self.base_pt.x - self.length * math.cos(math.radians(self.angle)), self.base_pt.y + self.length * math.sin(math.radians(self.angle)))
 
     def get_min_pt_vector(self):
-        return Point(round(self.base_pt.x - self.min_length * math.cos(math.radians(self.angle))), round(self.base_pt.y + self.min_length * math.sin(math.radians(self.angle))))
+        return Point(self.base_pt.x - self.min_length * math.cos(math.radians(self.angle)), self.base_pt.y + self.min_length * math.sin(math.radians(self.angle)))
     def get_max_pt_vector(self):
-        return Point(round(self.base_pt.x - self.max_length * math.cos(math.radians(self.angle))), round(self.base_pt.y + self.max_length * math.sin(math.radians(self.angle))))
+        return Point(self.base_pt.x - self.max_length * math.cos(math.radians(self.angle)), self.base_pt.y + self.max_length * math.sin(math.radians(self.angle)))
 
     def draw(self, canvas):
-        cv2.line(canvas, self.get_max_pt_vector().to_tuple(), self.base_pt.to_tuple(), (255, 255, 255), 8) 
-        cv2.line(canvas, self.get_max_pt_vector().to_tuple(), self.get_min_pt_vector().to_tuple(), (0, 0, 0), 3) 
-        cv2.circle(canvas, self.other_pt.to_tuple(), self.scale//15, (255, 255, 255))
+        cv2.line(canvas, (self.get_max_pt_vector() * self.scale).to_drawing_tuple(), (self.base_pt * self.scale).to_drawing_tuple(), (255, 255, 255), 8) 
+        cv2.line(canvas, (self.get_max_pt_vector() * self.scale).to_drawing_tuple(), (self.get_min_pt_vector() * self.scale).to_drawing_tuple(), (0, 0, 0), 3) 
+        cv2.circle(canvas, (self.other_pt * self.scale).to_drawing_tuple(), self.scale//15, (255, 255, 255))
     
     def follow(self, pt:Point, secondary_arm_angle):
         dr = pt - self.base_pt
@@ -61,8 +62,8 @@ class MainArm:
         elif rel_angle > global_parameters['MAIN_ARM_MAX_ANGLE']:
             self.base_pt.rotate(global_parameters['MAIN_ARM_MAX_ANGLE'] - rel_angle, self.other_pt)
 
-        self.delta_pos = self.length/self.scale - self.last_pos
-        self.last_pos = self.length/self.scale
+        self.delta_pos = self.length - self.last_pos
+        self.last_pos = self.length
         self.delta_angle = self.angle - self.last_angle
         self.last_angle = self.angle
 

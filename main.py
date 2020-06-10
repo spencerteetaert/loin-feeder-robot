@@ -9,7 +9,7 @@ from source import model
 sys.modules['model'] = model
 from source.global_parameters import global_parameters
 from source.global_parameters import set_parameters
-set_parameters("resources\configs\main-08062020-172639")
+set_parameters("resources\configs\main-10062020-124541")
 
 from source.path_planning.frame_handler import FrameHandler
 from source.data_send_receive.instruction_handler import InstructionHandler
@@ -110,7 +110,7 @@ with PLC() as plc:
             frame = bounding_box.scale(frame)
             frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
-            global_parameters['PICKUP_POINT1'].draw(frame)
+            (global_parameters['PICKUP_POINT1'] * global_parameters['VIDEO_SCALE']).draw(frame)
             cv2.imshow("Temp", frame)
 
             # k = cv2.waitKey(max(global_parameters['FRAME_RATE'] - round((time.time() - read_time )*1000 + 1), 1)) & 0xFF

@@ -9,10 +9,11 @@ from .. import vector_tools
 
 class Carriage:
     def __init__(self, pt:Point, scale, angle=0, downward_extension=0, gripper_extension=0.5):
+        ''' Input parameter units: m '''
         self.scale = scale
         self.base_pt = pt
-        self.width = global_parameters['CARRIAGE_WIDTH'] * scale
-        self.length = global_parameters['CARRIAGE_LENGTH'] * scale
+        self.width = global_parameters['CARRIAGE_WIDTH']
+        self.length = global_parameters['CARRIAGE_LENGTH']
         self.angle = angle 
         self.relative_angle = 90
         self.other_pt = self.get_other_pt()
@@ -34,13 +35,13 @@ class Carriage:
             self.relative_angle = (self.angle - secondary_arm_angle + 360 + 180) % 360
 
     def get_other_pt(self):
-        return Point(round(self.base_pt.x + self.length * math.cos(math.radians(self.angle))/2), round(self.base_pt.y - self.length * math.sin(math.radians(self.angle))/2))
+        return Point(self.base_pt.x + self.length * math.cos(math.radians(self.angle))/2, self.base_pt.y - self.length * math.sin(math.radians(self.angle))/2)
 
     def draw(self, canvas, color=(255, 255, 255)):  
         self.update_points()    
-        contour = np.array(self.points[0:4]).reshape((-1, 1, 2)).astype(np.int32)
+        contour = (np.array(self.points[0:4]) * self.scale).reshape((-1, 1, 2)).astype(np.int32)
         cv2.drawContours(canvas, [contour], 0, color, 2)
-        cv2.line(canvas, (int(round(self.points[4][0])), int(round(self.points[4][1]))), (int(round(self.points[5][0])), int(round(self.points[5][1]))), color, 4)
+        cv2.line(canvas, (int(round(self.points[4][0] * self.scale)), int(round(self.points[4][1] * self.scale))), (int(round(self.points[5][0] * self.scale)), int(round(self.points[5][1] * self.scale))), color, 4)
 
     def follow(self, pt:Point):
         if pt.angle != None:
@@ -60,7 +61,7 @@ class Carriage:
         k = np.array([self.length*math.cos(math.radians(self.angle))/2, -1 * self.length*math.sin(math.radians(self.angle))/2])
         x = vector_tools.get_normal_unit([0, 0], k)
         x1 = x * self.width/2
-        x2 = x * self.gripper_extension * self.scale
+        x2 = x * self.gripper_extension
 
         self.points += [(self.base_pt.to_array() + k + x1)] # top right
         self.points += [(self.base_pt.to_array() + k - x1)] # top left

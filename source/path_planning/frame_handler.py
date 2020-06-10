@@ -14,8 +14,8 @@ class FrameHandler:
         self.flip_flop = False # False = Left, True = Right 
         self.meats = []
         self.constants = []
-        self.end_pt1 = global_parameters['END_POINT1'] - Point(global_parameters['LOIN_WIDTH'] * global_parameters['VIDEO_SCALE'], 0)
-        self.end_pt2 = global_parameters['END_POINT2'] + Point(global_parameters['LOIN_WIDTH'] * global_parameters['VIDEO_SCALE'], 0)
+        self.end_pt1 = (global_parameters['END_POINT1'] - Point(global_parameters['LOIN_WIDTH'], 0)) * global_parameters['VIDEO_SCALE']
+        self.end_pt2 = (global_parameters['END_POINT2'] + Point(global_parameters['LOIN_WIDTH'], 0)) * global_parameters['VIDEO_SCALE']
 
         self.dt = None
         self.start = 0
@@ -43,9 +43,9 @@ class FrameHandler:
                     if len(self.meats) == 0: # Marks the time of the first of two meats 
                         self.start = start
                     if self.flip_flop:
-                        self.meats += [meat.Meat(data[i], side="Right", center=[cX, cY])]
+                        self.meats += [meat.Meat(data[i], global_parameters['VIDEO_SCALE'], side="Right", center=[cX, cY])]
                     else:
-                        self.meats += [meat.Meat(data[i], side="Left", center=[cX, cY])]
+                        self.meats += [meat.Meat(data[i], global_parameters['VIDEO_SCALE'], side="Left", center=[cX, cY])]
                     self.flip_flop = not self.flip_flop
 
                     if len(self.meats) > 1:
@@ -63,7 +63,7 @@ class FrameHandler:
         # Profiler model creates motion profiles, it updates as fast as possible in a separate thread
         if self.model.phase == 0:
             s1 = self.meats[0].get_center_as_point()
-            s2 = self.meats[1].get_center_as_point() + Point(0, self.dt * global_parameters['FRAME_RATE'] * global_parameters['CONVEYOR_SPEED'])
+            s2 = self.meats[1].get_center_as_point() + Point(0, self.dt * global_parameters['FRAME_RATE'] * global_parameters['CONVEYOR_SPEED'] * global_parameters['VIDEO_SCALE'])
 
             self.model.move_meat(s1, s2, self.end_pt1, self.end_pt2, self.meats[0].width, self.meats[1].width, phase_1_delay=False)
             self.meats = []

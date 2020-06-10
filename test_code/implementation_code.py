@@ -24,11 +24,11 @@ PROFILER_TOGGLE = True
 
 # Model for creating acceleration profiles
 if PROFILER_TOGGLE:
-    profile_model = Robot(Point(280, 600), global_parameters['VIDEO_SCALE'])
+    profile_model = Robot(global_parameters['ROBOT_BASE_POINT'], global_parameters['VIDEO_SCALE'])
     path_runner = PathRunner(profile_model)
 # Model for display
 if DISPLAY_TOGGLE:
-    drawing_model = Robot(Point(280, 600), global_parameters['VIDEO_SCALE'])
+    drawing_model = Robot(global_parameters['ROBOT_BASE_POINT'], global_parameters['VIDEO_SCALE'])
     current_graph = np.zeros([830, 830, 3], dtype=np.uint8)
     grapher = graphing_tools.Grapher()
 
@@ -101,9 +101,9 @@ def main(data_path=DATA_PATH):
 
                     if iH / 3 - 5 < cY and iH / 3 + 5 > cY:
                         if flip_flop:
-                            meats += [meat.Meat(box[i], side="Right", center=[cX, cY])]
+                            meats += [meat.Meat(box[i], global_parameters['VIDEO_SCALE'], side="Right", center=[cX, cY])]
                         else:
-                            meats += [meat.Meat(box[i], side="Left", center=[cX, cY])]
+                            meats += [meat.Meat(box[i], global_parameters['VIDEO_SCALE'], side="Left", center=[cX, cY])]
                         flip_flop = not flip_flop
                         delay = 0
 
@@ -125,8 +125,8 @@ def main(data_path=DATA_PATH):
         # # Profiler model creates motion profiles, it updates as fast as possible in a separate thread
         if PROFILER_TOGGLE:
             if profile_model.phase == 0 and len(queue1) > 0 and not path_runner.running:
-                dist1 = (global_parameters['PICKUP_POINT1'] - meats[queue1[0][0]].get_center_as_point()).y
-                dist2 = (global_parameters['PICKUP_POINT2'] - meats[queue1[0][1]].get_center_as_point()).y
+                dist1 = (global_parameters['PICKUP_POINT1'] * global_parameters['VIDEO_SCALE'] - meats[queue1[0][0]].get_center_as_point()).y
+                dist2 = (global_parameters['PICKUP_POINT2'] * global_parameters['VIDEO_SCALE'] - meats[queue1[0][1]].get_center_as_point()).y
 
                 if dist1 > 0:
                     sp1 = meats[queue1[0][0]].get_center_as_point().copy()
@@ -141,8 +141,8 @@ def main(data_path=DATA_PATH):
         # Drawing model is just for drawing purposes, it updates at the frame rate displayed
         if DISPLAY_TOGGLE:
             if drawing_model.phase == 0 and len(queue2) > 0:
-                dist1 = (global_parameters['PICKUP_POINT1'] - meats[queue2[0][0]].get_center_as_point()).y
-                dist2 = (global_parameters['PICKUP_POINT2'] - meats[queue2[0][1]].get_center_as_point()).y
+                dist1 = (global_parameters['PICKUP_POINT1'] * global_parameters['VIDEO_SCALE'] - meats[queue2[0][0]].get_center_as_point()).y
+                dist2 = (global_parameters['PICKUP_POINT2'] * global_parameters['VIDEO_SCALE'] - meats[queue2[0][1]].get_center_as_point()).y
 
                 if dist1 > 0:
                     sp1 = meats[queue2[0][0]].get_center_as_point().copy()

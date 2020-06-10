@@ -18,6 +18,7 @@ class Robot:
     #######################
 
     def __init__(self, robot_base_pt, scale):
+        ''' Input parameter units: m '''
         self.scale = scale
 
         # Initializes robot parts 
@@ -68,11 +69,11 @@ class Robot:
     def get_physical_state(self):
         ret = []
         
-        ret += [self.main_track.length / self.scale] # Main track extension
-        ret += [self.main_arm.length / self.scale] # Main arm extension
+        ret += [self.main_track.length] # Main track extension
+        ret += [self.main_arm.length] # Main arm extension
         ret += [self.main_arm.angle] # Main arm rotation 
-        ret += [self.secondary_arm.length1 / self.scale] # Secondary arm extension 1
-        ret += [self.secondary_arm.length2 / self.scale] # Secondary arm extension 2
+        ret += [self.secondary_arm.length1] # Secondary arm extension 1
+        ret += [self.secondary_arm.length2] # Secondary arm extension 2
         ret += [self.secondary_arm.relative_angle] # Secondary arm rotation 
         ret += [self.carriage1.relative_angle] # Carriage 1 rotation
         ret += [self.carriage1.gripper_extension] # Carriage 1 gripper 
@@ -146,8 +147,8 @@ class Robot:
         self.secondary_arm.draw(canvas)
         self.main_arm.draw(canvas)
 
-        self.follow_pt1.draw(canvas, color=(0, 255, 0))
-        self.follow_pt2.draw(canvas, color=(0, 0, 255))
+        (self.follow_pt1 * self.scale).draw(canvas, color=(0, 255, 0))
+        (self.follow_pt2 * self.scale).draw(canvas, color=(0, 0, 255))
         
         font = cv2.FONT_HERSHEY_SIMPLEX
         y0, dy = 30, 18
@@ -176,16 +177,27 @@ class Robot:
     '''
 
     def move_meat(self, s1, s2, e1, e2, meat1_width, meat2_width, phase_1_delay=True):
+        ''' Begin the motion to pick up and mvoe pieces of meat. 
+
+        All input values should have units of pixels. 
+
+        s1, s2: the two starting points of the meat
+        e1, e2: the two desired end points of the meat
+        meat1/2_width: the width of the meat
+        phase1_delay: whether or not the robot should move and wait for meat in phase 1. 
+            Making this False will result in the robot staying in ready position until it 
+            has to. Leaving it true will make the robot move to the pickup points to wait. '''
+
         if self.phase != 0:
             print("ERROR: Robot in use")
             return False 
 
         self.backup_state = self.get_model_state()
         
-        self.s1 = s1
-        self.s2 = s2
-        self.e1 = e1
-        self.e2 = e2
+        self.s1 = s1 / self.scale
+        self.s2 = s2 / self.scale
+        self.e1 = e1 / self.scale
+        self.e2 = e2 / self.scale
         self.phase = 1
         self.switched = True
 
@@ -402,7 +414,8 @@ class Robot:
             self.delay1 -= 1
             if self.switched:
                 self.switched = False
-                self.delay1 = round(np.sum(self.dt1))//3
+                # Delay carriage 1 to avoid collision on return 
+                self.delay1 = np.sum(self.dt1)//3
                 self.follow_path(global_parameters['PHASE_6_PATH1'], global_parameters['PHASE_6_PATH2'], global_parameters['PHASE_6_SPEED']-self.delay1)
                 self.follow1_index = 0
                 self.follow2_index = 0
@@ -428,10 +441,10 @@ class Robot:
 
         self.move_to(self.follow_pt1, self.follow_pt2)
 
-        # frame = np.zeros([1200, 1200, 3])
-        # self.draw(frame)
-        # cv2.imshow("Temp", frame)
-        # cv2.waitKey(1)
+        frame = np.zeros([1200, 1200, 3])
+        self.draw(frame)
+        cv2.imshow("Temp", frame)
+        cv2.waitKey(0)
 
         flag, report = self.collision_check()
         if flag:
@@ -452,25 +465,25 @@ class Robot:
 
         return True
 
-    def run(self, read_time):
+    def run(self, start_time, is_time=True):
         self.clear_history()
         self.recording = True
 
         counter = 0
         self.xs = []
-        self.xs += [read_time - 2 / global_parameters['FRAME_RATE']]
-        self.xs += [read_time - 1 / global_parameters['FRAME_RATE']]
+        self.xs += [start_time - 2 / global_parameters['FRAME_RATE']]
+        self.xs += [start_time - 1 / global_parameters['FRAME_RATE']]
         while self.update():
-            self.xs += [read_time + counter / global_parameters['FRAME_RATE']]
+            self.xs += [start_time + counter / global_parameters['FRAME_RATE']]
             counter += 1
-        self.xs += [read_time + counter / global_parameters['FRAME_RATE']]
+        self.xs += [start_time + counter / global_parameters['FRAME_RATE']]
         counter += 1
-        self.xs += [read_time + counter / global_parameters['FRAME_RATE']]
+        self.xs += [start_time + counter / global_parameters['FRAME_RATE']]
         counter += 1
 
         # c accounts for the time after the robot has moved into position but before it grabs the meat
-        
-        c = ((global_parameters['PICKUP_POINT1'] - self.s1).y / global_parameters['CONVEYOR_SPEED'] - self.phase_1_counter) / global_parameters['FRAME_RATE']
+        if is_time:
+            c = ((global_parameters['PICKUP_POINT1'] - self.s1).y / global_parameters['CONVEYOR_SPEED'] - self.phase_1_counter) / global_parameters['FRAME_RATE']
         self.xs = [self.xs[i] + c for i in range(0, len(self.xs))]
 
         self.recording = False
@@ -542,16 +555,16 @@ class Robot:
     def get_model_state(self):
         '''
             Returns all required parameters to determine the fully defined 
-            state of the robot. 
+            state of the robot. Units are in m and °
         '''
         state = []
-        state += [self.main_track.length/self.scale]
+        state += [self.main_track.length]
 
-        state += [self.main_arm.length/self.scale]
+        state += [self.main_arm.length]
         state += [self.main_arm.angle]
 
-        state += [self.secondary_arm.length1/self.scale]
-        state += [self.secondary_arm.length2/self.scale]
+        state += [self.secondary_arm.length1]
+        state += [self.secondary_arm.length2]
         state += [self.secondary_arm.relative_angle]
 
         state += [self.carriage1.relative_angle]

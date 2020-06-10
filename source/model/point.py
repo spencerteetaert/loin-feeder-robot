@@ -64,10 +64,10 @@ class Point:
         self.y = ret.y
 
     def draw(self, canvas, color=(0, 0, 255), size=3):
-        cv2.circle(canvas, self.to_tuple(), size, color)
+        cv2.circle(canvas, self.to_drawing_tuple(), size, color)
         if self.angle != None:
-            cv2.line(canvas, self.to_tuple(), (int(round(self.x + 20*math.cos(math.radians(self.angle)))), int(round(self.y - 20*math.sin(math.radians(self.angle))))), color)
-    def to_tuple(self):
+            cv2.line(canvas, self.to_drawing_tuple(), (self + Point(20*math.cos(math.radians(self.angle)), -20*math.sin(math.radians(self.angle)))).to_drawing_tuple(), color)
+    def to_drawing_tuple(self):
         return (int(round(self.x)), int(round(self.y)))
     def to_array(self):
         return np.array([self.x, self.y])
