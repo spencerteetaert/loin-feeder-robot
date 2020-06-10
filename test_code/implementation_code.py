@@ -9,9 +9,11 @@ from source.vision_identification.video_reader import FileVideoStream
 from source.vision_identification import meat
 from source.model.robot import Robot
 from source.model.point import Point
-from source.path_planning.path_runner import PathRunner
+# from source.path_planning.path_runner import PathRunner
 from source.path_planning import graphing_tools
 from source.global_parameters import global_parameters
+from source.data_send_receive.instruction_handler import InstructionHandler
+from source.path_planning.frame_handler import FrameHandler
 
 '''
     A full implementation of all of the non-PLC specific functionality 
@@ -19,18 +21,22 @@ from source.global_parameters import global_parameters
 '''
 
 DATA_PATH = r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4"
-DISPLAY_TOGGLE = True
-PROFILER_TOGGLE = True
+# DISPLAY_TOGGLE = True
+# PROFILER_TOGGLE = True
 
 # Model for creating acceleration profiles
-if PROFILER_TOGGLE:
-    profile_model = Robot(global_parameters['ROBOT_BASE_POINT'], global_parameters['VIDEO_SCALE'])
-    path_runner = PathRunner(profile_model)
+# if PROFILER_TOGGLE:
+#     profile_model = Robot(global_parameters['ROBOT_BASE_POINT'], global_parameters['VIDEO_SCALE'])
+    # path_runner = PathRunner(profile_model)
 # Model for display
-if DISPLAY_TOGGLE:
-    drawing_model = Robot(global_parameters['ROBOT_BASE_POINT'], global_parameters['VIDEO_SCALE'])
-    current_graph = np.zeros([830, 830, 3], dtype=np.uint8)
-    grapher = graphing_tools.Grapher()
+# if DISPLAY_TOGGLE:
+drawing_model = Robot(global_parameters['ROBOT_BASE_POINT'], global_parameters['VIDEO_SCALE'])
+current_graph = np.zeros([830, 830, 3], dtype=np.uint8)
+grapher = graphing_tools.Grapher()
+
+instruction_handler = InstructionHandler() 
+instruction_handler.start()
+frame_handler = FrameHandler()
 
 streamer = FileVideoStream(DATA_PATH)
 streamer.start()
@@ -45,13 +51,14 @@ def main(data_path=DATA_PATH):
     # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output.mp4', 0x7634706d, 30, (1680,830))
     # out = cv2.VideoWriter(r'C:\Users\User\Documents\Hylife 2020\Loin Feeder\output.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, (1680,830))
 
-    if DISPLAY_TOGGLE:
-        win = "Window"
-        cv2.namedWindow(win)
-        cv2.setMouseCallback(win, on_mouse)
+    # if DISPLAY_TOGGLE:
+    win = "Window"
+    cv2.namedWindow(win)
+    cv2.setMouseCallback(win, on_mouse)
 
-    delay = 0
+    delay = -120
     counter = 90 
+    timer1 = 0 
     flip_flop = False 
     flip_flop2 = False
     flag = False
@@ -79,18 +86,15 @@ def main(data_path=DATA_PATH):
         
         # frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
 
-        temp = streamer.read()
-        temp = bounding_box.scale(temp)
-        if flag:
-            cv2.imwrite(r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\FilterImg\disp" + str(counter) + ".png", cv2.rotate(temp, cv2.ROTATE_90_CLOCKWISE))
-            flag = False
-        frame = cv2.copyMakeBorder(temp, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
+        temp1 = streamer.read()
+        temp2 = bounding_box.scale(temp1)
+        frame = cv2.copyMakeBorder(temp2, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
         iH, iW, iD = frame.shape
-        box, _, temp2 = bounding_box.get_bbox(frame)
+        box, _, temp3 = bounding_box.get_bbox(frame)
 
-        # for i in range(0, len(box)):
-        #     cv2.drawContours(frame, [box[i][0]], 0, (255, 255, 255), 3)
+        for i in range(0, len(box)):
+            cv2.drawContours(frame, [box[i][0]], 0, (0, 255, 255), 2)
         
         # Artificially simulate camera trigger 
         if (box != 0):
@@ -100,83 +104,97 @@ def main(data_path=DATA_PATH):
                     cY = int(box[i][1]["m01"] / box[i][1]["m00"])
 
                     if iH / 3 - 5 < cY and iH / 3 + 5 > cY:
-                        if flip_flop:
-                            meats += [meat.Meat(box[i], global_parameters['VIDEO_SCALE'], side="Right", center=[cX, cY])]
-                        else:
-                            meats += [meat.Meat(box[i], global_parameters['VIDEO_SCALE'], side="Left", center=[cX, cY])]
-                        flip_flop = not flip_flop
+                        # if flip_flop:
+                        #     meats += [meat.Meat(box[i], global_parameters['VIDEO_SCALE'], side="Right", center=[cX, cY])]
+                        # else:
+                        #     meats += [meat.Meat(box[i], global_parameters['VIDEO_SCALE'], side="Left", center=[cX, cY])]
+                        # flip_flop = not flip_flop
                         delay = 0
+                        timer1 = 10
+                        read_time = time.time()
+                        if frame_handler.process_frame(temp1, read_time, draw=True):
+                            time_stamps, profiles = frame_handler.get_results(vel_toggle=False)
 
+                            flag = False
+                            for i in range(0, len(profiles)):
+                                # Adds full path to instruction handler 
+                                instruction_handler.add(time_stamps[i], profiles[i])
+                                flag = True
+                            if flag:
+                                instruction_handler.add(0, 0) # Ending flag. This is how the handler knows the command is over
+                    
         delay += 1
 
         ########################################
         ### Path planning and Robot Movement ###
         ########################################
 
-        ep1 = Point(625, 735, angle=90)
-        ep2 = Point(250, 735, angle=90)
+        # ep1 = Point(625, 735, angle=90)
+        # ep2 = Point(250, 735, angle=90)
 
-        if len(meats) > 3:
-            if len(meats) % 2 == 0 and delay == 1:
-                # Queue [P1 index, P2 index], so that meat can be accounted for even if robot is currently in motion 
-                queue1 += [[len(meats) - 1, len(meats) - 2]]
-                queue2 += [[len(meats) - 1, len(meats) - 2]]
+        # if len(meats) > 3:
+        #     if len(meats) % 2 == 0 and delay == 1:
+        #         # Queue [P1 index, P2 index], so that meat can be accounted for even if robot is currently in motion 
+        #         queue1 += [[len(meats) - 1, len(meats) - 2]]
+        #         queue2 += [[len(meats) - 1, len(meats) - 2]]
                 
-        # # Profiler model creates motion profiles, it updates as fast as possible in a separate thread
-        if PROFILER_TOGGLE:
-            if profile_model.phase == 0 and len(queue1) > 0 and not path_runner.running:
-                dist1 = (global_parameters['PICKUP_POINT1'] * global_parameters['VIDEO_SCALE'] - meats[queue1[0][0]].get_center_as_point()).y
-                dist2 = (global_parameters['PICKUP_POINT2'] * global_parameters['VIDEO_SCALE'] - meats[queue1[0][1]].get_center_as_point()).y
+        # # # Profiler model creates motion profiles, it updates as fast as possible in a separate thread
+        # if PROFILER_TOGGLE:
+        #     if profile_model.phase == 0 and len(queue1) > 0 and not path_runner.running:
+        #         dist1 = (global_parameters['PICKUP_POINT1'] * global_parameters['VIDEO_SCALE'] - meats[queue1[0][0]].get_center_as_point()).y
+        #         dist2 = (global_parameters['PICKUP_POINT2'] * global_parameters['VIDEO_SCALE'] - meats[queue1[0][1]].get_center_as_point()).y
 
-                if dist1 > 0:
-                    sp1 = meats[queue1[0][0]].get_center_as_point().copy()
-                    sp2 = meats[queue1[0][1]].get_center_as_point().copy()
-                    profile_model.move_meat(sp1, sp2, ep1, ep2, meats[queue1[0][0]].width, meats[queue1[0][1]].width, \
-                        phase_1_delay=False)
-                    queue1 = queue1[1:]
+        #         if dist1 > 0:
+        #             sp1 = meats[queue1[0][0]].get_center_as_point().copy()
+        #             sp2 = meats[queue1[0][1]].get_center_as_point().copy()
+        #             profile_model.move_meat(sp1, sp2, ep1, ep2, meats[queue1[0][0]].width, meats[queue1[0][1]].width, \
+        #                 phase_1_delay=False)
+        #             queue1 = queue1[1:]
 
-                    # Given the start and end conditions, calculate the profile_model motor profiles
-                    path_runner.start()
+        #             # Given the start and end conditions, calculate the profile_model motor profiles
+        #             path_runner.start()
             
-        # Drawing model is just for drawing purposes, it updates at the frame rate displayed
-        if DISPLAY_TOGGLE:
-            if drawing_model.phase == 0 and len(queue2) > 0:
-                dist1 = (global_parameters['PICKUP_POINT1'] * global_parameters['VIDEO_SCALE'] - meats[queue2[0][0]].get_center_as_point()).y
-                dist2 = (global_parameters['PICKUP_POINT2'] * global_parameters['VIDEO_SCALE'] - meats[queue2[0][1]].get_center_as_point()).y
+        # # Drawing model is just for drawing purposes, it updates at the frame rate displayed
+        # if DISPLAY_TOGGLE:
+        #     if drawing_model.phase == 0 and len(queue2) > 0:
+        #         dist1 = (global_parameters['PICKUP_POINT1'] * global_parameters['VIDEO_SCALE'] - meats[queue2[0][0]].get_center_as_point()).y
+        #         dist2 = (global_parameters['PICKUP_POINT2'] * global_parameters['VIDEO_SCALE'] - meats[queue2[0][1]].get_center_as_point()).y
 
-                if dist1 > 0:
-                    sp1 = meats[queue2[0][0]].get_center_as_point().copy()
-                    sp2 = meats[queue2[0][1]].get_center_as_point().copy()
-                    drawing_model.move_meat(sp1, sp2, ep1, ep2, meats[queue2[0][0]].width, meats[queue2[0][1]].width)
-                    queue2 = queue2[1:]
-                    flip_flop2 = True
-                    if PROFILER_TOGGLE:
-                        grapher.start(path_runner, (830, 830), 'o')
-                else:
-                    print("ERROR: Conveyor Speed too fast for current settings")
-                    queue2 = queue2[1:]
-            drawing_model.update()
+        #         if dist1 > 0:
+        #             sp1 = meats[queue2[0][0]].get_center_as_point().copy()
+        #             sp2 = meats[queue2[0][1]].get_center_as_point().copy()
+        #             drawing_model.move_meat(sp1, sp2, ep1, ep2, meats[queue2[0][0]].width, meats[queue2[0][1]].width)
+        #             queue2 = queue2[1:]
+        #             flip_flop2 = True
+        #             if PROFILER_TOGGLE:
+        #                 grapher.start(path_runner, (830, 830), 'o')
+        #         else:
+        #             print("ERROR: Conveyor Speed too fast for current settings")
+        #             queue2 = queue2[1:]
+        #     drawing_model.update()
 
-        # Changes display chart
-        if DISPLAY_TOGGLE and PROFILER_TOGGLE:
-            if flip_flop2 and not path_runner.running and not grapher.running:
-                current_graph = grapher.read()
-                flip_flop2 = False
+        # # Changes display chart
+        # if DISPLAY_TOGGLE and PROFILER_TOGGLE:
+        #     if flip_flop2 and not path_runner.running and not grapher.running:
+        #         current_graph = grapher.read()
+        #         flip_flop2 = False
 
         ###############
         ### Display ###
-        ###############        
+        ############### 
         
-        if DISPLAY_TOGGLE:
-            if (len(meats) != 1):
-                for i in range(1, len(meats)):
-                    meats[i].draw(frame, color=(255, 255, 0))
-            drawing_model.draw(frame)
-            global_parameters['PICKUP_POINT1'].draw(frame, color=(0,255,0))
-            global_parameters['PICKUP_POINT2'].draw(frame, color=(0,0,255))
-            if PROFILER_TOGGLE:
-                frame = np.concatenate((frame, current_graph), axis=1)
-            cv2.imshow(win, frame)
+        drawing_model.set_model_state(instruction_handler.to_send)
+
+        # if DISPLAY_TOGGLE:
+        if timer1 > 0:
+            cv2.circle(frame, (int(iW / 2), int(iH / 3)), 5, (0, 255, 0), 5)
+        if (len(meats) != 1):
+            for i in range(1, len(meats)):
+                meats[i].draw(frame, color=(255, 255, 0))
+        drawing_model.draw(frame)
+        # if PROFILER_TOGGLE:
+        #     frame = np.concatenate((frame, current_graph), axis=1)
+        cv2.imshow(win, frame)
 
         ################
         ### Controls ###
@@ -185,36 +203,32 @@ def main(data_path=DATA_PATH):
         for i in range(1, len(meats)):
             meats[i].step()
         
-        if DISPLAY_TOGGLE:
-            k = cv2.waitKey(1) & 0xFF
-            # k = cv2.waitKey(max(global_parameters['FRAME_RATE'] - round((time.time() - force_timer )*1000 + 1), 1)) & 0xFF
-            if k == ord('q'):
-                break
-            elif k == ord('p'):
-                cv2.waitKey(0)
-            elif k == ord('o'):
-                grapher.start(path_runner, (830, 830), 'o')
-                while grapher.running:
-                    pass
-                current_graph = grapher.read()
-            elif k == ord('i'):
-                grapher.start(path_runner, (830, 830), 'i')
-                while grapher.running:
-                    pass
-                current_graph = grapher.read()
-            elif k == ord('s'):
-                saved_state = drawing_model.get_model_state()
-                cv2.waitKey(0)
-                print("State saved.\n")
-            elif k == ord('r'):
-                drawing_model.set_model_state(saved_state)
-                print("State uploaded.")
-            elif k == ord('w'):
-                # Save frame 
-                cv2.imwrite(r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\FilterImg\disp" + str(counter) + ".png", cv2.rotate(temp, cv2.ROTATE_90_CLOCKWISE))
-                flag = True
-                counter += 1
+        # if DISPLAY_TOGGLE:
+        k = cv2.waitKey(1) & 0xFF
+        # k = cv2.waitKey(max(global_parameters['FRAME_RATE'] - round((time.time() - force_timer )*1000 + 1), 1)) & 0xFF
+        if k == ord('q'):
+            break
+        elif k == ord('p'):
+            cv2.waitKey(0)
+        elif k == ord('o'):
+            grapher.start(path_runner, (830, 830), 'o')
+            while grapher.running:
+                pass
+            current_graph = grapher.read()
+        elif k == ord('i'):
+            grapher.start(path_runner, (830, 830), 'i')
+            while grapher.running:
+                pass
+            current_graph = grapher.read()
+        elif k == ord('s'):
+            saved_state = drawing_model.get_model_state()
+            cv2.waitKey(0)
+            print("State saved.\n")
+        elif k == ord('r'):
+            drawing_model.set_model_state(saved_state)
+            print("State uploaded.")
             
+        timer1 -= 1
         times += [time.time() - start]
         # out.write(frame)
 
@@ -224,10 +238,10 @@ def main(data_path=DATA_PATH):
     print("Average frame time:", np.average(times))
     # out.release()
     streamer.stop()
-    if PROFILER_TOGGLE:
-        path_runner.stop()
-    if DISPLAY_TOGGLE:
-        grapher.stop()
+    # if PROFILER_TOGGLE:
+    #     path_runner.stop()
+    # if DISPLAY_TOGGLE:
+    #     grapher.stop()
     cv2.destroyAllWindows()
 
 main()

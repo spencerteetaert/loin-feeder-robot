@@ -70,9 +70,12 @@ class FrameHandler:
             # Given the start and end conditions, calculate the model motor profiles
             self.model.run(read_time) 
 
-    def get_results(self):
+    def get_results(self, vel_toggle=True):
         if len(self.meats) == 0:
-            xs, _, vels = self.model.get_data()
-            return xs, vels
+            xs, profiles, vels = self.model.get_data()
+            if vel_toggle:
+                return xs, vels
+            else:
+                return xs, profiles
         else:
             return [], []

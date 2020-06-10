@@ -66,24 +66,6 @@ class Robot:
         self.acc_data = []
         self.vel_data = []
 
-    def get_physical_state(self):
-        ret = []
-        
-        ret += [self.main_track.length] # Main track extension
-        ret += [self.main_arm.length] # Main arm extension
-        ret += [self.main_arm.angle] # Main arm rotation 
-        ret += [self.secondary_arm.length1] # Secondary arm extension 1
-        ret += [self.secondary_arm.length2] # Secondary arm extension 2
-        ret += [self.secondary_arm.relative_angle] # Secondary arm rotation 
-        ret += [self.carriage1.relative_angle] # Carriage 1 rotation
-        ret += [self.carriage1.gripper_extension] # Carriage 1 gripper 
-        ret += [self.carriage1.downward_extension] # Carriage 1 height
-        ret += [self.carriage2.relative_angle] # Carriage 2 rotation
-        ret += [self.carriage2.gripper_extension] # Carriage 2 gripper
-        ret += [self.carriage2.downward_extension] # Carriage 2 height
-
-        return ret
-
     def clear_history(self):
         self.profile_data = []
 
@@ -321,8 +303,8 @@ class Robot:
             self.phase_1_counter += 1
             if self.switched:
                 if self.recording:
-                    self.profile_data += [self.get_physical_state()]
-                    self.profile_data += [self.get_physical_state()]
+                    self.profile_data += [self.get_model_state()]
+                    self.profile_data += [self.get_model_state()]
                 self.switched = False
                 self.follow_pt1.set_heading(self.s1 + Point(0, (global_parameters['PICKUP_POINT1'] - self.s1).y), global_parameters['PHASE_1_SPEED'])
                 self.follow_pt2.set_heading(self.s2 + Point(0, (global_parameters['PICKUP_POINT2'] - self.s2).y), global_parameters['PHASE_1_SPEED'])
@@ -441,10 +423,10 @@ class Robot:
 
         self.move_to(self.follow_pt1, self.follow_pt2)
 
-        frame = np.zeros([1200, 1200, 3])
-        self.draw(frame)
-        cv2.imshow("Temp", frame)
-        cv2.waitKey(0)
+        # frame = np.zeros([1200, 1200, 3])
+        # self.draw(frame)
+        # cv2.imshow("Temp", frame)
+        # cv2.waitKey(0)
 
         flag, report = self.collision_check()
         if flag:
@@ -458,10 +440,10 @@ class Robot:
             return False
 
         if self.recording:
-            self.profile_data += [self.get_physical_state()]
+            self.profile_data += [self.get_model_state()]
             if self.phase == 0: # This only ever hits immediately after phase 6
-                self.profile_data += [self.get_physical_state()]
-                self.profile_data += [self.get_physical_state()]
+                self.profile_data += [self.get_model_state()]
+                self.profile_data += [self.get_model_state()]
 
         return True
 
@@ -489,7 +471,7 @@ class Robot:
         self.recording = False
 
     def set_model_state(self, state):
-        print("MODEL BACK UPPED")
+        # print("MODEL BACK UPPED")
         '''
         Using a list of the parameters required to fully define the robot, 
         set the robot parameters using to match the given state. 
@@ -520,7 +502,9 @@ class Robot:
                 17: Raised/Lowered
                 18: Gripper extension
         '''
-        temp = state.copy()
+        if state is None:
+            return 
+        temp = state.copy().tolist()
         self.main_track.set_model_state(temp[0])
 
         temp.insert(1, self.main_track.other_pt)

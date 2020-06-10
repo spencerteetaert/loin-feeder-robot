@@ -22,6 +22,7 @@ class InstructionHandler:
         self.running = False
         self.instruction_Q = Queue(maxsize=queueSize)
         self.time_Q = Queue(maxsize=queueSize)
+        self.to_send = None
 
     def __repr__(self):
         pass
@@ -54,10 +55,10 @@ class InstructionHandler:
                     counter += 1
                     if not self.instruction_Q.empty():
                         instruction = self.instruction_Q.get()
-                        to_send = np.around(instruction, 2)
+                        self.to_send = np.around(instruction, 2)
 
                         ### PLC write instruction ###
-                        print(instruction)
+                        # print(instruction)
                         # plc.Write("<tag0>", value=instruction[0])
                         # plc.Write("<tag1>", value=instruction[1])
                         # plc.Write("<tag2>", value=instruction[2])
