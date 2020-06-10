@@ -53,7 +53,7 @@ class FrameHandler:
                         if not self.model.gen_profiles(): # If path creation failed (collision, etc)
                             # self.xs = []
                             return False
-                        print(self.model)
+                        # print(self.model)
                     break # Ensures only one piece is identified 
         
         return True
@@ -62,10 +62,10 @@ class FrameHandler:
         self.dt = time.time() - self.start
         # Profiler model creates motion profiles, it updates as fast as possible in a separate thread
         if self.model.phase == 0:
-            s1 = self.meats[0].get_center_as_point()
-            s2 = self.meats[1].get_center_as_point() + Point(0, self.dt * global_parameters['FRAME_RATE'] * global_parameters['CONVEYOR_SPEED'] * global_parameters['VIDEO_SCALE'])
+            s1 = self.meats[1].get_center_as_point()
+            s2 = self.meats[0].get_center_as_point() + Point(0, self.dt * global_parameters['FRAME_RATE'] * global_parameters['CONVEYOR_SPEED'] * global_parameters['VIDEO_SCALE'])
 
-            self.model.move_meat(s1, s2, self.end_pt1, self.end_pt2, self.meats[0].width, self.meats[1].width, phase_1_delay=False)
+            self.model.move_meat(s1, s2, self.end_pt1, self.end_pt2, self.meats[1].width, self.meats[0].width, phase_1_delay=False)
             self.meats = []
             # Given the start and end conditions, calculate the model motor profiles
             self.model.run(read_time) 

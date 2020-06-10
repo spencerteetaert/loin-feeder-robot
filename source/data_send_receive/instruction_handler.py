@@ -1,5 +1,6 @@
-from threading import Thread
-from threading import Lock
+# from threading import Thread
+# from threading import Lock
+
 from queue import Queue
 import time
 
@@ -28,10 +29,10 @@ class InstructionHandler:
         pass
 
     def start(self):
-        self.stopped = False
-        self.t = Thread(target=self.run, args=([]))
-        self.t.daemon = True
-        self.t.start()
+        # self.stopped = False
+        # self.t = Thread(target=self.run)
+        # self.t.daemon = True
+        # self.t.start()
         return self
 
     def stop(self):
