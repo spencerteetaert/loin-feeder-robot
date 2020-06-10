@@ -116,8 +116,8 @@ class Meat():
         # self.lines = [self.loin_line, self.shoulder_line, self.ham_line, self.belly_line, self.cut_line]
 
     def get_center_as_point(self):
-        dy = self.loin_line[1][1] - self.loin_line[0][1]
-        dx = self.loin_line[1][0] - self.loin_line[0][0]
+        dy = min(self.loin_line[1][1], self.loin_line[0][1]) - max(self.loin_line[1][1], self.loin_line[0][1])
+        dx = max(self.loin_line[1][0], self.loin_line[0][0]) - min(self.loin_line[1][0], self.loin_line[0][0])
 
         return Point(self.center[0], self.center[1], angle=Point(dx, dy).vector_angle()) 
 

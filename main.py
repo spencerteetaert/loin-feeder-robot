@@ -1,15 +1,15 @@
 import time
 import sys
+import argparse
 
 import cv2
 from pylogix import PLC
-import numpy as np
 
 from source import model
 sys.modules['model'] = model
 from source.global_parameters import global_parameters
 from source.global_parameters import set_parameters
-set_parameters("resources\configs\main-05062020-132549")
+set_parameters("resources\configs\main-08062020-172639")
 
 from source.path_planning.frame_handler import FrameHandler
 from source.data_send_receive.instruction_handler import InstructionHandler
@@ -18,6 +18,14 @@ from source.vision_identification import bounding_box
 frame_handler = FrameHandler()
 instruction_handler = InstructionHandler()
 video_capture = cv2.VideoCapture(r"C:\Users\User\Documents\Hylife 2020\Loin Feeder\Data\good.mp4")
+
+# ap = argparse.ArgumentParser()
+# ap.add_argument("-v", "--video", required=False,
+# 	help="path to the video file")
+# args = vars(ap.parse_args())
+
+# video_capture = cv2.VideoCapture(args['video'])
+
 times = []
 
 instruction_handler.start()
@@ -80,38 +88,41 @@ with PLC() as plc:
         #To be replaced by camera trigger software 
         (val, frame) = video_capture.read() 
 
-        if not count_flag:
-            val = 0
-        else:
-            count_flag = False
+        if val: # If image is available
+            if count_flag:
+                if frame_handler.process_frame(frame, read_time, draw=True):
+                    time_stamps, profiles = frame_handler.get_results()
 
-        if val != 0: # If image is available
-            if frame_handler.process_frame(frame, read_time, draw=True):
-                time_stamps, profiles = frame_handler.get_results()
-
-                flag = False
-                for i in range(0, len(profiles)):
-                    # Adds full path to instruction handler 
-                    instruction_handler.add(time_stamps[i], profiles[i])
-                    flag = True
-                if flag:
-                    instruction_handler.add(0, 0) # Ending flag. This is how the handler knows the command is over
+                    flag = False
+                    for i in range(0, len(profiles)):
+                        # Adds full path to instruction handler 
+                        instruction_handler.add(time_stamps[i], profiles[i])
+                        flag = True
+                    if flag:
+                        instruction_handler.add(0, 0) # Ending flag. This is how the handler knows the command is over
+                print("Frame time:", time.time() - read_time)
+                count_flag = False
         ################################
 
 
-        #### Just for visualization ####
-        # else:
-        frame = bounding_box.scale(frame)
-        frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
+            #### Just for visualization ####
+            # else:
+            frame = bounding_box.scale(frame)
+            frame = cv2.copyMakeBorder(frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
 
-        global_parameters['PICKUP_POINT'].draw(frame)
-        cv2.imshow("Temp", frame)
+            global_parameters['PICKUP_POINT1'].draw(frame)
+            cv2.imshow("Temp", frame)
 
-        k = cv2.waitKey(max(global_parameters['FRAME_RATE'] - round((time.time() - read_time )*1000 + 1), 1)) & 0xFF
-        if k == ord('q'):    
+            # k = cv2.waitKey(max(global_parameters['FRAME_RATE'] - round((time.time() - read_time )*1000 + 1), 1)) & 0xFF
+            k = cv2.waitKey(1) & 0xFF
+            if k == ord('q'):    
+                cv2.destroyAllWindows()
+                break
+            elif k == ord('c'):
+                count_flag = True
+        else:
+            print("ERROR: Image import failed.")
             break
-        elif k == ord('c'):
-            count_flag = True
         #################################
         
     instruction_handler.stop()
