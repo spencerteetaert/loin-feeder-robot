@@ -79,10 +79,13 @@ class MainArm:
 
         return [[p, r1], [p, r2]]
 
-    def set_model_state(self, state):
+    def set_model_state(self, state, vel_toggle=False):
         '''
             0: Main track other pt
             1: Length
             2: Angle
         '''
-        self.__init__(state[0], self.scale, state[1], state[2])
+        if vel_toggle:
+            self.__init__(state[0], self.scale, self.length + state[1] / global_parameters['FRAME_RATE'], self.angle + state[2] / global_parameters['FRAME_RATE'])
+        else:
+            self.__init__(state[0], self.scale, state[1], state[2])

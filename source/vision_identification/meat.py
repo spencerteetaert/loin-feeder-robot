@@ -11,7 +11,7 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 
 class Meat():
     def __init__(self, data, scale, conveyor_speed=global_parameters['CONVEYOR_SPEED'] * global_parameters['RUNTIME_FACTOR'], side="Left", center=(0,0)):
-        self.conveyor_speed = conveyor_speed * scale
+        self.conveyor_speed = conveyor_speed * scale / global_parameters['FRAME_RATE'] #px/frame
         self.side = side
         self.bbox = data[0]
         self.center = center

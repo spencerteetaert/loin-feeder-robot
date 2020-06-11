@@ -24,7 +24,7 @@ def on_mouse(event, pX, pY, flags, param):
     if event == cv2.EVENT_LBUTTONUP:
         print("Clicked", pX, pY)    
 
-def run(Q, shared_data):   
+def run(Q, shared_data):
     with PLC() as plc:
         win = "Window"
         cv2.namedWindow(win)
@@ -47,7 +47,8 @@ def run(Q, shared_data):
 
                     ### PLC write instruction ###
                     # print(instruction)
-                    shared_data.set_model_state(to_send)
+                    # print(current_time, time.time())
+                    shared_data.set_model_state(to_send, vel_toggle=True)
                     # plc.Write("<tag0>", value=instruction[0])
                     # plc.Write("<tag1>", value=instruction[1])
                     # plc.Write("<tag2>", value=instruction[2])
@@ -82,7 +83,6 @@ def run(Q, shared_data):
             cv2.waitKey(1)
 
 def main():  
-    manager = mp.Manager()
     shared_data = Robot(global_parameters['ROBOT_BASE_POINT'], global_parameters['VIDEO_SCALE'])
 
     Q = mp.Queue(maxsize=1048)
@@ -144,12 +144,13 @@ def main():
                             timer1 = 10
                             read_time = time.time()
                             if frame_handler.process_frame(temp1, read_time):
-                                time_stamps, profiles = frame_handler.get_results(vel_toggle=False)
+                                time_stamps, profiles = frame_handler.get_results(vel_toggle=True)
 
                                 flag = False
                                 for i in range(0, len(profiles)):
                                     # Adds full path to instruction handler 
                                     Q.put(time_stamps[i])
+                                    # print(time_stamps[i])
                                     Q.put(profiles[i])
                                     flag = True
                                 if flag:
@@ -178,8 +179,8 @@ def main():
             times += [time.time() - start]
             # out.write(frame)
 
-            # k = cv2.waitKey(1) & 0xFF
-            k = cv2.waitKey(max(global_parameters['FRAME_RATE'] - round((time.time() - force_timer )*1000 + 1), 1)) & 0xFF
+            k = cv2.waitKey(1) & 0xFF
+            # k = cv2.waitKey(max(global_parameters['FPS'] - round((time.time() - force_timer )*1000 + 1), 1)) & 0xFF
             if k == ord('q'):
                 break
             elif k == ord('p'):

@@ -28,7 +28,7 @@ params_1 = { # Parameters
     #########################
 
     "VIDEO_SCALE" : 212,                                       # Pixels / m 
-    "RUNTIME_FACTOR" : 1,
+    "RUNTIME_FACTOR" : 1.2,
     "FPS" : 30, 
 
     "MINIMUM_MIDDLE_SIZE" : 0.18,                              # Minimum middle size in m^2
@@ -113,13 +113,13 @@ params_2 = {
     "FRAME_RATE" : params_1['FPS'] * params_1['RUNTIME_FACTOR'],
     "MINIMUM_AREA" : params_1['MINIMUM_MIDDLE_SIZE'] * params_1['VIDEO_SCALE']**2,     # Pixel area for an acceptable contour 
 
-    "CONVEYOR_SPEED" : 9.434e-3 / params_1['RUNTIME_FACTOR'], #Px/frame
-
     "PHASE_6_PATH1" : [Point(2.123, 2.052, angle=0), params_1['READY_POS1']],
     "PHASE_6_PATH2" : [Point(1.627, 3.278, angle=0), params_1['READY_POS2']]
 }
 
 params_3 = {
+    "CONVEYOR_SPEED" : 9.434e-3 * params_2['FRAME_RATE'], #m/s
+
     "PHASE_1_SPEED" : params_1['PHASE_1_PERCENTAGE'] * params_1['TOTAL_EXECUTION_TIME'] * params_2['FRAME_RATE'],
     "PHASE_2_DELAY" : params_1['PHASE_2_PERCENTAGE'] * params_1['TOTAL_EXECUTION_TIME'] * params_2['FRAME_RATE'],
     "PHASE_3_SPEED" : params_1['PHASE_3_2_PERCENTAGE'] * params_1['TOTAL_EXECUTION_TIME'] * params_2['FRAME_RATE'],

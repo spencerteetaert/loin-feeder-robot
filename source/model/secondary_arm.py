@@ -85,13 +85,17 @@ class SecondaryArm:
         r = (self.other_pt2 - self.other_pt1).to_array()
         return [[p, r]]
 
-    def set_model_state(self, state):
+    def set_model_state(self, state, vel_toggle=False):
         '''
             0: Main arm other pt
             1: Main arm angle
             2: Length1
             3: Length2
-            4: Angle
+            4: Angle (rel)
         '''
-        angle = (state[4] + state[1] + 180 + 720) % 360
-        self.__init__(state[0], self.scale, length1=state[2], length2=state[3], angle=angle, relative_angle=state[1])
+        if vel_toggle:
+            angle = (state[4] / global_parameters['FRAME_RATE'] + self.relative_angle + state[1] + 180 + 720) % 360
+            self.__init__(state[0], self.scale, length1=self.length1 + state[2] / global_parameters['FRAME_RATE'], length2=self.length2 + state[3] / global_parameters['FRAME_RATE'], angle=angle, relative_angle=self.relative_angle + state[4] / global_parameters['FRAME_RATE'])
+        else:
+            angle = (state[4] + state[1] + 180 + 720) % 360
+            self.__init__(state[0], self.scale, length1=state[2], length2=state[3], angle=angle, relative_angle=state[4])

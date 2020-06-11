@@ -23,13 +23,10 @@ class FrameHandler:
     def __repr__(self):
         return "FrameHandler Object\n\tModel:" + self.model.__repr__()
 
-    def process_frame(self, frame, read_time, draw=False):
+    def process_frame(self, frame, read_time):
         start = time.time()
         self.frame = bounding_box.scale(frame)
         self.frame = cv2.copyMakeBorder(self.frame, 0, 300, 300, 300, cv2.BORDER_CONSTANT, value=0)
-
-        if draw:
-            cv2.imshow("Temp", self.frame)
 
         iH, _, _ = self.frame.shape
         data, _, _ = bounding_box.get_bbox(self.frame)
@@ -63,7 +60,7 @@ class FrameHandler:
         # Profiler model creates motion profiles, it updates as fast as possible in a separate thread
         if self.model.phase == 0:
             s1 = self.meats[1].get_center_as_point()
-            s2 = self.meats[0].get_center_as_point() + Point(0, self.dt * global_parameters['FRAME_RATE'] * global_parameters['CONVEYOR_SPEED'] * global_parameters['VIDEO_SCALE'])
+            s2 = self.meats[0].get_center_as_point() + Point(0, self.dt * global_parameters['CONVEYOR_SPEED'] * global_parameters['VIDEO_SCALE'])
 
             self.model.move_meat(s1, s2, self.end_pt1, self.end_pt2, self.meats[1].width, self.meats[0].width, phase_1_delay=False)
             self.meats = []

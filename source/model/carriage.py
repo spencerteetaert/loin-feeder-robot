@@ -8,14 +8,14 @@ from ..global_parameters import global_parameters
 from .. import vector_tools
 
 class Carriage:
-    def __init__(self, pt:Point, scale, angle=0, downward_extension=0, gripper_extension=0.5):
+    def __init__(self, pt:Point, scale, angle=0, downward_extension=0, gripper_extension=0.5, relative_angle=90):
         ''' Input parameter units: m '''
         self.scale = scale
         self.base_pt = pt
         self.width = global_parameters['CARRIAGE_WIDTH']
         self.length = global_parameters['CARRIAGE_LENGTH']
         self.angle = angle 
-        self.relative_angle = 90
+        self.relative_angle = relative_angle
         self.other_pt = self.get_other_pt()
         self.downward_extension = downward_extension
         self.gripper_extension = gripper_extension
@@ -86,7 +86,7 @@ class Carriage:
         
             return [[self.points[1], r3], [self.points[1], r4], [self.points[5], r1], [self.points[5], r2]]
 
-    def set_model_state(self, state):
+    def set_model_state(self, state, vel_toggle=False):
         '''
             0: Secondary arm other pt
             1: Secondary arm abs angle
@@ -94,8 +94,13 @@ class Carriage:
             3: Raised/Lowered
             4: Gripper extension
         '''
-        angle = (state[2] + state[1] + 180 + 720) % 360
-        self.__init__(state[0], self.scale, angle, state[3], state[4])
+        if vel_toggle:
+            angle = (state[2] / global_parameters['FRAME_RATE'] + self.relative_angle + state[1] + 180 + 720) % 360
+            self.__init__(state[0], self.scale, angle, self.downward_extension + state[3] / global_parameters['FRAME_RATE'], \
+                self.gripper_extension + state[4] / global_parameters['FRAME_RATE'], self.relative_angle + state[2] / global_parameters['FRAME_RATE'])
+        else:
+            angle = (state[2] + state[1] + 180 + 720) % 360
+            self.__init__(state[0], self.scale, angle, state[3], state[4])
 
     def close(self, width):
         if self.gripper_extension > width:

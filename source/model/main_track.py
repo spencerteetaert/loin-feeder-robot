@@ -52,8 +52,12 @@ class MainTrack:
         self.base_pt = pt
         self.other_pt = self.get_other_pt()
 
-    def set_model_state(self, state):
+    def set_model_state(self, state, vel_toggle=False):
         '''
             state = length 
         '''
-        self.__init__(self.base_pt, self.scale, length=state)
+        if vel_toggle:
+            self.__init__(self.base_pt, self.scale, length=self.length + state / global_parameters['FRAME_RATE'])
+        else:
+            self.__init__(self.base_pt, self.scale, length=state)
+            

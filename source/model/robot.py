@@ -183,8 +183,10 @@ class Robot:
         self.phase = 1
         self.switched = True
 
-        self.delay1 = (global_parameters['PICKUP_POINT1'] - self.s1).y / global_parameters['CONVEYOR_SPEED']
-        self.delay2 = (global_parameters['PICKUP_POINT2'] - self.s2).y / global_parameters['CONVEYOR_SPEED']
+        self.delay1 = (global_parameters['PICKUP_POINT1'] - self.s1).y * global_parameters['FRAME_RATE'] / global_parameters['CONVEYOR_SPEED']
+        self.delay2 = (global_parameters['PICKUP_POINT2'] - self.s2).y * global_parameters['FRAME_RATE'] / global_parameters['CONVEYOR_SPEED']
+
+        print("delays",self.delay1, self.delay2)
 
         self.meat1_width = meat1_width / self.scale
         self.meat2_width = meat2_width / self.scale
@@ -323,14 +325,16 @@ class Robot:
             if self.switched:
                 self.switched = False
                 self.delay1 = global_parameters['PHASE_2_DELAY']
-                self.follow_pt1.set_heading(self.follow_pt1 + Point(0, global_parameters['PHASE_2_DELAY'] * global_parameters['CONVEYOR_SPEED']), global_parameters['PHASE_2_DELAY'])
+                self.follow_pt1.set_heading(self.follow_pt1 + Point(0, global_parameters['PHASE_2_DELAY'] * \
+                    global_parameters['CONVEYOR_SPEED'] / global_parameters['FRAME_RATE']), global_parameters['PHASE_2_DELAY'])
                 # self.follow_pt2.set_heading(self.follow_pt2 + Point(0, self.delay1 * global_parameters['CONVEYOR_SPEED']), global_parameters['PHASE_2_DELAY'])
 
             self.carriage1.lower()
             self.carriage1.close(self.meat1_width)
 
             if self.delay2 < 0:
-                self.follow_pt2.set_heading(self.follow_pt2 + Point(0, global_parameters['PHASE_2_DELAY'] * global_parameters['CONVEYOR_SPEED']), global_parameters['PHASE_2_DELAY'])
+                self.follow_pt2.set_heading(self.follow_pt2 + Point(0, global_parameters['PHASE_2_DELAY'] * \
+                    global_parameters['CONVEYOR_SPEED'] / global_parameters['FRAME_RATE']), global_parameters['PHASE_2_DELAY'])
                 self.carriage2.lower()
                 self.carriage2.close(self.meat2_width)
 
@@ -417,7 +421,7 @@ class Robot:
                 self.follow1_index += 1
                 self.follow_pt1.set_heading(global_parameters['PHASE_6_PATH1'][self.follow1_index], self.dt1[self.follow1_index - 1])
             if self.follow_pt2.steps_remaining <= 1 and self.follow2_index < len(global_parameters['PHASE_6_PATH2']) - 1 \
-                and self.delay1 <= 0:
+                and self.delay1 < 0:
                 self.follow2_index += 1
                 self.follow_pt2.set_heading(global_parameters['PHASE_6_PATH2'][self.follow2_index], self.dt2[self.follow2_index - 1])
 
@@ -465,12 +469,13 @@ class Robot:
 
         # c accounts for the time after the robot has moved into position but before it grabs the meat
         if is_time:
-            c = ((global_parameters['PICKUP_POINT1'] - self.s1).y / global_parameters['CONVEYOR_SPEED'] - self.phase_1_counter) / global_parameters['FRAME_RATE']
+            c = ((global_parameters['PICKUP_POINT1'] - self.s1).y * global_parameters['FRAME_RATE'] / \
+                global_parameters['CONVEYOR_SPEED'] - self.phase_1_counter) / global_parameters['FRAME_RATE']
         self.xs = [self.xs[i] + c for i in range(0, len(self.xs))]
 
         self.recording = False
 
-    def set_model_state(self, state):
+    def set_model_state(self, state, vel_toggle=False):
         '''
         Using a list of the parameters required to fully define the robot, 
         set the robot parameters using to match the given state. 
@@ -504,22 +509,22 @@ class Robot:
         if state is None:
             return 
         temp = state.copy().tolist()
-        self.main_track.set_model_state(temp[0])
+        self.main_track.set_model_state(temp[0], vel_toggle=vel_toggle)
 
         temp.insert(1, self.main_track.other_pt)
-        self.main_arm.set_model_state(temp[1:4])
+        self.main_arm.set_model_state(temp[1:4], vel_toggle=vel_toggle)
 
         temp.insert(4, self.main_arm.other_pt)
         temp.insert(5, self.main_arm.angle)
-        self.secondary_arm.set_model_state(temp[4:9])
+        self.secondary_arm.set_model_state(temp[4:9], vel_toggle=vel_toggle)
 
         temp.insert(9, self.secondary_arm.other_pt1) 
         temp.insert(10, self.secondary_arm.angle)
-        self.carriage1.set_model_state(temp[9:14])
+        self.carriage1.set_model_state(temp[9:14], vel_toggle=vel_toggle)
 
         temp.insert(14, self.secondary_arm.other_pt2) 
         temp.insert(15, self.secondary_arm.angle)
-        self.carriage2.set_model_state(temp[14:19])
+        self.carriage2.set_model_state(temp[14:19], vel_toggle=vel_toggle)
 
         self.follow_pt1 = self.get_current_point(1)
         self.follow_pt2 = self.get_current_point(2)

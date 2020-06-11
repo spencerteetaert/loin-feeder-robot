@@ -10,7 +10,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 pr.enable()
-import main
+import test_code.implementation_code
 pr.disable()
 
 pr.print_stats(sort='time')
