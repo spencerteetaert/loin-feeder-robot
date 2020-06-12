@@ -8,6 +8,11 @@ This software aims at solving three challenges:
 * Program the appropriate PLCs to actuate the path determined on the physical build. 
 
 ## source
+### data_send_receive 
+
+This folder contains code that aids in sending/receiving data from a PLC/server as required. 
+* instruction_handler.py is a script that ensures commands are sent at the required time to achieve the expected robot motion. 
+
 ### model
 
 This folder contains the necessary classes required for creating a digital model of the actual robot. 
@@ -15,7 +20,7 @@ This folder contains the necessary classes required for creating a digital model
 
 #### Test code: model_test.py
 
-![Robot model implementation](/resources/images/model.PNG)
+<img src="/resources/images/model.PNG" width="500" height="500">
 
 ### path_planning
 
@@ -25,6 +30,7 @@ Raw position data          |  Integrated position data
 :-------------------------:|:-------------------------:
 ![](/resources/images/figure_o.png)  |  ![](/resources/images/figure_i.png)
 
+* frame_handler.py contains functionality to handle frames as produced by a triggered camera. Given two images, and some time between them, the script identifies their location and produces the required motion profiles to achieve the desired path. 
 * graphing_tools.py contains a class to thread the graphing process. 
 * path_runner.py contains a class to thread the path finder.
 * path.py (Not in use) contains a path finding algorithm based off existing "safe paths".
@@ -49,7 +55,13 @@ Contains tools used for finding parameter values, testing functions, and timing 
 * get_colour_range.py allows users to specify a range of pixels over a range of images and returns the max/min values for HSV. 
 * profiler.py runs a timing analysis on any file required. 
 
-## main.py
-main.py is a full implementation of the library. 
+## implementation_code.py 
 
-![](/resources/images/main.PNG)
+implementation_code.py is a full implementation of the library for visualization and debugging purposes. 
+
+![Visualization of library implementation](/resources/images/main.PNG)
+
+## main.py
+main.py is an implementation of the library required to be used for the robotic system. 
+
+
